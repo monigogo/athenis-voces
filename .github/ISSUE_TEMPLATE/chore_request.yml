@@ -1,0 +1,25 @@
+name: 🗂️ Chore Request
+description: Configuration, dependencies, CI or other maintenance work
+title: "[Chore]: "
+labels: ["chore"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed description
+      description: What needs to be done?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+

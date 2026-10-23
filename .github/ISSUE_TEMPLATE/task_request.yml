@@ -1,0 +1,34 @@
+name: 📝 Task Request
+description: Work on an assigned task (no code, e.g. research, metrics, production plan)
+title: "[Task]: "
+labels: ["task"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed description
+      description: What needs to be done?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Definition of done
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+

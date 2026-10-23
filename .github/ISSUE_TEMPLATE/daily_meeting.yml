@@ -1,0 +1,27 @@
+name: 👥 Daily Meeting
+description: Daily meeting summary
+title: "[Daily]: "
+labels: ["daily"]
+
+body:
+  - type: textarea
+    id: done
+    attributes:
+      label: What was done
+    validations:
+      required: true
+
+  - type: textarea
+    id: next
+    attributes:
+      label: What will be done
+    validations:
+      required: true
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers
+      placeholder: None
+    validations:
+      required: false

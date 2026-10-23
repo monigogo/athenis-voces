@@ -1,0 +1,7 @@
+# Cada PR solicita revisión automática a los propietarios del código modificado.
+# El último patrón que coincide es el que se aplica.
+
+*                  @Arowi95 @Risseii @monigogo
+/backend/          @Arowi95 @Risseii @monigogo
+/frontend/         @Arowi95 @Risseii @monigogo
+/.github/          @Arowi95 @Risseii @monigogo
