@@ -32,7 +32,7 @@ Una analista sube un audio. El sistema lo convierte a un formato único y averig
 
 ### Historia 2 - Proponer cómo suena cada voz (Prioridad: P1)
 
-Para cada hablante, el sistema propone si su voz suena femenina, masculina o no determinada, con una confianza entre 0 y 1. Es solo una propuesta: la decide una persona (RN-02).
+Para cada hablante, el sistema propone una etiqueta para su voz (femenino, masculino o indeterminado), con una confianza entre 0 y 1. Es solo una propuesta: la decide una persona (RN-02).
 
 **Por qué esta prioridad**: es Must en modo asistido, el modo del MVP (D-04), y lo necesita la pantalla Confirmar voces.
 
@@ -40,8 +40,8 @@ Para cada hablante, el sistema propone si su voz suena femenina, masculina o no 
 
 **Escenarios de aceptación**:
 
-1. **Dado** un hablante separado, **cuando** se calcula la propuesta, **entonces** tiene una etiqueta (femenina, masculina o no determinada) y una probabilidad entre 0 y 1 (RF-06).
-2. **Dado** un hablante cuya probabilidad cae en la zona dudosa (0,35–0,65 [VALIDAR]), **cuando** se calcula la propuesta, **entonces** la propuesta es «no determinada» (RF-06).
+1. **Dado** un hablante separado, **cuando** se calcula la propuesta, **entonces** tiene una etiqueta (femenino, masculino o indeterminado) y una probabilidad entre 0 y 1 (RF-06).
+2. **Dado** un hablante cuya probabilidad cae en la zona dudosa (0,35–0,65 [VALIDAR]), **cuando** se calcula la propuesta, **entonces** la propuesta es «indeterminado» (RF-06).
 3. **Dada** una propuesta, **cuando** se guarda, **entonces** consta que la etiqueta viene del modelo y no de una persona (RF-07).
 
 ---
@@ -89,8 +89,8 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 
 - **FR-001**: El sistema DEBE convertir el audio de entrada a mono de 16 kHz conservando la duración ± 0,1 s (RF-03, Must).
 - **FR-002**: El sistema DEBE devolver los turnos de cada hablante, numerado como «Hablante n», y los tramos de habla simultánea, con el formato del contrato de datos (RF-05, Must; RN-10).
-- **FR-003**: El sistema DEBE proponer para cada hablante una etiqueta femenina, masculina o no determinada, con una probabilidad entre 0 y 1 (RF-06, Must en modo asistido).
-- **FR-004**: El sistema DEBE proponer «no determinada» cuando la probabilidad cae en la zona dudosa, 0,35–0,65 [VALIDAR] (RF-06).
+- **FR-003**: El sistema DEBE proponer para cada hablante una etiqueta (femenino, masculino o indeterminado), con una probabilidad entre 0 y 1 (RF-06, Must en modo asistido).
+- **FR-004**: El sistema DEBE proponer «indeterminado» cuando la probabilidad cae en la zona dudosa, 0,35–0,65 [VALIDAR] (RF-06).
 - **FR-005**: El sistema DEBE registrar que una propuesta viene del modelo (RF-07).
 - **FR-006**: El sistema DEBE ofrecer al menos 3 fragmentos de 3 a 5 s por cada hablante presente (RF-07).
 - **FR-007**: Con el modo manual activo, el sistema NO DEBE ejecutar ningún clasificador de voz (RF-08, Should).
@@ -108,7 +108,7 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **Hablante**: una voz distinta dentro de un audio, numerada «Hablante n»; no identifica a nadie.
 - **Turno**: un tramo continuo en el que habla un hablante: hablante, inicio y fin en segundos con decimales.
 - **Solapamiento**: un tramo en el que hablan dos o más hablantes a la vez: hablantes, inicio y fin.
-- **Propuesta de voz**: para un hablante, la etiqueta (femenina, masculina o no determinada), la probabilidad y el origen (modelo).
+- **Propuesta de voz**: para un hablante, la etiqueta (femenino, masculino o indeterminado), la probabilidad y el origen (modelo).
 - **Fragmento**: un tramo de 3 a 5 s de un hablante, con inicio y fin, para escucharlo al confirmar.
 
 ## Criterios de éxito *(obligatorio)*

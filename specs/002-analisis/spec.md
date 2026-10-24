@@ -26,7 +26,7 @@ Con los turnos y las etiquetas de voz ya confirmadas, el sistema dice si hay voc
 
 1. **Dado** al menos un hablante etiquetado como femenino con 10 s o más de habla, **cuando** se calcula, **entonces** «voz femenina presente» vale sí (MD-01, RN-01 [VALIDAR]).
 2. **Dados** los turnos etiquetados, **cuando** se calcula, **entonces** se obtienen las voces por grupo (MD-02), el inicio de la primera intervención femenina en min:s (MD-03), la cuota de tiempo (MD-04), la cuota de turnos (MD-05) y los turnos de más de 30 s de cada persona (MD-06).
-3. **Dado** un hablante etiquetado como «no determinada», **cuando** se calculan los porcentajes por grupo, **entonces** su tiempo no entra en el denominador, no se reparte entre los otros dos grupos y se informa aparte (RN-03, RN-04).
+3. **Dado** un hablante etiquetado como «indeterminado», **cuando** se calculan los porcentajes por grupo, **entonces** su tiempo no entra en el denominador, no se reparte entre los otros dos grupos y se informa aparte (RN-03, RN-04).
 
 ---
 
@@ -118,25 +118,25 @@ El equipo mide cuánto acierta el sistema con audios reales, con líneas base, i
 ### Casos límite
 
 - **Episodio sin voces femeninas** (TS3003a) o **sin masculinas** (IS1009a): RR o BI «no aplicable» (RN-13).
-- **Solo voces «no determinada»:** no hay voces etiquetadas; todas las cuotas e índices de grupo son «no aplicable» (RN-04, RN-13).
+- **Solo voces «indeterminado»:** no hay voces etiquetadas; todas las cuotas e índices de grupo son «no aplicable» (RN-04, RN-13).
 - **Persona sin tiempo de habla propio** para la tasa por 10 min: «no aplicable», nunca dividir por 0 (RN-13).
-- **Solapamiento de tres voces:** [NEEDS CLARIFICATION: el tiempo en que hablan dos o más a la vez, ¿cuenta como tiempo de habla de cada una (MD-04) o se reparte?]
+- **Habla simultánea:** el tiempo en que hablan dos o más a la vez cuenta entero para cada una (aclaración 1). La suma de los tiempos de habla puede superar la duración del episodio.
 - **Discrepancia entre documentos:** el plan dice «no tiene voces o habla menos de 10 s» y el funcional (RN-13) dice «no tiene voces o tiempo». Manda el funcional; se anota para revisarlo en el anexo C.
 
 ## Requisitos *(obligatorio)*
 
 ### Requisitos funcionales
 
-- **FR-001**: El sistema DEBE calcular MD-01 a MD-06 tal como los define el catálogo 6.7 (RF-12, Must). [NEEDS CLARIFICATION: para la cuota de turnos (MD-05), ¿cuentan como turno las señales de escucha?]
+- **FR-001**: El sistema DEBE calcular MD-01 a MD-06 tal como los define el catálogo 6.7 (RF-12, Must). Las señales de escucha no cuentan como turno en la cuota de turnos (MD-05) ni en el recuento de turnos de cada persona (aclaración 2, D-14).
 - **FR-002**: El sistema DEBE calcular por persona «abre» y «cierra» como el primer y el último turno de más de 5 s (RF-13, Must; MD-07 y MD-08).
 - **FR-003**: El sistema DEBE marcar como candidato un cambio de A a B cuando B empieza mientras A habla y se pisan más de 0,3 s (RF-14, Must).
-- **FR-004**: El sistema DEBE clasificar cada candidato como «con éxito», «intento» o «señal de escucha» según la tabla de 6.7. [NEEDS CLARIFICATION: los «2 s siguientes» de «con éxito», ¿se cuentan desde que empieza a hablar B o desde que empieza el solapamiento?]
+- **FR-004**: El sistema DEBE clasificar cada candidato como «con éxito», «intento» o «señal de escucha» según la tabla de 6.7. Los «2 s siguientes» de «con éxito» se cuentan desde que B empieza a hablar (aclaración 3).
 - **FR-005**: Solo «con éxito» e «intento» DEBEN contar como interrupción (RN-07).
 - **FR-006**: El sistema DEBE calcular MD-14 a MD-17, con las tasas por cada 10 min de habla de la persona interrumpida (RN-08).
 - **FR-007**: El sistema DEBE calcular RR y BI con las fórmulas de 6.7 (RF-16, Must).
 - **FR-008**: El sistema DEBERÍA calcular el índice de protagonismo con su análisis de sensibilidad (RF-16, Should).
 - **FR-009**: Cualquier índice o tasa cuyo denominador sea 0 DEBE mostrarse como «no aplicable» (RN-13).
-- **FR-010**: Las cuotas por grupo DEBEN calcularse sobre el tiempo de las voces femeninas y masculinas; el tiempo «no determinada» se informa aparte y nunca se reparte (RN-03, RN-04).
+- **FR-010**: Las cuotas por grupo DEBEN calcularse sobre el tiempo de las voces femeninas y masculinas; el tiempo «indeterminado» se informa aparte y nunca se reparte (RN-03, RN-04).
 - **FR-011**: Toda cifra DEBE llevar su fórmula, y toda interrupción, sus tiempos para escucharla (RN-06).
 - **FR-012**: Los umbrales (10 s, 5 s, 30 s, 0,3 s, 2 s, 1 s, 10 s de recuperación) y los pesos DEBEN estar en un solo sitio de configuración y ajustarse solo con la partición de desarrollo (RD-05; plan, Parte 4).
 - **FR-013**: Todo cambio de regla o de umbral DEBE anotarse en el anexo C con su motivo y su fecha (RD-06).
@@ -149,7 +149,7 @@ El equipo mide cuánto acierta el sistema con audios reales, con líneas base, i
 
 Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_de_datos.md`), todavía pendiente.
 
-- **Entrada del análisis**: los turnos y solapamientos de cada «Hablante n» (feature 001) y su etiqueta confirmada (femenina, masculina o no determinada) con su origen (modelo o persona).
+- **Entrada del análisis**: los turnos y solapamientos de cada «Hablante n» (feature 001) y su etiqueta confirmada (femenino, masculino o indeterminado) con su origen (modelo o persona).
 - **Métricas por persona**: tiempo, turnos, turnos largos, abre, cierra, interrupciones recibidas y hechas, tasas, recupera la palabra, apoyos e índice de protagonismo.
 - **Métricas por grupo**: presencia, número de voces, primera intervención, cuotas de tiempo y de turnos.
 - **Interrupción**: quién interrumpe, a quién, tipo, inicio y fin.
@@ -169,10 +169,18 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **SC-007**: La cobertura de pruebas del módulo de análisis es del 80 % de líneas o más [VALIDAR] (RNF-13, Should).
 - **SC-008**: Una persona ajena al código regenera las tablas de 12.1 con un solo script (RNF-07, Must).
 
+## Aclaraciones
+
+### Sesión 2026-10-24
+
+- **1. Tiempo durante un solapamiento:** cuenta entero para cada persona. Ejemplo: Ana habla de 0 a 10 s y Luis de 8 a 14 s; Ana suma 10 s y Luis 6 s.
+- **2. Señales de escucha como turno:** no cuentan como turno. Sus segundos sí cuentan como tiempo de habla. Registrado como D-14.
+- **3. Los 2 s de «con éxito»:** se cuentan desde que B empieza a hablar.
+
 ## Supuestos
 
 - **Entradas confirmadas:** el análisis solo empieza cuando todas las voces presentes están confirmadas (RF-07, RN-02).
-- **Grupos:** «voces etiquetadas» son las femeninas y las masculinas; «no determinada» se informa aparte (RN-04).
+- **Grupos:** «voces etiquetadas» son las femeninas y las masculinas; «indeterminado» se informa aparte (RN-04).
 - **Sin LLM y sin palabras:** todas las cifras las calcula el código a partir de tiempos (D-10). MD-09 a MD-13 están retiradas.
 - **Límite declarado:** sin palabras, los solapamientos colaborativos pueden contarse como «intento»; cada caso se puede escuchar (6.7).
 - **Datos:** desarrollo con IB4002 e IB4010; prueba con EN2002a, EN2002c, ES2004a, IS1009a, TS3003a y las grabaciones del equipo. La persona B no anota la prueba, porque diseña las reglas (11.2).
