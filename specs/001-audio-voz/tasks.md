@@ -18,7 +18,7 @@
 **Propósito**: crear la estructura de carpetas e instalar las dependencias nuevas.
 
 - [ ] T001 Crear `backend/src/audio/__init__.py` y `backend/src/voz/__init__.py` (nuevos paquetes)
-- [ ] T002 Añadir dependencias en `backend/pyproject.toml`: `pyannote.audio`, `inaSpeechSegmenter` (sin pydub; la conversión de audio usa ffmpeg vía subprocess); ejecutar `uv sync`
+- [ ] T002 Añadir `pyannote.audio` e `inaSpeechSegmenter` al grupo `audio` en `[dependency-groups]` de `backend/pyproject.toml` (no a las dependencias base ni al grupo `dev`); ejecutar `uv lock` y, para usar los modelos, `uv sync --group audio`
 
 ---
 
@@ -142,8 +142,8 @@
 
 **Propósito**: integración completa del pipeline con los módulos reales y validación end-to-end.
 
-- [ ] T015 [P] Añadir `backend/tests/test_pipeline_integracion.py`: prueba que `preparar_para_confirmar` con los cuatro módulos reales (no falsos) procesa `IB4002_fragmento_5min.mp3` y devuelve `HablantesParaConfirmar` válido; usar `@pytest.mark.slow` para excluirlo de la CI rápida
-- [ ] T016 Ejecutar la validación completa de `quickstart.md` sección 8 (`uv run pytest tests/ -v`) y confirmar que todos los tests pasan
+- [ ] T015 [P] Añadir `backend/tests/test_pipeline_integracion.py`: prueba que `preparar_para_confirmar` con los cuatro módulos reales (no falsos) procesa `IB4002_fragmento_5min.mp3` y devuelve `HablantesParaConfirmar` válido; marcar con `@pytest.mark.slow` para excluirlo de la CI rápida; la CI ejecuta `uv run pytest tests/ -m "not slow"` (sin instalar el grupo `audio`); los tests slow se ejecutan localmente con `uv sync --group audio && uv run pytest tests/ -m slow`
+- [ ] T016 Ejecutar la validación completa de `quickstart.md` sección 8 y confirmar que todos los tests pasan
 - [ ] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
 - [ ] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
 

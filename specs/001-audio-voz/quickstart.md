@@ -14,12 +14,17 @@ cd backend
 uv sync
 ```
 
-Para los modelos de audio (primera ejecución, descarga modelos de Hugging Face):
+Para los modelos de audio (instala el grupo `audio` con pyannote.audio e inaSpeechSegmenter):
 
 ```bash
+uv sync --group audio
 uv run python -c "from audio.diarizacion import diarizar; print('ok')"
 uv run python -c "from voz.clasificador import proponer_voz; print('ok')"
 ```
+
+> **CI rápida**: el CI ejecuta `uv run pytest tests/ -m "not slow"` sin instalar el grupo `audio`.
+> Los tests marcados `@pytest.mark.slow` (requieren modelos reales) se ejecutan localmente con
+> `uv sync --group audio && uv run pytest tests/ -m slow`.
 
 ---
 
@@ -155,8 +160,15 @@ uv run pytest tests/test_pipeline.py -k "manual" -v
 
 ```bash
 cd backend
-uv run pytest tests/ -v
+uv run pytest tests/ -m "not slow" -v
 ```
 
-Todos los tests deben pasar. El falso de análisis (`analisis/falso.py`) cubre la fase 2 mientras
-el análisis real no está listo.
+Todos los tests rápidos deben pasar. El falso de análisis (`analisis/falso.py`) cubre la fase 2
+mientras el análisis real no está listo.
+
+Para incluir también los tests de integración con modelos reales:
+
+```bash
+uv sync --group audio
+uv run pytest tests/ -v
+```
