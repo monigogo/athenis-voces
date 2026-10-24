@@ -12,6 +12,10 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.6",
 ]
+audio = [
+    "pyannote.audio",
+    "inaSpeechSegmenter",
+]
 
 [tool.uv]
 package = false
@@ -19,6 +23,9 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: tests lentos que necesitan los modelos reales y el grupo audio",
+]
 
 [tool.ruff]
 line-length = 100
