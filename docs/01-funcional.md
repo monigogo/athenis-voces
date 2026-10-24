@@ -258,7 +258,7 @@ Las reglas de negocio fijan cómo se cuenta cada cosa y no cambian sin pasar por
 
 | ID | Regla | Motivo |
 | --- | --- | --- |
-| RN-01 | Una voz cuenta como presente si suma al menos 10 s de habla [VALIDAR] | No contar ruidos ni un «hola» suelto |
+| RN-01 | Una voz cuenta como presente si suma al menos 10 s de habla [VALIDAR]; las que no llegan no se confirman y su tiempo se muestra aparte en el resultado (D-15) | No contar ruidos ni un «hola» suelto |
 | RN-02 | La etiqueta final de voz la fija una persona; el modelo solo propone | Supervisión humana y perspectiva de género |
 | RN-03 | Las etiquetas posibles son femenino, masculino e indeterminado; «indeterminado» nunca se reparte entre las otras dos | No forzar el binarismo ni inflar porcentajes |
 | RN-04 | Los porcentajes por grupo se calculan sobre el tiempo de voces etiquetadas; el tiempo indeterminado se informa aparte | Denominador transparente |
@@ -756,6 +756,7 @@ Cada criterio de evaluación tiene requisitos que lo cubren y una evidencia que 
 | D-12 | Nombre del proyecto | athenis-voces | Tiempo de Voz | Decisión del equipo | Decidida | 24 oct 2026 |
 | D-13 | Nombre y género de las etiquetas de voz (RN-03) | femenino, masculino e indeterminado | femenina, masculina y no determinada | Decisión de Monica Gomez | Decidida | 24 oct 2026 |
 | D-14 | Señales de escucha y cuota de turnos (MD-05) | No cuentan como turno | Sí cuentan como turno | Un «ajá» no debe hacer que alguien parezca participar más | Decidida | 24 oct 2026 |
+| D-15 | Voces de menos de 10 s (RN-01) | No cuentan como voz ni se confirman; su tiempo se muestra aparte | Quitar el mínimo de 10 s | Evitar voces falsas por ruidos sin esconder a nadie que hable poco | Decidida | 24 oct 2026 |
 
 ### D. Plantilla para añadir un requisito
 

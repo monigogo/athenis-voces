@@ -262,6 +262,27 @@ def test_cuotas_en_porcentaje(campo):  # MD-04, MD-05
         c.MetricasGrupo(**grupo, **{campo: 100.5})
 
 
+def resultado(**cambios):
+    datos = {
+        "id_analisis": "a1",
+        "duracion": 20.0,
+        "voz_femenina_presente": False,
+        "segundos_voces_cortas": 0.0,
+        "grupos": [],
+        "hablantes": [],
+        "turnos": [],
+        "solapamientos": [],
+        "interrupciones": [],
+        "indices": [],
+    }
+    datos.update(cambios)
+    return datos
+
+
+def test_resultado_minimo_valido():
+    assert c.Resultado(**resultado()).segundos_voces_cortas == 0.0
+
+
 def test_resultado_rechaza_grupo_repetido():
     grupo = {
         "etiqueta": "femenino",
@@ -271,14 +292,20 @@ def test_resultado_rechaza_grupo_repetido():
         "interrupciones_recibidas": 0,
     }
     with pytest.raises(ValidationError):
-        c.Resultado(
-            id_analisis="a1",
-            duracion=20.0,
-            voz_femenina_presente=True,
-            grupos=[grupo, grupo],
-            hablantes=[],
-            turnos=[],
-            solapamientos=[],
-            interrupciones=[],
-            indices=[],
-        )
+        c.Resultado(**resultado(grupos=[grupo, grupo]))
+
+
+def test_resultado_exige_el_tiempo_de_voces_cortas():  # D-15
+    datos = resultado()
+    del datos["segundos_voces_cortas"]
+    with pytest.raises(ValidationError):
+        c.Resultado(**datos)
+
+
+def test_tiempo_de_voces_cortas_valido():  # D-15
+    assert c.Resultado(**resultado(segundos_voces_cortas=6.5)).segundos_voces_cortas == 6.5
+
+
+def test_tiempo_de_voces_cortas_no_negativo():  # D-15
+    with pytest.raises(ValidationError):
+        c.Resultado(**resultado(segundos_voces_cortas=-1.0))

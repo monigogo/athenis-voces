@@ -1,9 +1,10 @@
 {
-  "version_contrato": "0.1",
+  "version_contrato": "0.2",
   "id_analisis": "ejemplo-con-voces-femeninas",
   "duracion": 180.0,
   "voz_femenina_presente": true,
   "primera_intervencion_femenina": 0.0,
+  "segundos_voces_cortas": 0.0,
   "grupos": [
     {
       "etiqueta": "femenino",

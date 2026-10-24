@@ -82,8 +82,18 @@ def test_ids_de_analisis_distintos():
     assert len(set(ids)) == len(ids)
 
 
-def test_hablantes_coinciden_con_los_turnos(r):
-    assert {h.hablante for h in r.hablantes} == {t.hablante for t in r.turnos}
+def test_hablantes_son_las_voces_presentes(r):  # RN-01, D-15
+    presentes = {h.hablante for h in r.hablantes}
+    for hablante in {t.hablante for t in r.turnos} - presentes:
+        segundos = sum(duracion(t) for t in r.turnos if t.hablante == hablante)
+        assert segundos < 10, f"Hablante {hablante} habla {segundos} s y falta en hablantes"
+    assert presentes <= {t.hablante for t in r.turnos}
+
+
+def test_tiempo_de_voces_cortas_aparte(r):  # D-15
+    presentes = {h.hablante for h in r.hablantes}
+    cortas = sum(duracion(t) for t in r.turnos if t.hablante not in presentes)
+    assert r.segundos_voces_cortas == pytest.approx(cortas, abs=1e-3)
 
 
 def test_todos_los_hablantes_son_presentes(r):  # RN-01: 10 s o más
