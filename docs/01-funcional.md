@@ -115,7 +115,7 @@ Sin autenticación, el MVP desplegado en público solo debe ofrecer los ejemplos
 
 ### 2.4 Roles del equipo (RACI)
 
-R realiza · A responde y aprueba (una por fila) · C consultada · I informada. B = Monica Gomez; A y C = Aroa Mate y Vania Carlos [DECIDIR hoy a las 12:30 quién es cada una].
+R realiza · A responde y aprueba (una por fila) · C consultada · I informada. B = Monica Gomez; A = Vania Carlos; C = Aroa Mate.
 
 | Trabajo | Persona A (audio y voz) | Persona B (análisis y evaluación) | Persona C (producto) |
 | --- | --- | --- | --- |
