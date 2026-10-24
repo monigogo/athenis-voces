@@ -34,7 +34,7 @@ Una analista sube un audio desde la pantalla Analizar y ve en qué punto está e
 
 ### Historia 2 - Confirmar las voces (Prioridad: P1)
 
-La analista escucha los fragmentos de cada hablante, ve la propuesta y su confianza, y elige femenina, masculina o no determinada. Hasta que confirma todas las voces presentes, no hay resultados.
+La analista escucha los fragmentos de cada hablante, ve la propuesta y su confianza, y elige femenino, masculino o indeterminado. Hasta que confirma todas las voces presentes, no hay resultados.
 
 **Por qué esta prioridad**: es Must (RF-07) y es la supervisión humana en la que se apoya todo el apartado ético (RN-02, sección 4.3).
 
@@ -42,7 +42,7 @@ La analista escucha los fragmentos de cada hablante, ve la propuesta y su confia
 
 **Escenarios de aceptación**:
 
-1. **Dado** un análisis «esperando confirmación», **cuando** se abre Confirmar voces, **entonces** hay una tarjeta por hablante presente con sus fragmentos, la propuesta, la confianza y tres opciones: femenina, masculina y no determinada (RF-07, 8.2).
+1. **Dado** un análisis «esperando confirmación», **cuando** se abre Confirmar voces, **entonces** hay una tarjeta por hablante presente con sus fragmentos, la propuesta, la confianza y tres opciones: femenino, masculino e indeterminado (RF-07, 8.2).
 2. **Dado** el modo manual, **cuando** se abre la pantalla, **entonces** las tarjetas no muestran propuesta (RF-08).
 3. **Dado** que falta alguna voz presente por confirmar, **cuando** la analista intenta ver resultados, **entonces** no puede (RF-07, RN-01).
 4. **Dada** una etiqueta confirmada, **cuando** se guarda, **entonces** consta si coincide con la del modelo o la ha fijado una persona (RF-07).

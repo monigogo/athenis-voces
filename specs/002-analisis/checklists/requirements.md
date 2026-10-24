@@ -13,7 +13,7 @@
 
 ## Requisitos completos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION]
+- [x] No quedan marcadores [NEEDS CLARIFICATION]
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -31,7 +31,7 @@
 
 ## Notas
 
-- Quedan 3 marcadores [NEEDS CLARIFICATION]: tiempo de habla durante un solapamiento, si las señales de escucha cuentan como turno y desde cuándo se cuentan los 2 s de «con éxito». Se resuelven en `/speckit-clarify` (fase 3).
+- Los 3 marcadores [NEEDS CLARIFICATION] se resolvieron el 2026-10-24 (ver «Aclaraciones» en la spec): tiempo durante un solapamiento, señales de escucha como turno y desde cuándo se cuentan los 2 s de «con éxito».
 - pyannote se nombra solo en la ablación, porque así la define el funcional (11.3).
 - Los umbrales y pesos marcados [VALIDAR] vienen del funcional y se fijan con la partición de desarrollo (RD-05).
 - Hay una discrepancia entre el plan y la RN-13 sobre cuándo un índice es «no aplicable»; se sigue el funcional y se propone anotarlo en el anexo C.

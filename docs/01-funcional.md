@@ -156,7 +156,7 @@ Contar minutos no basta: una mujer puede hablar mucho y aun así no abrir ni cer
 
 | Enfoque existente | Qué resuelve | Qué añadimos |
 | --- | --- | --- |
-| inaSpeechSegmenter (INA), creado para estudios de igualdad en radio y televisión francesas | Tiempo de habla por voz femenina y masculina | Rol protagonista, interrupciones, confirmación humana y validación en español |
+| inaSpeechSegmenter (INA), creado para estudios de igualdad en radio y televisión francesas | Tiempo de habla por voz femenina y masculino | Rol protagonista, interrupciones, confirmación humana y validación en español |
 | Diarización genérica (pyannote, servicios de transcripción) | Quién habla cuándo | Métricas con perspectiva de género y explicación de cada cifra |
 | Recuento manual en observatorios | Rigor, pero lento y caro | La misma metodología, automatizada y repetible, con revisión humana |
 
@@ -217,7 +217,7 @@ Solo R5 y R9 combinan probabilidad e impacto altos. Revisad la posición de cada
 | R9 | Los entregables se comen el último día | Sin guion de vídeo el domingo por la noche | Guiones el domingo (B15) y tomas de la demo el miércoles (C14) | Vídeo con capturas y voz en off | C |
 | R10 | Una clave o un dato personal llega al repositorio público | Aviso de gitleaks o del agente de seguridad | Hooks, .gitignore y revisión | Revocar la clave y limpiar el historial | A |
 | R11 | Se generalizan conclusiones a partir de pocos episodios | Frases del tipo «las mujeres en los podcasts…» | RN-12; n e intervalos siempre visibles | Revisar los textos de la presentación | B |
-| R12 | Se atribuye a una persona un género que no es el suyo | Etiqueta corregida después de publicar | Autopresentación pública como criterio; «no determinada» | Corregir y retirar el resultado afectado | A |
+| R12 | Se atribuye a una persona un género que no es el suyo | Etiqueta corregida después de publicar | Autopresentación pública como criterio; «indeterminado» | Corregir y retirar el resultado afectado | A |
 
 ### 4.3 Clasificación según la Ley de IA
 
@@ -260,8 +260,8 @@ Las reglas de negocio fijan cómo se cuenta cada cosa y no cambian sin pasar por
 | --- | --- | --- |
 | RN-01 | Una voz cuenta como presente si suma al menos 10 s de habla [VALIDAR] | No contar ruidos ni un «hola» suelto |
 | RN-02 | La etiqueta final de voz la fija una persona; el modelo solo propone | Supervisión humana y perspectiva de género |
-| RN-03 | Las etiquetas posibles son femenina, masculina y no determinada; «no determinada» nunca se reparte entre las otras dos | No forzar el binarismo ni inflar porcentajes |
-| RN-04 | Los porcentajes por grupo se calculan sobre el tiempo de voces etiquetadas; el tiempo no determinado se informa aparte | Denominador transparente |
+| RN-03 | Las etiquetas posibles son femenino, masculino e indeterminado; «indeterminado» nunca se reparte entre las otras dos | No forzar el binarismo ni inflar porcentajes |
+| RN-04 | Los porcentajes por grupo se calculan sobre el tiempo de voces etiquetadas; el tiempo indeterminado se informa aparte | Denominador transparente |
 | RN-05 | Retirada en la v0.2: el sistema no usa LLM; todas las cifras las calcula el código | Exactitud y reproducibilidad |
 | RN-06 | Toda cifra mostrada lleva a su fórmula y a sus fragmentos de audio | Explicabilidad |
 | RN-07 | Hay tres tipos de solapamiento (definidos en 6.7); solo «con éxito» e «intento» cuentan como interrupción | Las señales de escucha no quitan la palabra |
@@ -306,8 +306,8 @@ Hay 26 requisitos: 15 Must, 1 Should y 10 Won't en esta versión. El MVP se acep
 | ID | Requisito | Prior. | Criterio de aceptación | Verif. | Resp. |
 | --- | --- | --- | --- | --- | --- |
 | RF-05 | Separar hablantes y detectar habla simultánea | Must | Devuelve turnos y solapamientos con el formato del contrato, con pyannote en local | P y A (M-01) | A |
-| RF-06 | Proponer una etiqueta de voz por hablante, con su confianza | Must en modo asistido (D-03: inaSpeechSegmenter) | Probabilidad entre 0 y 1; en la zona dudosa [VALIDAR 0,35–0,65] la propuesta es «no determinada» | A (M-02, M-03) | A |
-| RF-07 | Confirmar o corregir cada etiqueta escuchando muestras | Must | Al menos 3 fragmentos de 3 a 5 s por hablante; opciones femenina, masculina y no determinada; queda registrado si la etiqueta vino del modelo o de una persona; no hay resultados hasta confirmar todas las voces presentes (RN-01) | D y P | C |
+| RF-06 | Proponer una etiqueta de voz por hablante, con su confianza | Must en modo asistido (D-03: inaSpeechSegmenter) | Probabilidad entre 0 y 1; en la zona dudosa [VALIDAR 0,35–0,65] la propuesta es «indeterminado» | A (M-02, M-03) | A |
+| RF-07 | Confirmar o corregir cada etiqueta escuchando muestras | Must | Al menos 3 fragmentos de 3 a 5 s por hablante; opciones femenino, masculino e indeterminado; queda registrado si la etiqueta vino del modelo o de una persona; no hay resultados hasta confirmar todas las voces presentes (RN-01) | D y P | C |
 | RF-08 | Modo manual, sin propuesta automática | Should (D-04 decidida) | Con el modo activo no se ejecuta ningún clasificador de voz y la persona etiqueta sin propuesta previa | P | A |
 
 ### 6.3 Transcripción y señales de conversación (Won't en esta versión)
@@ -358,7 +358,7 @@ Es la propuesta conceptual que pide el reto, medida solo con la voz: cuatro dime
 | MD-02 | Presencia | Voces por grupo | Número de hablantes con cada etiqueta | recuento |
 | MD-03 | Presencia | Primera intervención femenina | Inicio del primer turno de una voz femenina | min:s |
 | MD-04 | Participación | Cuota de tiempo | Segundos de habla del grupo ÷ segundos de voces etiquetadas (RN-04) | % |
-| MD-05 | Participación | Cuota de turnos | Turnos del grupo ÷ total de turnos | % |
+| MD-05 | Participación | Cuota de turnos | Turnos del grupo ÷ total de turnos; las señales de escucha no cuentan como turno (D-14) | % |
 | MD-06 | Participación | Turnos largos | Turnos de más de 30 s | recuento |
 | MD-07 | Posición | Abre | Tiene el primer turno de más de 5 s del episodio | sí / no |
 | MD-08 | Posición | Cierra | Tiene el último turno de más de 5 s | sí / no |
@@ -470,7 +470,7 @@ El atajo discontinuo solo existe para los ejemplos precalculados, cuyas voces ya
 | Principio | Regla concreta |
 | --- | --- |
 | Explicable | Cada número abre su fórmula y sus fragmentos (RN-06) |
-| Incertidumbre visible | La confianza y «no determinada» se muestran, nunca se esconden |
+| Incertidumbre visible | La confianza y «indeterminado» se muestran, nunca se esconden |
 | Sin estereotipos | Paleta neutra, sin rosa ni azul; formas o etiquetas además del color (RNF-14) |
 | Personas anónimas | «Hablante n» por defecto (RN-10); nunca hay rankings de personas |
 | Lenguaje preciso | «Voz percibida como femenina», no «mujer»; «interrupción» solo para los tipos que cuentan |
@@ -481,7 +481,7 @@ El atajo discontinuo solo existe para los ejemplos precalculados, cuyas voces ya
 | Dónde | Texto |
 | --- | --- |
 | Antes de subir | «Analizaremos solo las voces de este audio, no lo que se dice. No identificamos a nadie y borramos el audio pasadas [COMPLETAR plazo de D-08]. Sube solo audios que tengas derecho a usar.» |
-| Confirmar voces | «El sistema propone cómo suena cada voz; tú decides. Si sabes cómo se presenta públicamente esa persona, usa eso. Si no lo sabes, marca ‘no determinada’.» |
+| Confirmar voces | «El sistema propone cómo suena cada voz; tú decides. Si sabes cómo se presenta públicamente esa persona, usa eso. Si no lo sabes, marca ‘indeterminado’.» |
 | Resultados | «Estos datos describen este episodio, no a las personas. La voz percibida no es la identidad de género.» |
 | Índice no aplicable | «En este episodio no hay voces de este grupo, así que el índice no se puede calcular.» |
 | Error del análisis | «El análisis no ha podido terminar. Puedes reintentarlo sin volver a subir el audio durante [COMPLETAR plazo].» |
@@ -537,14 +537,14 @@ Los siete requisitos de las Directrices éticas para una IA fiable, convertidos 
 | Solidez técnica y seguridad | Evaluación con prueba ciega y revisión de seguridad | RNF-03 a RNF-05, RNF-09 y RNF-10 | Informes de evaluación y de seguridad |
 | Privacidad y gestión de datos | Sin identificación, sin transcribir, retención corta y tratamiento local | RN-10, RF-23, RNF-12 | Prueba de borrado |
 | Transparencia | Fórmulas visibles, fragmento por cifra, ficha del sistema | RN-06, RF-22 | Página «cómo funciona» |
-| Diversidad, no discriminación y equidad | Error por grupo, categoría «no determinada», comparación con lo proporcional | RN-03, RN-09, RNF-06 | Tabla de equidad |
+| Diversidad, no discriminación y equidad | Error por grupo, categoría «indeterminado», comparación con lo proporcional | RN-03, RN-09, RNF-06 | Tabla de equidad |
 | Bienestar social y ambiental | GPU solo para cargas pesadas | RNF-17 | Registro de uso |
 | Rendición de cuentas | Código abierto, registro de decisiones, canal de reclamaciones en producción | RD-06, anexo C | Repositorio |
 
 ### 10.2 Perspectiva de género
 
 - **La voz percibida no es la identidad de género.** La interfaz lo dice (8.4) y la referencia de evaluación es la autopresentación pública, no la percepción de quien anota (11.2). En AMI, la referencia es el sexo que el corpus registra en el código de cada participante.
-- **No binario por diseño:** existe «no determinada» y su tiempo se informa aparte (RN-03, RN-04).
+- **No binario por diseño:** existe «indeterminado» y su tiempo se informa aparte (RN-03, RN-04).
 - **Protagonismo, no solo minutos:** posición, turnos largos y respeto del turno (6.7).
 - **Sesgo medido, no supuesto:** error por grupo con intervalo (RNF-06); por tipo de voz o acento, solo si hay etiquetas fiables [VALIDAR].
 - **Interrupciones con matiz:** se separan las señales de escucha de las que quitan la palabra y se mide quién interrumpe a quién en todas las direcciones, sin presuponer el sentido. Sin palabras no se distinguen los solapamientos colaborativos: es un límite declarado (6.7).
@@ -754,6 +754,8 @@ Cada criterio de evaluación tiene requisitos que lo cubren y una evidencia que 
 | D-10 | Qué analiza el sistema | Solo la voz | Voz y transcripción | Elegida A: privacidad (no se procesa el contenido y el audio no sale), menos horas y menos piezas | Decidida | 24 oct 2026 |
 | D-11 | Datos | Grabaciones propias, corpus AMI y una sesión del Congreso | Episodio de podcast público anotado a mano | Elegida A: AMI ya está anotado y tiene licencia CC BY 4.0; las grabaciones propias se pueden enseñar | Decidida | 24 oct 2026 |
 | D-12 | Nombre del proyecto | athenis-voces | Tiempo de Voz | Decisión del equipo | Decidida | 24 oct 2026 |
+| D-13 | Nombre y género de las etiquetas de voz (RN-03) | femenino, masculino e indeterminado | femenina, masculina y no determinada | Decisión de Monica Gomez | Decidida | 24 oct 2026 |
+| D-14 | Señales de escucha y cuota de turnos (MD-05) | No cuentan como turno | Sí cuentan como turno | Un «ajá» no debe hacer que alguien parezca participar más | Decidida | 24 oct 2026 |
 
 ### D. Plantilla para añadir un requisito
 
