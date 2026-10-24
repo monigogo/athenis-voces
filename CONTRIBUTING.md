@@ -50,6 +50,21 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 Example: `feat(backend): add speaking time metric`.
 
+## Project structure
+
+Backend code lives under `backend/src/`, never directly in `backend/`.
+
+| Path | What goes there |
+| --- | --- |
+| `backend/src/` | Backend code: `config.py`, `contrato.py`, `pipeline.py` and the `audio/`, `voz/`, `analisis/` and `api/` packages |
+| `backend/tests/` | Backend tests, written before the code |
+| `backend/scripts/` | Python scripts that use backend code (for example `precalcular_demo.py`) |
+| `scripts/` | Shell scripts for the whole repository (for example `descargar_datos.sh`, `revisar_seguridad.sh`, `listar_licencias.sh`) |
+| `frontend/` | Web app |
+| `evaluacion/` | Evaluation script, annotation guide and labels |
+| `docs/` | Documentation |
+| `specs/` | Spec Kit specs, one folder per feature |
+
 ## Checks
 
 Backend (from `backend/`):
