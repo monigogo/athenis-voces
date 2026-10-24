@@ -595,7 +595,7 @@ Trabajamos con el contrato de datos primero e integramos en puntos fijos. Evalua
 
 ### 11.2 Anotación de referencia
 
-1. **Guía escrita antes de anotar:** qué es un turno, un solapamiento y cada tipo de interrupción, con ejemplos.
+1. **Guía escrita antes de anotar:** qué es un turno, un solapamiento y cada tipo de interrupción, con ejemplos. Además de los tres tipos, se anota «colaborativo» para los solapamientos que no quitan la palabra (D-16).
 2. **Anotación independiente:** A y C anotan los mismos clips por separado en Audacity; B no anota la prueba porque diseña las reglas.
 3. **Acuerdo entre anotadoras:** kappa de Cohen para el tipo de interrupción (M-08). Si es menor de 0,6 [VALIDAR], se revisa la guía y se vuelve a anotar.
 4. **Desacuerdos:** se resuelven por consenso, se registran y el resultado es la referencia.
@@ -757,6 +757,7 @@ Cada criterio de evaluación tiene requisitos que lo cubren y una evidencia que 
 | D-13 | Nombre y género de las etiquetas de voz (RN-03) | femenino, masculino e indeterminado | femenina, masculina y no determinada | Decisión de Monica Gomez | Decidida | 24 oct 2026 |
 | D-14 | Señales de escucha y cuota de turnos (MD-05) | No cuentan como turno | Sí cuentan como turno | Un «ajá» no debe hacer que alguien parezca participar más | Decidida | 24 oct 2026 |
 | D-15 | Voces de menos de 10 s (RN-01) | No cuentan como voz ni se confirman; su tiempo se muestra aparte | Quitar el mínimo de 10 s | Evitar voces falsas por ruidos sin esconder a nadie que hable poco | Decidida | 24 oct 2026 |
+| D-16 | Qué se anota como interrupción en la referencia (11.2) | Criterio humano al escuchar, con una cuarta etiqueta solo para anotar: «colaborativo», que no cuenta | Solo las reglas de tiempo | Con solo reglas de tiempo la referencia sería el propio código y la línea base «contar cualquier solapamiento» no tendría sentido; así el límite declarado de 6.7 se ve en los resultados | Decidida | 24 oct 2026 |
 
 ### D. Plantilla para añadir un requisito
 
