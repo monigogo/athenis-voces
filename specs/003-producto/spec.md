@@ -129,7 +129,7 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 - **FR-004**: El sistema DEBE permitir reintentar un análisis en error sin volver a subir el audio, mientras dure la retención (8.1).
 - **FR-005**: El sistema DEBE mostrar por hablante sus fragmentos, la propuesta, la confianza y las tres opciones, y no mostrar resultados hasta confirmar todas las voces presentes (RF-07, Must).
 - **FR-006**: El sistema DEBE guardar si cada etiqueta final viene del modelo o de una persona (RF-07).
-- **FR-007**: El sistema DEBE mostrar tarjetas de presencia e índices, línea de tiempo por hablante, gráfico de tiempo y tabla de interrupciones (RF-17, Must).
+- **FR-007**: El sistema DEBE mostrar tarjetas de presencia e índices, línea de tiempo por hablante, gráfico de tiempo y tabla de interrupciones, y aparte el tiempo de las voces de menos de 10 s (RF-17, Must; D-15).
 - **FR-008**: El sistema DEBE permitir escuchar cada interrupción con un fragmento que empieza como mucho 1 s antes, acaba después y dura 15 s como máximo (RF-18, Must).
 - **FR-009**: El sistema DEBE ofrecer episodios de ejemplo precalculados cuyos resultados aparecen en 2 s o menos (RF-02, RNF-02, Must).
 - **FR-010**: El sistema DEBE tener una página «Cómo funciona» con definiciones, fórmulas, exactitud por grupo y limitaciones (RF-22, Must).

@@ -78,7 +78,7 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 
 ### Casos límite
 
-- **Hablante con menos de 10 s de habla:** no cuenta como presente (RN-01). [NEEDS CLARIFICATION: ¿se le genera propuesta y fragmentos o se excluye de la confirmación? ¿Dónde se cuenta su tiempo?]
+- **Hablante con menos de 10 s de habla:** no cuenta como presente (RN-01): no recibe propuesta ni fragmentos y no pasa a confirmación, pero su tiempo se muestra aparte en el resultado (D-15).
 - **Audio sin ninguna voz** o en el que solo se detecta una: [NEEDS CLARIFICATION: ¿termina en «error» con motivo o sigue con un resultado vacío?]
 - **Audio largo en CPU:** en desarrollo se trabaja con fragmentos de 5 min; los audios completos van a GPU (plan, Parte 5.2).
 - **Hablante con poco audio:** es un estado que la pantalla Confirmar voces debe cubrir (sección 8.2); qué fragmentos recibe es la pregunta de la historia 3.
