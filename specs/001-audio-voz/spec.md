@@ -12,6 +12,16 @@
 
 **Fuente de verdad**: [docs/01-funcional.md](../../docs/01-funcional.md). Si esta spec y el funcional no coinciden, manda el funcional (constitución, punto 1).
 
+## Clarifications
+
+### Session 2026-10-24
+
+- Q: ¿Con qué criterio selecciona el sistema los ≥ 3 fragmentos de un hablante? → A: Distribuidos uniformemente a lo largo del audio del hablante (inicio, mitad, final y los que hagan falta).
+- Q: ¿El «modo manual» es una opción por análisis o una configuración global? → A: Opción por análisis; cada análisis lleva su propio campo `modo` (asistido / manual).
+- Q: Cuando falla un paso del pipeline, ¿el sistema se detiene de inmediato o continúa? → A: Parada inmediata; el primer paso fallido detiene el análisis y lo marca como «error» con el motivo.
+- Q: ¿Los ≥ 3 fragmentos de un hablante deben ser estrictamente no solapados entre sí? → A: Sí, cada fragmento abarca segundos distintos; ninguno comparte tiempo con otro del mismo hablante.
+- Q: ¿Hay una duración mínima para registrar un solapamiento entre hablantes? → A: No; la diarización devuelve todos los solapamientos detectados por pyannote, sin filtrar por duración. El filtro de > 0,3 s lo aplica la persona B en su regla de interrupciones (`solapamiento_mas_de` en config.py).
+
 ## Escenarios de uso y pruebas *(obligatorio)*
 
 ### Historia 1 - Preparar el audio y separar las voces (Prioridad: P1)
@@ -48,7 +58,7 @@ Para cada hablante, el sistema propone una etiqueta para su voz (femenino, mascu
 
 ### Historia 3 - Dar fragmentos para confirmar cada voz (Prioridad: P1)
 
-Para que una persona confirme o corrija la propuesta escuchando, el sistema elige y corta fragmentos cortos de cada hablante.
+Para que una persona confirme o corrija la propuesta escuchando, el sistema elige y corta fragmentos cortos de cada hablante, distribuidos uniformemente a lo largo del audio del hablante (inicio, mitad, final y los que hagan falta).
 
 **Por qué esta prioridad**: sin fragmentos no se puede confirmar, y sin confirmación no hay resultados (RF-07, RN-02).
 
@@ -88,13 +98,13 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 ### Requisitos funcionales
 
 - **FR-001**: El sistema DEBE convertir el audio de entrada a mono de 16 kHz conservando la duración ± 0,1 s (RF-03, Must).
-- **FR-002**: El sistema DEBE devolver los turnos de cada hablante, numerado como «Hablante n», y los tramos de habla simultánea, con el formato del contrato de datos (RF-05, Must; RN-10).
+- **FR-002**: El sistema DEBE devolver los turnos de cada hablante, numerado como «Hablante n», y los tramos de habla simultánea de 0,5 s o más, con el formato del contrato de datos (RF-05, Must; RN-10).
 - **FR-003**: El sistema DEBE proponer para cada hablante una etiqueta (femenino, masculino o indeterminado), con una probabilidad entre 0 y 1 (RF-06, Must en modo asistido).
 - **FR-004**: El sistema DEBE proponer «indeterminado» cuando la probabilidad cae en la zona dudosa, 0,35–0,65 [VALIDAR] (RF-06).
 - **FR-005**: El sistema DEBE registrar que una propuesta viene del modelo (RF-07).
-- **FR-006**: El sistema DEBE ofrecer al menos 3 fragmentos de 3 a 5 s por cada hablante presente (RF-07).
-- **FR-007**: Con el modo manual activo, el sistema NO DEBE ejecutar ningún clasificador de voz (RF-08, Should).
-- **FR-008**: Si falla un paso, el análisis DEBE quedar en «error» con su motivo (RNF-16, Must).
+- **FR-006**: El sistema DEBE ofrecer al menos 3 fragmentos de 3 a 5 s por cada hablante presente, distribuidos uniformemente a lo largo del audio del hablante (inicio, mitad, final) y sin solapamiento entre sí (ningún segundo compartido) (RF-07).
+- **FR-007**: Con el modo manual activo en un análisis concreto, el sistema NO DEBE ejecutar ningún clasificador de voz para ese análisis (RF-08, Should). El modo (asistido / manual) se especifica por análisis.
+- **FR-008**: Si falla cualquier paso del pipeline, el sistema DEBE detenerse de inmediato, sin ejecutar pasos posteriores, y marcar el análisis como «error» con el motivo del fallo (RNF-16, Must).
 - **FR-009**: El sistema NO DEBE identificar a nadie ni guardar ninguna huella de voz; solo numera las voces dentro de cada audio (secciones 4.3 y 10.3; plan, Parte 2.2).
 - **FR-010**: El audio DEBE procesarse en infraestructura propia, sin enviarse fuera (RNF-12, Must).
 - **FR-011**: El sistema DEBE funcionar sin GPU, en CPU (RNF-20, Must).
@@ -105,9 +115,10 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_de_datos.md`), todavía pendiente.
 
 - **Audio preparado**: el audio de entrada convertido a mono de 16 kHz, con su duración.
+- **Análisis**: la unidad de procesamiento de un audio; lleva su propio campo `modo` (asistido o manual).
 - **Hablante**: una voz distinta dentro de un audio, numerada «Hablante n»; no identifica a nadie.
 - **Turno**: un tramo continuo en el que habla un hablante: hablante, inicio y fin en segundos con decimales.
-- **Solapamiento**: un tramo en el que hablan dos o más hablantes a la vez: hablantes, inicio y fin.
+- **Solapamiento**: un tramo de 0,5 s o más en el que hablan dos o más hablantes a la vez: hablantes, inicio y fin. Los solapamientos más cortos no se registran.
 - **Propuesta de voz**: para un hablante, la etiqueta (femenino, masculino o indeterminado), la probabilidad y el origen (modelo).
 - **Fragmento**: un tramo de 3 a 5 s de un hablante, con inicio y fin, para escucharlo al confirmar.
 

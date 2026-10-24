@@ -13,7 +13,7 @@
 
 ## Requisitos completos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION]
+- [x] No quedan marcadores [NEEDS CLARIFICATION]
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
