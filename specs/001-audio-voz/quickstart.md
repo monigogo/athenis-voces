@@ -42,7 +42,7 @@ Todos deben pasar antes de tocar ningún módulo real.
 
 ## 3. Validar preparación del audio (SC-001)
 
-Pasa un fragmento de 5 min de la reunión IB4002 y comprueba que el WAV resultante tiene
+Pasa la reunión IB4002 y comprueba que el WAV resultante tiene
 la duración correcta (± 0,1 s) y el formato esperado.
 
 ```bash
@@ -51,7 +51,7 @@ uv run python - <<'EOF'
 from pathlib import Path
 from audio.preparar import preparar
 
-entrada = Path("../data/IB4002_fragmento_5min.mp3")   # descargado con descargar_datos.sh
+entrada = Path("../datos/ami/audios/IB4002.Mix-Headset.wav")   # descargado con descargar_datos.sh
 destino = Path("/tmp/ib4002_prep.wav")
 duracion = preparar(entrada, destino)
 print(f"Duración: {duracion:.2f} s")

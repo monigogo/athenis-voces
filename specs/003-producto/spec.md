@@ -1,6 +1,6 @@
 # Especificación de la feature: Producto
 
-**Rama de trabajo**: `feat/moni/fase1` (creación de la spec; la implementación irá en la rama de la persona C)
+**Rama de trabajo**: una rama por tarea de la persona C (`feat/aroa/<tarea>`), con PR a `develop`
 
 **Creada**: 2026-10-24
 

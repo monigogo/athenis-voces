@@ -1,6 +1,6 @@
 # Especificación de la feature: Análisis y evaluación
 
-**Rama de trabajo**: `feat/moni/fase1` (creación de la spec; la implementación irá en la rama de la persona B)
+**Rama de trabajo**: una rama por tarea de la persona B (`feat/moni/<tarea>`), con PR a `develop`
 
 **Creada**: 2026-10-24
 
@@ -144,11 +144,11 @@ El equipo mide cuánto acierta el sistema con audios reales, con líneas base, i
 - **FR-015**: La evaluación DEBE regenerar las tablas de 12.1 desde un único script, a partir de las etiquetas y las salidas guardadas (RNF-07, 11.4).
 - **FR-016**: La evaluación DEBE usar la partición de prueba solo para medir, una vez por versión (RD-05; constitución, punto 9).
 - **FR-017**: Toda comparación DEBE indicar el número de episodios y de minutos, y los resultados de un episodio no se generalizan (RN-12).
-- **FR-018**: El resultado DEBE indicar aparte los segundos de las voces cortas (menos de 10 s o sin 3 tramos limpios), que no cuentan como voz (RN-01, D-15, D-18).
+- **FR-018**: El resultado DEBE indicar aparte los segundos de las voces cortas (menos de 10 s o sin sitio para 3 fragmentos limpios, aunque se partan los tramos largos), que no cuentan como voz (RN-01, D-15, D-18).
 
 ### Entidades clave
 
-Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_de_datos.md`), todavía pendiente.
+Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_de_datos.md`).
 
 - **Entrada del análisis**: los turnos y solapamientos de cada «Hablante n» (feature 001) y su etiqueta confirmada (femenino, masculino o indeterminado) con su origen (modelo o persona).
 - **Métricas por persona**: tiempo, turnos, turnos largos, abre, cierra, interrupciones recibidas y hechas, tasas, recupera la palabra, apoyos e índice de protagonismo.
@@ -186,5 +186,5 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **Límite declarado:** sin palabras, los solapamientos colaborativos pueden contarse como «intento»; cada caso se puede escuchar (6.7).
 - **Datos:** desarrollo con IB4002 e IB4010; prueba con EN2002a, EN2002c, ES2004a, IS1009a, TS3003a y las grabaciones del equipo. La persona B no anota la prueba, porque diseña las reglas (11.2).
 - **Referencia:** las anotaciones de AMI publicadas por BUT, y las anotaciones manuales de A y C para las interrupciones (plan, Parte 6).
-- **Contrato:** depende de `docs/contrato_de_datos.md`, todavía pendiente.
+- **Contrato:** depende de `docs/contrato_de_datos.md`.
 - **Fuera de esta feature:** separar voces y proponer la voz (001), y mostrar los resultados en la web (003).

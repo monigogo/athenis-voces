@@ -16,7 +16,7 @@ Por eso **anotad cada una por separado y no comentéis nada hasta que las dos ha
 ## 2. Qué audios anotáis
 
 - Las 2 grabaciones propias (de 3 a 5 minutos cada una).
-- 5 minutos de la reunión EN2002a de AMI [COMPLETAR: propuesta, del minuto 0 al 5].
+- 5 minutos de la reunión EN2002a de AMI: del minuto 0:00 al 5:00.
 
 Las dos anotáis los mismos clips.
 
