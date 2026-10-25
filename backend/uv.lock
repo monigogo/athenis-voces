@@ -303,8 +303,8 @@ requires-dist = [{ name = "pydantic", specifier = ">=2.14.1" }]
 
 [package.metadata.requires-dev]
 audio = [
-    { name = "inaspeechsegmenter" },
-    { name = "pyannote-audio" },
+    { name = "inaspeechsegmenter", specifier = ">=0.8" },
+    { name = "pyannote-audio", specifier = ">=4.0" },
     { name = "torch", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "torchaudio", specifier = "==2.11.0", index = "https://download.pytorch.org/whl/cu126" },
 ]
