@@ -11,7 +11,7 @@ Versión 0.2 en borrador: completad los campos [COMPLETAR] durante el reto y con
 | Proyecto | [**athenis-voces**](https://github.com/monigogo/athenis-voces) |
 | Reto | Mujeres por la IA Abierta , Comunidad IA de Código Abierto |
 | Versión y estado | 0.2 · borrador |
-| Autoras | Monica Gomez, Aroa Mate, Vania Carlos |
+| Autoras | Monica Gomez, Aroa Mateo, Vania Carlos |
 | Aprobación | Las tres autoras (sección 12.5) |
 | Repositorio | <https://github.com/monigogo/athenis-voces.git> |
 | Documentos relacionados | Bases del reto · Plan definitivo · docs/contrato\_de\_datos.md |
