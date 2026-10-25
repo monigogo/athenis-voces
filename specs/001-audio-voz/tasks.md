@@ -91,7 +91,7 @@
 
 ## Phase 5: Historia 3 — Dar fragmentos para confirmar cada voz (P1)
 
-**Objetivo**: para cada hablante presente (≥ 10 s de habla), el sistema elige ≥ 3 fragmentos de 3–5 s, distribuidos uniformemente y sin solapamiento entre sí.
+**Objetivo**: para cada hablante con ≥ 10 s de habla (presente si además tiene 3 tramos válidos, D-18), el sistema elige ≥ 3 fragmentos de 3–5 s, distribuidos uniformemente y sin solapamiento entre sí.
 
 **Prueba independiente**: con audio separado, comprobar que cada hablante presente tiene ≥ 3 fragmentos de 3–5 s, no solapados entre sí, distribuidos uniformemente; hablantes con < 3 tramos válidos no aparecen en el dict.
 

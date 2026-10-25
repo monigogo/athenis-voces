@@ -258,7 +258,7 @@ Las reglas de negocio fijan cómo se cuenta cada cosa y no cambian sin pasar por
 
 | ID | Regla | Motivo |
 | --- | --- | --- |
-| RN-01 | Una voz cuenta como presente si suma al menos 10 s de habla [VALIDAR]; las que no llegan no se confirman y su tiempo se muestra aparte en el resultado (D-15) | No contar ruidos ni un «hola» suelto |
+| RN-01 | Una voz cuenta como presente si suma al menos 10 s de habla [VALIDAR] y tiene al menos 3 tramos de 3 s o más sin solaparse con nadie, para poder escucharla (D-18); las que no lo cumplen no se confirman y su tiempo se muestra aparte en el resultado (D-15) | No contar ruidos ni un «hola» suelto, sin esconder a nadie que habló |
 | RN-02 | La etiqueta final de voz la fija una persona; el modelo solo propone | Supervisión humana y perspectiva de género |
 | RN-03 | Las etiquetas posibles son femenino, masculino e indeterminado; «indeterminado» nunca se reparte entre las otras dos | No forzar el binarismo ni inflar porcentajes |
 | RN-04 | Los porcentajes por grupo se calculan sobre el tiempo de voces etiquetadas; el tiempo indeterminado se informa aparte | Denominador transparente |
@@ -461,8 +461,8 @@ El atajo discontinuo solo existe para los ejemplos precalculados, cuyas voces ya
 | Pantalla | Objetivo | Contenido mínimo | Estados que debe cubrir |
 | --- | --- | --- | --- |
 | Analizar | Empezar un análisis | Subida de archivo, lista de ejemplos, aviso de privacidad | Vacío, archivo no válido, subiendo, en cola |
-| Confirmar voces | Fijar las etiquetas | Una tarjeta por hablante con 3 fragmentos, propuesta, confianza y tres opciones | Propuesta dudosa, hablante con poco audio, todo confirmado |
-| Resultados | Entender el episodio | Tarjetas de presencia e índices, línea de tiempo, gráfico por hablante y tabla de interrupciones con «escuchar» | Sin voces femeninas, índice no aplicable |
+| Confirmar voces | Fijar las etiquetas | Una tarjeta por hablante con 3 fragmentos, propuesta, confianza y tres opciones | Propuesta dudosa, todo confirmado |
+| Resultados | Entender el episodio | Tarjetas de presencia e índices, línea de tiempo, gráfico por hablante, tabla de interrupciones con «escuchar» y, aparte, el tiempo de las voces cortas (D-15) | Sin voces femeninas, índice no aplicable |
 | Cómo funciona | Confiar con criterio | Definiciones, fórmulas, exactitud por grupo y limitaciones | — |
 
 ### 8.3 Principios de experiencia de uso
@@ -758,6 +758,8 @@ Cada criterio de evaluación tiene requisitos que lo cubren y una evidencia que 
 | D-14 | Señales de escucha y cuota de turnos (MD-05) | No cuentan como turno | Sí cuentan como turno | Un «ajá» no debe hacer que alguien parezca participar más | Decidida | 24 oct 2026 |
 | D-15 | Voces de menos de 10 s (RN-01) | No cuentan como voz ni se confirman; su tiempo se muestra aparte | Quitar el mínimo de 10 s | Evitar voces falsas por ruidos sin esconder a nadie que hable poco | Decidida | 24 oct 2026 |
 | D-16 | Qué se anota como interrupción en la referencia (11.2) | Criterio humano al escuchar, con una cuarta etiqueta solo para anotar: «colaborativo», que no cuenta | Solo las reglas de tiempo | Con solo reglas de tiempo la referencia sería el propio código y la línea base «contar cualquier solapamiento» no tendría sentido; así el límite declarado de 6.7 se ve en los resultados | Decidida | 24 oct 2026 |
+| D-17 | Audio con menos de dos voces presentes (RNF-16) | El análisis acaba en «error» con un motivo claro: «solo se ha detectado una voz que se pueda confirmar» | Dar un resultado con los índices «no aplicable» | Con una sola voz no hay nada que comparar; el motivo explica por qué no hay resultado, en vez de descartar el audio en silencio | Decidida | 25 oct 2026 |
+| D-18 | Voz de 10 s o más sin 3 tramos de 3 s sin solapamiento (RN-01) | No es voz presente: no se confirma y su tiempo cuenta como voz corta (D-15) | Descartarla sin contar su tiempo | Sin esos tramos no se puede escuchar para confirmarla, pero tampoco se puede esconder a alguien que sí habló | Decidida | 25 oct 2026 |
 
 ### D. Plantilla para añadir un requisito
 

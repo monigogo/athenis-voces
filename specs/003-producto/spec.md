@@ -46,7 +46,7 @@ La analista escucha los fragmentos de cada hablante, ve la propuesta y su confia
 2. **Dado** el modo manual, **cuando** se abre la pantalla, **entonces** las tarjetas no muestran propuesta (RF-08).
 3. **Dado** que falta alguna voz presente por confirmar, **cuando** la analista intenta ver resultados, **entonces** no puede (RF-07, RN-01).
 4. **Dada** una etiqueta confirmada, **cuando** se guarda, **entonces** consta si coincide con la del modelo o la ha fijado una persona (RF-07).
-5. La pantalla cubre los estados «propuesta dudosa», «hablante con poco audio» y «todo confirmado» (8.2) y muestra el texto de la sección 8.4.
+5. La pantalla cubre los estados «propuesta dudosa» y «todo confirmado» (8.2) y muestra el texto de la sección 8.4.
 
 ---
 
@@ -116,7 +116,7 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 - **Archivo con extensión de audio que no es audio:** se rechaza por su contenido (RF-01, RNF-10).
 - **Archivo malicioso o mal formado:** se rechaza sin colgar el servicio; el nombre del archivo lo genera el sistema (RNF-10).
 - **Petición de un fragmento de más de 15 s:** se rechaza, para que no se pueda descargar el audio completo (9.3).
-- **Hablante con poco audio:** la tarjeta lo indica (8.2).
+- **Hablante con poco audio:** no llega a Confirmar voces (D-18); su tiempo se ve aparte en Resultados.
 - **Demo pública:** sin autenticación, solo debe ofrecer los ejemplos precalculados (2.3). [NEEDS CLARIFICATION: ¿admite subidas la demo pública? Es parte de D-08.]
 
 ## Requisitos *(obligatorio)*
@@ -129,7 +129,7 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 - **FR-004**: El sistema DEBE permitir reintentar un análisis en error sin volver a subir el audio, mientras dure la retención (8.1).
 - **FR-005**: El sistema DEBE mostrar por hablante sus fragmentos, la propuesta, la confianza y las tres opciones, y no mostrar resultados hasta confirmar todas las voces presentes (RF-07, Must).
 - **FR-006**: El sistema DEBE guardar si cada etiqueta final viene del modelo o de una persona (RF-07).
-- **FR-007**: El sistema DEBE mostrar tarjetas de presencia e índices, línea de tiempo por hablante, gráfico de tiempo y tabla de interrupciones, y aparte el tiempo de las voces de menos de 10 s (RF-17, Must; D-15).
+- **FR-007**: El sistema DEBE mostrar tarjetas de presencia e índices, línea de tiempo por hablante, gráfico de tiempo y tabla de interrupciones, y aparte el tiempo de las voces cortas (RF-17, Must; D-15, D-18).
 - **FR-008**: El sistema DEBE permitir escuchar cada interrupción con un fragmento que empieza como mucho 1 s antes, acaba después y dura 15 s como máximo (RF-18, Must).
 - **FR-009**: El sistema DEBE ofrecer episodios de ejemplo precalculados cuyos resultados aparecen en 2 s o menos (RF-02, RNF-02, Must).
 - **FR-010**: El sistema DEBE tener una página «Cómo funciona» con definiciones, fórmulas, exactitud por grupo y limitaciones (RF-22, Must).

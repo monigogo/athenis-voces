@@ -144,7 +144,7 @@ El equipo mide cuánto acierta el sistema con audios reales, con líneas base, i
 - **FR-015**: La evaluación DEBE regenerar las tablas de 12.1 desde un único script, a partir de las etiquetas y las salidas guardadas (RNF-07, 11.4).
 - **FR-016**: La evaluación DEBE usar la partición de prueba solo para medir, una vez por versión (RD-05; constitución, punto 9).
 - **FR-017**: Toda comparación DEBE indicar el número de episodios y de minutos, y los resultados de un episodio no se generalizan (RN-12).
-- **FR-018**: El resultado DEBE indicar aparte los segundos de las voces de menos de 10 s, que no cuentan como voz (RN-01, D-15).
+- **FR-018**: El resultado DEBE indicar aparte los segundos de las voces cortas (menos de 10 s o sin 3 tramos limpios), que no cuentan como voz (RN-01, D-15, D-18).
 
 ### Entidades clave
 

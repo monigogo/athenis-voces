@@ -67,7 +67,8 @@ confianza entre 0 y 1. Se aplica segmento a segmento sobre el WAV del hablante. 
 3. Elegir `config.fragmentos_por_hablante` tramos distribuidos uniformemente por índice
    (índices 0, n//2, n-1, y los intermedios si hace falta más de 3).
 4. Recortar cada tramo a entre `fragmento_min_segundos` y `fragmento_max_segundos`.
-5. Si hay menos de `fragmentos_por_hablante` tramos válidos, el hablante se descarta.
+5. Si hay menos de `fragmentos_por_hablante` tramos válidos, el hablante no aparece en el resultado: no es
+   una voz presente y su tiempo cuenta como voz corta (D-18).
 
 **Alternativas descartadas**:
 - Selección aleatoria: no reproducible sin semilla fija; complica los tests.

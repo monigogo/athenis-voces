@@ -31,7 +31,7 @@
 
 ## Notas
 
-- Quedan 2 marcadores [NEEDS CLARIFICATION]: fragmentos cuando un hablante tiene poco audio y qué hacer con un audio sin voces. Los resuelve la persona A en `/speckit-clarify` (fase 3). El de los hablantes de menos de 10 s se resolvió con D-15.
+- Las 3 dudas de la persona A están resueltas: hablantes de menos de 10 s (D-15), voz sin 3 tramos limpios (D-18) y audio con menos de dos voces presentes (D-17).
 - Los nombres pyannote e inaSpeechSegmenter aparecen solo en «Entrada» y «Supuestos», porque son decisiones ya tomadas (D-03), no requisitos.
 - Los umbrales marcados [VALIDAR] vienen del funcional y se confirman midiendo con la partición de desarrollo (RD-05).
 - Las entidades se ajustarán a `docs/contrato_de_datos.md` cuando exista.
