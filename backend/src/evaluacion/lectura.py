@@ -9,6 +9,7 @@ from contrato import (
     EtiquetaConfirmada,
     EtiquetaVoz,
     OrigenEtiqueta,
+    Resultado,
     Solapamiento,
     Turno,
 )
@@ -17,6 +18,8 @@ from contrato import (
 TIPOS_ANOTACION = ("con_exito", "intento", "senal_de_escucha", "colaborativo")
 # En AMI, la primera letra del código de participante es su sexo registrado (funcional, 11.2)
 SEXO = {"F": EtiquetaVoz.FEMENINO, "M": EtiquetaVoz.MASCULINO}
+
+Tramo = tuple[str, float, float]  # (código o número de hablante, inicio, fin), como en un RTTM
 
 
 @dataclass(frozen=True)
@@ -31,7 +34,7 @@ class Anotacion:
         return self.tipo in ("con_exito", "intento")
 
 
-def leer_rttm(ruta: Path) -> list[tuple[str, float, float]]:
+def leer_rttm(ruta: Path) -> list[Tramo]:
     """Tramos (código, inicio, fin) de las líneas SPEAKER, sin los de duración 0."""
     tramos = []
     for linea in Path(ruta).read_text(encoding="utf-8").splitlines():
@@ -43,7 +46,7 @@ def leer_rttm(ruta: Path) -> list[tuple[str, float, float]]:
 
 
 def entrada_de_referencia(
-    tramos: list[tuple[str, float, float]], config: Config = CONFIG
+    tramos: list[Tramo], config: Config = CONFIG
 ) -> tuple[EntradaAnalisis, dict[int, str]]:
     """Convierte la referencia de AMI en la entrada del análisis.
 
@@ -91,6 +94,11 @@ def entrada_de_referencia(
         etiquetas=etiquetas,
     )
     return entrada, {n: codigo for codigo, n in numero.items()}
+
+
+def leer_resultado(ruta: Path) -> Resultado:
+    """Resultado del análisis guardado en JSON (contrato de datos)."""
+    return Resultado.model_validate_json(Path(ruta).read_text(encoding="utf-8"))
 
 
 def leer_etiquetas(ruta: Path) -> list[Anotacion]:

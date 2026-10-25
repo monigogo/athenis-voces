@@ -16,6 +16,9 @@ audio = [
     "pyannote.audio",
     "inaSpeechSegmenter",
 ]
+evaluacion = [
+    "pyannote-metrics>=4.2.0",
+]
 
 [tool.uv]
 package = false

@@ -1,15 +1,15 @@
-"""Métricas de evaluación (funcional, 12.1): M-04, M-05 y M-08, la línea base y el bootstrap.
+"""Métricas de evaluación (funcional, 12.1): M-01, M-04, M-05 y M-08, la línea base y el bootstrap.
 
 None significa «no aplicable» (RN-13). El remuestreo usa una semilla fija (11.4).
 """
 
 import random
 import statistics
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from contrato import EntradaAnalisis
-from evaluacion.lectura import Anotacion
+from evaluacion.lectura import Anotacion, Tramo
 
 SEMILLA = 20261024
 NINGUNO = "ninguno"  # lo que marca una anotadora y la otra no (M-08)
@@ -55,6 +55,15 @@ class Deteccion:
         # Equivale a la media armónica de precisión y exhaustividad, pero sirve también con 0
         base = 2 * self.verdaderos + self.falsos + self.perdidos
         return 2 * self.verdaderos / base if base else None
+
+
+def sumar(detecciones: Sequence[Deteccion]) -> Deteccion:
+    """Junta los recuentos de varios audios: la unidad es el evento (11.3)."""
+    return Deteccion(
+        sum(d.verdaderos for d in detecciones),
+        sum(d.falsos for d in detecciones),
+        sum(d.perdidos for d in detecciones),
+    )
 
 
 def deteccion(
@@ -112,6 +121,43 @@ def kappa_entre_anotadoras(
     return kappa(de_a, de_b)
 
 
+@dataclass(frozen=True)
+class Der:
+    """M-01: segundos con error (falsa alarma, voz perdida o confusión) sobre segundos de voz."""
+
+    error: float
+    total: float
+
+    @property
+    def valor(self) -> float | None:
+        return self.error / self.total if self.total else None
+
+
+def der(referencia: Sequence[Tramo], sistema: Sequence[Tramo]) -> Der:
+    """M-01 con pyannote.metrics, estricto: sin margen en los bordes y con los solapamientos."""
+    from pyannote.core import Annotation, Segment, Timeline
+    from pyannote.metrics.diarization import DiarizationErrorRate
+
+    def anotacion(tramos: Sequence[Tramo]) -> Annotation:
+        a = Annotation()
+        for k, (codigo, inicio, fin) in enumerate(tramos):
+            a[Segment(inicio, fin), k] = codigo
+        return a
+
+    ref = anotacion(referencia)
+    zona = Timeline([Segment(min(i for _, i, _ in referencia), max(f for _, _, f in referencia))])
+    detalle = DiarizationErrorRate(collar=0.0, skip_overlap=False)(
+        ref, anotacion(sistema), uem=zona, detailed=True
+    )
+    error = detalle["false alarm"] + detalle["missed detection"] + detalle["confusion"]
+    return Der(round(error, 6), round(detalle["total"], 6))
+
+
+def der_conjunto(ders: Sequence[Der]) -> Der:
+    """DER de varias reuniones: suma de errores entre suma de tiempos, como pyannote.metrics."""
+    return Der(sum(d.error for d in ders), sum(d.total for d in ders))
+
+
 def error_porcentaje_femenino(referencia: float | None, sistema: float | None) -> float | None:
     """M-04: error absoluto, en puntos, del % de tiempo femenino."""
     if referencia is None or sistema is None:
@@ -120,15 +166,25 @@ def error_porcentaje_femenino(referencia: float | None, sistema: float | None) -
 
 
 def intervalo_bootstrap(
-    valores: Sequence[float], remuestreos: int = 1000, nivel: float = 0.95, semilla: int = SEMILLA
+    valores: Sequence,
+    remuestreos: int = 1000,
+    nivel: float = 0.95,
+    semilla: int = SEMILLA,
+    estadistico: Callable[[list], float | None] = statistics.fmean,
 ) -> tuple[float, float] | None:
-    """Intervalo de confianza de la media por remuestreo (11.3), redondeado a 4 decimales."""
+    """Intervalo de confianza del 95 % por remuestreo (11.3), redondeado a 4 decimales.
+
+    Por defecto, de la media. Con otro estadístico se remuestrean unidades enteras (por ejemplo,
+    reuniones) y se recalcula la métrica con cada muestra; las muestras en las que la métrica no se
+    aplica (None) no cuentan.
+    """
     if not valores:
         return None
     azar = random.Random(semilla)
-    medias = sorted(
-        statistics.fmean(azar.choices(valores, k=len(valores))) for _ in range(remuestreos)
-    )
-    bajo = medias[int((1 - nivel) / 2 * remuestreos)]
-    alto = medias[int((1 + nivel) / 2 * remuestreos) - 1]
+    muestras = (estadistico(azar.choices(valores, k=len(valores))) for _ in range(remuestreos))
+    medias = sorted(x for x in muestras if x is not None)
+    if not medias:
+        return None
+    bajo = medias[int((1 - nivel) / 2 * len(medias))]
+    alto = medias[int((1 + nivel) / 2 * len(medias)) - 1]
     return round(bajo, 4), round(alto, 4)

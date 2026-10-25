@@ -115,6 +115,12 @@ def test_si_hay_eventos_y_no_acierta_ninguno_el_f1_es_0(sistema, referencia):
     assert metricas.deteccion(sistema=sistema, referencia=referencia).f1 == 0.0
 
 
+def test_detecciones_de_varios_audios_suman_sus_recuentos():  # unidad: el evento (11.3)
+    juntas = metricas.sumar([metricas.Deteccion(1, 0, 1), metricas.Deteccion(2, 3, 0)])
+    assert juntas == metricas.Deteccion(3, 3, 1)
+    assert metricas.sumar([]) == metricas.Deteccion(0, 0, 0)
+
+
 def test_linea_base_cuenta_cualquier_solapamiento():  # 11.3
     e = entrada(
         [turno(1, 0.0, 30.0), turno(2, 10.0, 10.2), turno(2, 20.0, 20.5), turno(2, 29.9, 40.0)],
@@ -174,3 +180,57 @@ def test_bootstrap_de_valores_iguales():
 
 def test_bootstrap_sin_valores_no_se_aplica():
     assert metricas.intervalo_bootstrap([]) is None
+
+
+def test_bootstrap_con_otro_estadistico():  # para remuestrear audios y juntar sus recuentos
+    pares = [(1, 2), (1, 2), (1, 2)]
+    assert metricas.intervalo_bootstrap(pares, estadistico=lambda m: sum(a for a, _ in m)) == (
+        3,
+        3,
+    )
+
+
+# --- M-01: DER con pyannote.metrics, estricto (sin margen y con solapamientos) -------------
+
+
+@pytest.fixture
+def pyannote_metrics():
+    return pytest.importorskip("pyannote.metrics")
+
+
+def test_der_sin_errores_aunque_los_nombres_cambien(pyannote_metrics):
+    d = metricas.der(
+        [("FEE005", 0.0, 10.0), ("MEE006", 10.0, 20.0)], [("1", 0.0, 10.0), ("2", 10.0, 20.0)]
+    )
+    assert (d.error, d.total, d.valor) == (0.0, 20.0, 0.0)
+
+
+def test_der_confunde_dos_voces_en_una(pyannote_metrics):
+    d = metricas.der([("a", 0.0, 10.0), ("b", 10.0, 20.0)], [("x", 0.0, 20.0)])
+    assert d.valor == pytest.approx(0.5)
+
+
+def test_der_cuenta_el_solapamiento(pyannote_metrics):  # sin skip_overlap
+    d = metricas.der([("a", 0.0, 10.0), ("b", 5.0, 10.0)], [("x", 0.0, 10.0)])
+    assert d.total == 15.0
+    assert d.valor == pytest.approx(5 / 15)
+
+
+def test_der_sin_margen_en_los_bordes(pyannote_metrics):  # collar 0
+    d = metricas.der([("a", 0.0, 10.0)], [("x", 0.0, 9.9)])
+    assert d.error == pytest.approx(0.1)
+
+
+def test_der_de_varias_reuniones_suma_errores_y_tiempos():
+    juntos = metricas.der_conjunto([metricas.Der(1.0, 10.0), metricas.Der(3.0, 30.0)])
+    assert juntos == metricas.Der(4.0, 40.0)
+    assert juntos.valor == 0.1
+    assert metricas.Der(0.0, 0.0).valor is None
+
+
+def test_bootstrap_ignora_las_muestras_en_las_que_no_se_aplica():  # RN-13: un None no es un 0
+    def solo_con_eventos(muestra):
+        return None if all(x == 0 for x in muestra) else 1.0
+
+    assert metricas.intervalo_bootstrap([0, 1], estadistico=solo_con_eventos) == (1.0, 1.0)
+    assert metricas.intervalo_bootstrap([0], estadistico=solo_con_eventos) is None
