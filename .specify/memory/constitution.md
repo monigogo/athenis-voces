@@ -8,7 +8,7 @@
 6. El sistema analiza la voz, nunca lo que se dice: no se transcribe.
 7. No entran en el repositorio audios, transcripciones, nombres reales ni claves (RD-04).
    Los audios de evaluación se descargan con scripts/descargar_datos.sh.
-8. Una persona confirma cada voz, con tres opciones: femenina, masculina y no determinada.
+8. Una persona confirma cada voz, con tres opciones: femenino, masculino e indeterminado.
 9. Las reuniones de prueba solo sirven para medir; nada se ajusta con ellas.
 10. Primero los requisitos Must; los demás, solo si sobra tiempo.
 11. Cada feature recorre las 8 fases y ninguna fase empieza sin el fichero de la anterior.
