@@ -93,7 +93,7 @@ backend/src/
 ├── voz/
 │   ├── __init__.py
 │   └── clasificador.py      # RF-06: propone voz con inaSpeechSegmenter
-└── config.py                # añadir solapamiento_registro_desde_segundos
+└── config.py                # sin cambios
 
 backend/tests/
 ├── test_preparar.py          # TDD: RF-03, SC-001

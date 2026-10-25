@@ -37,8 +37,8 @@ Tramo en que hablan dos o más hablantes a la vez.
 | `inicio` | `float ≥ 0` | Segundos con decimales |
 | `fin` | `float > inicio` | Segundos con decimales |
 
-**Regla de registro** (clarificación 2026-10-24): solo se registran solapamientos con
-`fin - inicio ≥ config.solapamiento_registro_desde_segundos` (0,5 s por defecto).
+**Regla de registro** (clarificación 2026-10-24): se devuelven todos los solapamientos detectados,
+sin filtrar por duración. El filtro de más de 0,3 s es de la persona B (`solapamiento_mas_de`).
 
 ### PropuestaVoz (`contrato.PropuestaVoz`)
 
@@ -94,17 +94,6 @@ Respuesta que devuelve la fase 1 del pipeline.
 | `version_contrato` | `str` | Debe ser VERSION_CONTRATO |
 | `id_analisis` | `str` | No vacío |
 | `hablantes` | `list[Hablante]` | Sin hablantes repetidos |
-
----
-
-## Campo nuevo en config.py
-
-| Campo | Valor por defecto | Referencia |
-|-------|-------------------|------------|
-| `solapamiento_registro_desde_segundos` | `0.5` | Clarificación 2026-10-24 |
-
-Este campo se añade a `backend/src/config.py` junto a los demás umbrales de solapamiento.
-No modifica `contrato.py` (constitución, punto 3).
 
 ---
 

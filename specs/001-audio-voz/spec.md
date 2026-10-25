@@ -98,7 +98,7 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 ### Requisitos funcionales
 
 - **FR-001**: El sistema DEBE convertir el audio de entrada a mono de 16 kHz conservando la duración ± 0,1 s (RF-03, Must).
-- **FR-002**: El sistema DEBE devolver los turnos de cada hablante, numerado como «Hablante n», y los tramos de habla simultánea de 0,5 s o más, con el formato del contrato de datos (RF-05, Must; RN-10).
+- **FR-002**: El sistema DEBE devolver los turnos de cada hablante, numerado como «Hablante n», y los tramos de habla simultánea, con el formato del contrato de datos (RF-05, Must; RN-10).
 - **FR-003**: El sistema DEBE proponer para cada hablante una etiqueta (femenino, masculino o indeterminado), con una probabilidad entre 0 y 1 (RF-06, Must en modo asistido).
 - **FR-004**: El sistema DEBE proponer «indeterminado» cuando la probabilidad cae en la zona dudosa, 0,35–0,65 [VALIDAR] (RF-06).
 - **FR-005**: El sistema DEBE registrar que una propuesta viene del modelo (RF-07).
@@ -118,7 +118,7 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **Análisis**: la unidad de procesamiento de un audio; lleva su propio campo `modo` (asistido o manual).
 - **Hablante**: una voz distinta dentro de un audio, numerada «Hablante n»; no identifica a nadie.
 - **Turno**: un tramo continuo en el que habla un hablante: hablante, inicio y fin en segundos con decimales.
-- **Solapamiento**: un tramo de 0,5 s o más en el que hablan dos o más hablantes a la vez: hablantes, inicio y fin. Los solapamientos más cortos no se registran.
+- **Solapamiento**: un tramo en el que hablan dos o más hablantes a la vez: hablantes, inicio y fin. Se devuelven todos los detectados, sin filtrar por duración.
 - **Propuesta de voz**: para un hablante, la etiqueta (femenino, masculino o indeterminado), la probabilidad y el origen (modelo).
 - **Fragmento**: un tramo de 3 a 5 s de un hablante, con inicio y fin, para escucharlo al confirmar.
 

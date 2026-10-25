@@ -29,8 +29,8 @@ token de Hugging Face del entorno (`.env`).
 plan, Parte 5.2. Devuelve segmentos por hablante; los solapamientos se calculan a partir de
 segmentos que se cruzan en el tiempo. Gratuito y de código abierto (MIT).
 
-**Solapamientos**: se registran solo los de duración ≥ 0,5 s (clarificación 2026-10-24, RD-05).
-El umbral vive en `config.solapamiento_registro_desde_segundos`.
+**Solapamientos**: se devuelven todos los que detecta pyannote, sin filtrar por duración. El filtro de
+más de 0,3 s lo aplica la persona B en su regla de interrupciones (`solapamiento_mas_de`).
 
 **Alternativas descartadas**:
 - pyannote-audio versión de pago: no cumple la constitución (punto 4).
@@ -81,6 +81,4 @@ confianza entre 0 y 1. Se aplica segmento a segmento sobre el WAV del hablante. 
 Las entidades `Turno`, `Solapamiento`, `Fragmento`, `PropuestaVoz`, `Hablante`,
 `HablantesParaConfirmar` y `EstadoAnalisis` ya existen y cubren la feature.
 
-**Única adición al config.py** (no es el contrato de datos): campo
-`solapamiento_registro_desde_segundos: float = 0.5` para el umbral mínimo de duración de
-solapamiento.
+Esta feature no añade ningún campo a `config.py`.

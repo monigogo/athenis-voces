@@ -81,13 +81,13 @@ turnos, solapamientos = diarizar(wav)
 hablantes = {t.hablante for t in turnos}
 print(f"Hablantes detectados: {sorted(hablantes)}")
 print(f"Turnos: {len(turnos)}")
-print(f"Solapamientos (≥ 0,5 s): {len(solapamientos)}")
+print(f"Solapamientos: {len(solapamientos)}")
 for s in solapamientos[:3]:
     print(f"  {s.hablantes} {s.inicio:.1f}–{s.fin:.1f} s ({s.fin-s.inicio:.2f} s)")
 EOF
 ```
 
-**Resultado esperado**: ≥ 2 hablantes, turnos con formato `Hablante n`, solapamientos todos ≥ 0,5 s.
+**Resultado esperado**: ≥ 2 hablantes, turnos con formato `Hablante n`, solapamientos con inicio y fin válidos.
 
 ---
 
