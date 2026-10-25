@@ -3,7 +3,7 @@
 Criterios aclarados en la spec 002:
 - El tiempo de un solapamiento cuenta entero para cada persona (aclaración 1).
 - Las señales de escucha no cuentan como turno, aunque su tiempo sí cuenta (D-14).
-- Las voces sin etiqueta confirmada son voces cortas (D-15): no son voces, no entran en ningún
+- Las voces sin etiqueta confirmada son voces cortas (D-15, D-18): no son voces, no entran en ningún
   grupo y su tiempo se informa aparte.
 
 Los segundos se redondean a 3 decimales y los porcentajes a 2.
@@ -57,11 +57,11 @@ def turnos_que_cuentan(
     Una señal de escucha es el turno de quien interrumpe (B) que empieza en el inicio de la señal.
     """
     etiquetadas = {e.hablante for e in entrada.etiquetas}
-    excluidos = {(s.interrumpe, s.inicio) for s in senales}
+    excluidos = {(s.interrumpe, round(s.inicio, 6)) for s in senales}
     contados = [
         t
         for t in entrada.turnos
-        if t.hablante in etiquetadas and (t.hablante, t.inicio) not in excluidos
+        if t.hablante in etiquetadas and (t.hablante, round(t.inicio, 6)) not in excluidos
     ]
     return sorted(contados, key=lambda t: (t.inicio, t.hablante))
 

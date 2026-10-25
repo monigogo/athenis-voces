@@ -9,6 +9,7 @@ from config import CONFIG, Config
 
 def test_valores_iniciales_del_funcional():
     assert CONFIG.presencia_desde_segundos == 10.0  # RN-01
+    assert CONFIG.voces_presentes_minimas == 2  # D-17
     assert (CONFIG.zona_dudosa_min, CONFIG.zona_dudosa_max) == (0.35, 0.65)  # RF-06
     assert CONFIG.fragmentos_por_hablante == 3  # RF-07
     assert (CONFIG.fragmento_min_segundos, CONFIG.fragmento_max_segundos) == (3.0, 5.0)  # RF-07
@@ -49,6 +50,7 @@ def test_variante_para_ajustar_con_desarrollo():  # RD-05: el original no cambia
         {"zona_dudosa_min": -0.1},  # probabilidad negativa
         {"fragmento_min_segundos": 6.0},  # mínimo por encima del máximo
         {"fragmentos_por_hablante": 0},
+        {"voces_presentes_minimas": 0},
         {"exito_en_segundos": 0.0},
         {"segundos_por_tasa": -600.0},
         {"peso_posicion": -0.1},

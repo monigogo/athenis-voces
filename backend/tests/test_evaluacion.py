@@ -107,6 +107,14 @@ def test_sin_eventos_las_medidas_no_se_aplican():  # RN-13
     assert (d.precision, d.exhaustividad, d.f1) == (None, None, None)
 
 
+@pytest.mark.parametrize(
+    ("sistema", "referencia"), [([10.0, 30.0], [50.0]), ([], [50.0]), ([10.0], [])]
+)
+def test_si_hay_eventos_y_no_acierta_ninguno_el_f1_es_0(sistema, referencia):
+    # un 0 de verdad: no se esconde como «no aplicable»
+    assert metricas.deteccion(sistema=sistema, referencia=referencia).f1 == 0.0
+
+
 def test_linea_base_cuenta_cualquier_solapamiento():  # 11.3
     e = entrada(
         [turno(1, 0.0, 30.0), turno(2, 10.0, 10.2), turno(2, 20.0, 20.5), turno(2, 29.9, 40.0)],
@@ -138,7 +146,11 @@ def test_kappa_entre_anotadoras_cuenta_lo_que_solo_marca_una():
     a = [lectura.Anotacion(10.0, 11.0, "intento"), lectura.Anotacion(30.0, 31.0, "con_exito")]
     b = [lectura.Anotacion(10.4, 11.0, "intento"), lectura.Anotacion(50.0, 51.0, "con_exito")]
     pares = metricas.pares_de_anotadoras(a, b)
-    assert sorted(pares) == [("con_exito", "ninguno"), ("intento", "intento"), ("ninguno", "con_exito")]
+    assert sorted(pares) == [
+        ("con_exito", "ninguno"),
+        ("intento", "intento"),
+        ("ninguno", "con_exito"),
+    ]
 
 
 # --- M-04 y el intervalo de confianza ------------------------------------------------------

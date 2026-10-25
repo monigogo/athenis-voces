@@ -52,8 +52,9 @@ class Deteccion:
 
     @property
     def f1(self) -> float | None:
-        p, r = self.precision, self.exhaustividad
-        return 2 * p * r / (p + r) if p and r else None
+        # Equivale a la media armónica de precisión y exhaustividad, pero sirve también con 0
+        base = 2 * self.verdaderos + self.falsos + self.perdidos
+        return 2 * self.verdaderos / base if base else None
 
 
 def deteccion(
