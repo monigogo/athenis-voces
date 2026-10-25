@@ -150,7 +150,7 @@
 - [X] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
 - [X] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
 - [X] T019 [US1] Escribir test y añadir `backend/scripts/analizar_audio.py`: recibe un audio y una carpeta de salida por argumento (CLI); rechaza rutas de salida dentro del repositorio (RD-04); ejecuta `preparar` y `diarizar`; escribe `<nombre>.rttm` con líneas `SPEAKER <nombre> 1 <inicio> <duración> <NA> <NA> <hablante> <NA> <NA>`, donde `<hablante>` es `hablante_1`, `hablante_2`, … (sin espacios, porque `evaluacion/evaluar.py` separa por espacios y lee el campo 8); depende de T008; test primero
-- [ ] T020 [US1] Ampliar `backend/scripts/analizar_audio.py` para ejecutar el pipeline completo y escribir `<nombre>.json` con el formato de `Resultado`; en este comando de evaluación las voces se confirman automáticamente con la propuesta del modelo; depende de T010, T012 y de la respuesta de Mónica sobre la confirmación automática
+- [X] T020 [US1] Ampliar `backend/scripts/analizar_audio.py` para ejecutar el pipeline completo y escribir `<nombre>.json` con el formato de `Resultado`; en este comando de evaluación las voces se confirman automáticamente con la propuesta del modelo; depende de T010, T012 y de la respuesta de Mónica sobre la confirmación automática
 
 ---
 

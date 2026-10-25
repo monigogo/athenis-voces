@@ -1,17 +1,19 @@
-"""Tests para backend/scripts/analizar_audio.py (T019).
+"""Tests para backend/scripts/analizar_audio.py (T019, T020).
 
 TDD: estos tests deben fallar antes de que exista el script.
 
-preparar y diarizar están simuladas para no descargar modelos ni necesitar HF_TOKEN.
+preparar, diarizar y proponer_voz están simuladas para no descargar modelos ni necesitar HF_TOKEN.
 """
 
 from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
+
+from contrato import EtiquetaVoz, OrigenEtiqueta, PropuestaVoz, Resultado, Turno
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = BACKEND_DIR / "scripts"
@@ -31,12 +33,15 @@ def mod():
     return _cargar_modulo()
 
 
+@pytest.fixture(autouse=True)
+def sin_modelo_de_voz():
+    """Por defecto la propuesta de voz está vacía: ningún test carga inaSpeechSegmenter."""
+    with patch("voz.clasificador.proponer_voz", return_value={}) as simulada:
+        yield simulada
+
+
 def _turno(inicio: float, fin: float, hablante: int):
-    t = MagicMock()
-    t.inicio = inicio
-    t.fin = fin
-    t.hablante = hablante
-    return t
+    return Turno(hablante=hablante, inicio=inicio, fin=fin)
 
 
 # --- Nombre base ----------------------------------------------------------------
@@ -155,3 +160,79 @@ def test_acepta_salida_fuera_del_repositorio(tmp_path, mod):
         rttm = mod.analizar(audio, fuera)
 
     assert rttm.exists()
+
+
+# --- Resultado completo en JSON (T020) -------------------------------------------
+
+# Dos voces con 12 s de habla limpia cada una: caben 3 fragmentos de 3 a 5 s (RN-01, D-18)
+DOS_VOCES = [_turno(0.0, 12.0, 1), _turno(20.0, 32.0, 2)]
+
+
+def _analizar_dos_voces(mod, tmp_path, propuestas):
+    audio = tmp_path / "EN2002a.Mix-Headset.wav"
+    audio.touch()
+    salida = tmp_path / "salidas"
+    with (
+        patch.object(mod, "_raiz_repositorio", return_value=None),
+        patch("audio.preparar.preparar", return_value=40.0),
+        patch("audio.diarizacion.diarizar", return_value=(DOS_VOCES, [])),
+        patch("voz.clasificador.proponer_voz", return_value=propuestas),
+    ):
+        mod.analizar(audio, salida)
+    return salida
+
+
+def test_escribe_el_json_con_el_resultado_del_contrato(tmp_path, mod):
+    """Junto al RTTM se escribe <nombre>.json con el formato de Resultado."""
+    propuestas = {
+        1: PropuestaVoz(etiqueta=EtiquetaVoz.FEMENINO, confianza=0.9),
+        2: PropuestaVoz(etiqueta=EtiquetaVoz.MASCULINO, confianza=0.8),
+    }
+    salida = _analizar_dos_voces(mod, tmp_path, propuestas)
+
+    assert (salida / "EN2002a.rttm").exists()
+    resultado = Resultado.model_validate_json((salida / "EN2002a.json").read_text("utf-8"))
+    assert resultado.id_analisis == "EN2002a"
+    assert resultado.duracion == pytest.approx(40.0)
+    assert {h.hablante for h in resultado.hablantes} == {1, 2}
+
+
+def test_las_voces_se_confirman_con_la_propuesta_del_modelo(tmp_path, mod):
+    """Confirmación automática: cada voz toma la etiqueta propuesta y su origen es «modelo»."""
+    propuestas = {
+        1: PropuestaVoz(etiqueta=EtiquetaVoz.FEMENINO, confianza=0.9),
+        2: PropuestaVoz(etiqueta=EtiquetaVoz.INDETERMINADO, confianza=0.5),
+    }
+    salida = _analizar_dos_voces(mod, tmp_path, propuestas)
+
+    resultado = Resultado.model_validate_json((salida / "EN2002a.json").read_text("utf-8"))
+    por_voz = {h.hablante: h for h in resultado.hablantes}
+    assert por_voz[1].etiqueta is EtiquetaVoz.FEMENINO
+    assert por_voz[2].etiqueta is EtiquetaVoz.INDETERMINADO
+    assert all(h.origen is OrigenEtiqueta.MODELO for h in resultado.hablantes)
+
+
+def test_sin_voces_suficientes_no_hay_json_pero_si_rttm_y_se_explica(tmp_path, mod, capsys):
+    """Con menos de dos voces presentes (D-17) queda el RTTM, no el JSON, y se dice el motivo."""
+    audio = tmp_path / "corto.wav"
+    audio.touch()
+    salida = tmp_path / "salidas"
+    with (
+        patch.object(mod, "_raiz_repositorio", return_value=None),
+        patch("audio.preparar.preparar", return_value=5.0),
+        patch("audio.diarizacion.diarizar", return_value=([_turno(0.0, 5.0, 1)], [])),
+    ):
+        rttm = mod.analizar(audio, salida)
+
+    assert rttm.exists()
+    assert not (salida / "corto.json").exists()
+    assert "que se pueda confirmar" in capsys.readouterr().err
+
+
+def test_el_wav_temporal_no_se_queda_en_la_carpeta_de_salida(tmp_path, mod):
+    propuestas = {
+        1: PropuestaVoz(etiqueta=EtiquetaVoz.FEMENINO, confianza=0.9),
+        2: PropuestaVoz(etiqueta=EtiquetaVoz.MASCULINO, confianza=0.8),
+    }
+    salida = _analizar_dos_voces(mod, tmp_path, propuestas)
+    assert sorted(p.suffix for p in salida.iterdir()) == [".json", ".rttm"]
