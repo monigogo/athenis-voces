@@ -102,7 +102,7 @@
 
 ### Tests — Historia 3 (escribir primero; deben fallar)
 
-- [ ] T011 [US3] Escribir `backend/tests/test_fragmentos.py` con los siguientes casos (deben fallar antes de implementar):
+- [X] T011 [US3] Escribir `backend/tests/test_fragmentos.py` con los siguientes casos (deben fallar antes de implementar):
   - hablante presente con ≥ 3 tramos válidos → ≥ 3 fragmentos de `[fragmento_min_segundos, fragmento_max_segundos]` (FR-006, SC-006)
   - fragmentos de un mismo hablante no se solapan entre sí (clarificación 2026-10-24)
   - fragmentos distribuidos uniformemente: el primero está en el primer tercio del audio del hablante, el último en el último tercio
@@ -112,7 +112,7 @@
 
 ### Implementación — Historia 3
 
-- [ ] T012 [US3] Implementar `backend/src/audio/fragmentos.py`: función `elegir_fragmentos(turnos: list[Turno], solapamientos: list[Solapamiento]) -> dict[int, list[Fragmento]]`; filtra tramos de solapamiento; aplica umbral de presencia; selecciona por distribución uniforme; garantiza no solapamiento entre fragmentos del mismo hablante (firma: contracts/pipeline-pasos.md)
+- [X] T012 [US3] Implementar `backend/src/audio/fragmentos.py`: función `elegir_fragmentos(turnos: list[Turno], solapamientos: list[Solapamiento]) -> dict[int, list[Fragmento]]`; filtra tramos de solapamiento; aplica umbral de presencia; selecciona por distribución uniforme; garantiza no solapamiento entre fragmentos del mismo hablante (firma: contracts/pipeline-pasos.md)
 
 **Checkpoint**: Historias 1, 2 y 3 completas. Ejecutar `quickstart.md` sección 6.
 
