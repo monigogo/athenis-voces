@@ -1,0 +1,23 @@
+# Hooks de pre-commit (B06). Se instalan una vez, desde backend/: uv run pre-commit install
+# Cada herramienta mira solo su carpeta (constitución, regla 5); gitleaks mira todo (RD-04).
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  # Misma versión que backend/uv.lock; si se actualiza ruff, se actualiza aquí (lo vigila una prueba)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2
+    hooks:
+      - id: ruff-check
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  # Sin ficheros en frontend/ no hace nada. Solo comprueba: no reescribe nada (biome ci)
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v2.6.3
+    hooks:
+      - id: biome-ci
+        files: ^frontend/

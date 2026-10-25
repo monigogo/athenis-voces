@@ -30,14 +30,20 @@ def preparar(audio: Path, destino: Path) -> float:
         "ffmpeg",
         "-nostdin",
         "-hide_banner",
-        "-loglevel", "error",
+        "-loglevel",
+        "error",
         "-y",
-        "-i", f"file:{audio}",
+        "-i",
+        f"file:{audio}",
         "-vn",
-        "-ac", "1",
-        "-ar", str(CONFIG.frecuencia_muestreo),
-        "-f", "wav",
-        "-c:a", "pcm_s16le",
+        "-ac",
+        "1",
+        "-ar",
+        str(CONFIG.frecuencia_muestreo),
+        "-f",
+        "wav",
+        "-c:a",
+        "pcm_s16le",
         str(destino),
     ]
 
@@ -56,9 +62,7 @@ def preparar(audio: Path, destino: Path) -> float:
         destino.unlink(missing_ok=True)
         stderr_lineas = resultado.stderr.decode(errors="replace").splitlines()
         stderr_recortado = "\n".join(stderr_lineas[-5:])
-        raise RuntimeError(
-            f"ffmpeg falló (código {resultado.returncode}):\n{stderr_recortado}"
-        )
+        raise RuntimeError(f"ffmpeg falló (código {resultado.returncode}):\n{stderr_recortado}")
 
     with wave.open(str(destino)) as wf:
         duracion = wf.getnframes() / wf.getframerate()

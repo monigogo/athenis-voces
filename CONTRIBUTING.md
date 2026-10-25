@@ -84,6 +84,15 @@ pnpm test
 pnpm build
 ```
 
+Pre-commit hooks (gitleaks, ruff and Biome). Install them once, from `backend/`:
+
+```bash
+uv sync
+uv run pre-commit install
+```
+
+Every `git commit` then looks for secrets in the whole repository, and checks `backend/` with ruff and `frontend/` with Biome. Never skip them with `--no-verify`.
+
 ## Pull requests
 
 - Small and focused on a single thing (ideally under 400 lines).

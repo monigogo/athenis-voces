@@ -201,9 +201,7 @@ def test_preparar_comando_incluye_opciones_requeridas(tmp_path: Path) -> None:
     origen.write_bytes(b"datos")
     destino = tmp_path / "salida.wav"
 
-    resultado_ok = subprocess.CompletedProcess(
-        args=[], returncode=0, stdout=b"", stderr=b""
-    )
+    resultado_ok = subprocess.CompletedProcess(args=[], returncode=0, stdout=b"", stderr=b"")
     destino_wav_sintetico = tmp_path / "salida.wav"
 
     def _run_y_crea_wav(cmd, **_kwargs):  # type: ignore[no-untyped-def]
