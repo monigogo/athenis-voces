@@ -21,7 +21,7 @@ y no modifican el contrato de datos (`contrato.py`).
 
 **Dependencias principales**:
 - `pydantic >= 2.14.1` (ya instalada)
-- `pydub` + ffmpeg (conversión de audio, RF-03)
+- ffmpeg del sistema, sin shell y con tiempo máximo (conversión de audio, RF-03)
 - `pyannote.audio` modelo `speaker-diarization-community-1` (diarización, RF-05)
 - `inaSpeechSegmenter` (propuesta de voz, RF-06)
 
@@ -51,7 +51,7 @@ repositorio (RD-04)
 | 1. Manda el funcional | Spec referencia `docs/01-funcional.md`; si hay conflicto manda el funcional | ✅ |
 | 2. TDD obligatorio | Cada módulo empieza con su test fallando | GATE |
 | 3. Contrato único | `contrato.py` no se modifica; solo se añade un campo a `config.py` | ✅ |
-| 4. Todo gratuito | pydub (MIT), pyannote community (MIT), inaSpeechSegmenter (MIT) | ✅ |
+| 4. Todo gratuito | ffmpeg (LGPL / GPL), pyannote community (MIT), inaSpeechSegmenter (MIT) | ✅ |
 | 5. uv solo en backend/ | `uv sync` en `backend/`; pnpm no aplica aquí | ✅ |
 | 6. Solo analiza la voz | No se transcribe nada (inaSpeechSegmenter solo clasifica el sonido) | ✅ |
 | 7. Sin audios en repo | Tests usan fixtures JSON; audios de evaluación fuera del repo | ✅ |
