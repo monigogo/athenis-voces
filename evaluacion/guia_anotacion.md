@@ -83,6 +83,7 @@ persona del proyecto).
 
 1. Comparáis vuestras dos anotaciones.
 2. Los desacuerdos se resuelven hablando; el resultado es la referencia y se anota cuáles eran.
+   La referencia se guarda como `<audio>_referencia.txt`, en la misma carpeta y con el mismo formato.
 3. Moni calcula la kappa. Si sale menos de 0,6 [VALIDAR], se revisa esta guía y se vuelve a anotar
    (funcional, 11.2).
 
