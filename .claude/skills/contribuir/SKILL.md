@@ -12,16 +12,16 @@ Sigue estos pasos en orden. Todas las PRs van contra `develop`. Detalle completo
 - **Nunca** subas secretos: `.env`, `.env.*`, tokens o credenciales.
 - **Nunca** hagas push con ruff o tests fallando.
 - **Nunca** hagas commit ni push directo a `main` o `develop`.
-- **Sin ninguna mención a IA/Claude** en el mensaje de commit ni en trailers (ni `Co-Authored-By`).
 
 ## Paso 1: rama correcta
 
-1. Si estás en `main` o `develop`, crea una rama con `git switch -c feat/<nombre>/<tarea>` (ej. `feat/moni/setup-ci`; usa `chore/`, `fix/`, `docs/` según el cambio). Los cambios sin commitear se mueven con la rama.
+1. `git branch --show-current` y `git status --short`.
+2. Si estás en `main` o `develop`, crea una rama con `git switch -c feat/<nombre>/<tarea>` (ej. `feat/moni/setup-ci`; usa `chore/`, `fix/`, `docs/` según el cambio). Los cambios sin commitear se mueven con la rama.
 
 ## Paso 2: qué se sube
 
 1. Revisa `git status` y `git diff`. Añade solo ficheros relevantes, por nombre (nunca `git add -A` a ciegas).
-2. Excluye ficheros scratch (notas, volcados, `tmp*`, `*.log`, salidas de prueba).
+2. Excluye siempre: `.env`, `.env.*`, `.venv/`, `__pycache__/`, `node_modules/`, caches, y ficheros scratch (notas, volcados, `tmp*`, `*.log`, salidas de prueba).
 3. Si dudas de un fichero, pregunta al usuario.
 
 ## Paso 3: ruff + tests
@@ -30,10 +30,13 @@ Desde `backend/`:
 
 ```bash
 uv run ruff check src/ tests/ scripts/
+uv run ruff format --check src/ tests/ scripts/
 uv run python -m pytest tests -q
 ```
 
-Si algo falla: **para**, enseña el error al usuario y ofrécete a arreglarlo (`ruff check --fix` para lo automático). No continúes hasta que todo pase.
+Si hay cambios en `frontend/` (cuando exista el proyecto): `pnpm lint`, `pnpm test`, `pnpm build`.
+
+Si algo falla: **para**, enseña el error al usuario y ofrécete a arreglarlo (`ruff format` y `ruff check --fix` para lo automático). No continúes hasta que todo pase.
 
 ## Paso 4: sincronizar con develop
 
@@ -50,7 +53,8 @@ git rebase origin/develop
 ## Paso 5: preparar el commit
 
 - Un solo commit con todo el cambio.
-- Formato Conventional Commits, con los tipos de `CONTRIBUTING.md`.
+- Formato Conventional Commits: `<tipo>(<scope opcional>): <descripción>`.
+- Tipos: `fix`, `feat`, `chore`, `docs`, `test`, `refactor`.
 - Mensaje en español, claro, en imperativo. Ej.: `feat(backend): añadir métrica de tiempo de habla`.
 
 ## Paso 6: enseñar el diff y pedir OK
