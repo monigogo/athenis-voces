@@ -4,10 +4,12 @@ Reglas de la spec 001 (FR-006, data-model y research):
 
 - Solo reciben fragmentos las voces con 10 s o más de habla (RN-01).
 - Cada fragmento sale de un tramo en el que esa voz habla sola: sin ningún solapamiento.
-- Hacen falta al menos 3 tramos limpios de 3 s o más. Sin ellos la voz no aparece: no es una voz
-  presente y su tiempo cuenta como voz corta (D-18).
-- Los tramos se eligen repartidos por índice a lo largo de la intervención (principio, mitad y
-  final), sin azar, y se recortan a 5 s como mucho por el centro, lejos de los bordes.
+- Hacen falta sitio para al menos 3 fragmentos de 3 s o más, sin nadie más hablando. Sin él la voz
+  no aparece: no es una voz presente y su tiempo cuenta como voz corta (D-18).
+- Si la voz tiene 3 tramos limpios o más, cada fragmento sale de un tramo distinto. Si tiene menos,
+  los tramos largos se parten en varios fragmentos (decisión del equipo, 25 oct 2026).
+- Los fragmentos se eligen repartidos a lo largo de la intervención (principio, mitad y final), sin
+  azar, y se recortan a 5 s como mucho por el centro, lejos de los bordes.
 - Los fragmentos de una misma voz no comparten ni un segundo.
 """
 
@@ -53,6 +55,16 @@ def _repartidos(total: int, cuantos: int) -> list[int]:
     return [int(i * paso + 0.5) for i in range(cuantos)]
 
 
+def _partir(tramos: list[Intervalo], minimo: float) -> list[Intervalo]:
+    """Parte cada tramo en tantos trozos iguales como caben de `minimo` segundos o más."""
+    trozos: list[Intervalo] = []
+    for inicio, fin in tramos:
+        cuantos = int((fin - inicio) // minimo)
+        largo = (fin - inicio) / cuantos
+        trozos.extend((inicio + k * largo, inicio + (k + 1) * largo) for k in range(cuantos))
+    return trozos
+
+
 def _por_el_centro(tramo: Intervalo, maximo: float) -> Intervalo:
     """El tramo recortado a `maximo` segundos como mucho, quitando lo mismo de cada lado."""
     inicio, fin = tramo
@@ -75,6 +87,8 @@ def elegir_fragmentos(
             for tramo in _restar(_unir(propios), pisados)
             if tramo[1] - tramo[0] >= config.fragmento_min_segundos
         ]
+        if len(limpios) < config.fragmentos_por_hablante:
+            limpios = _partir(limpios, config.fragmento_min_segundos)  # los largos dan varios
         if len(limpios) < config.fragmentos_por_hablante:
             continue
         elegidos = [limpios[i] for i in _repartidos(len(limpios), config.fragmentos_por_hablante)]
