@@ -5,7 +5,7 @@ from ayudas import cargar_ejemplo, entrada_de
 
 import contrato as c
 from analisis.analizar import analizar
-from evaluacion import evaluar, lectura, metricas
+from evaluacion import cronometrar, evaluar, lectura, metricas
 
 # Referencia de una reunión: FIO093 habla 4 s y es una voz corta (RN-01, D-15)
 TRAMOS = [("FIE038", 0.0, 20.0), ("MIO091", 19.5, 35.0), ("FIO093", 41.0, 45.0)]
@@ -272,3 +272,78 @@ def test_el_informe_avisa_de_la_confirmacion_ideal():
     )
     assert "confirmación ideal" in evaluar.informe([reunion], [])
     assert "confirmación ideal" not in evaluar.informe([], [])
+
+
+# --- M-02 y M-03: propuesta de voz frente al sexo registrado en AMI ----------------------------
+
+F, M, IND = c.EtiquetaVoz.FEMENINO, c.EtiquetaVoz.MASCULINO, c.EtiquetaVoz.INDETERMINADO
+MODELO, PERSONA = c.OrigenEtiqueta.MODELO, c.OrigenEtiqueta.PERSONA
+
+
+def con_etiquetas(*etiquetas):
+    """TRAMOS se numeran por orden alfabético: 1 = FIE038 (F), 3 = MIO091 (M); 2 es voz corta."""
+    return resultado_de(
+        TRAMOS,
+        etiquetas=[c.EtiquetaConfirmada(hablante=h, etiqueta=e, origen=o) for h, e, o in etiquetas],
+    )
+
+
+def test_cada_voz_propuesta_se_compara_con_el_sexo_de_quien_mas_coincide():  # M-02, 11.2
+    resultado = con_etiquetas((1, F, MODELO), (3, IND, MODELO))
+    assert evaluar.voces_propuestas(resultado, TRAMOS) == [(F, F), (M, IND)]
+
+
+def test_las_voces_confirmadas_por_una_persona_no_miden_el_modelo():
+    resultado = con_etiquetas((1, F, PERSONA), (3, M, MODELO))
+    assert evaluar.voces_propuestas(resultado, TRAMOS) == [(M, M)]
+
+
+def test_la_reunion_guarda_las_voces_propuestas(carpetas):
+    pytest.importorskip("pyannote.metrics")
+    ami, salidas, _ = carpetas
+    escribir_rttm(ami / "EN2002a.rttm", TRAMOS)
+    escribir_rttm(salidas / "EN2002a.rttm", TRAMOS)
+    escribir_resultado(salidas / "EN2002a.json", con_etiquetas((1, F, MODELO), (3, F, MODELO)))
+
+    (reunion,) = evaluar.evaluar_ami(ami, salidas)
+    assert reunion.voces == ((F, F), (M, F))
+
+
+def test_con_la_confirmacion_ideal_no_hay_voces_propuestas(carpetas):
+    pytest.importorskip("pyannote.metrics")
+    ami, salidas, _ = carpetas
+    escribir_rttm(ami / "EN2002a.rttm", TRAMOS)
+    escribir_rttm(salidas / "EN2002a.rttm", TRAMOS)
+    (reunion,) = evaluar.evaluar_ami(ami, salidas)
+    assert reunion.voces == ()
+
+
+def filas_del(texto):
+    return {linea.split(" | ")[0]: linea for linea in texto.splitlines() if linea.startswith("| ")}
+
+
+def test_el_informe_publica_m02_y_m03_por_hablante():  # RNF-03 y RNF-06: Must publicarlas
+    voces = ((F, F), (F, IND), (M, M), (M, M))
+    reunion = evaluar.Reunion("EN2002a", metricas.Der(0.0, 10.0), None, None, voces=voces)
+    filas = filas_del(evaluar.informe([reunion], []))
+    assert filas["| M-02, exactitud equilibrada de la voz"].startswith(
+        "| M-02, exactitud equilibrada de la voz | 0,75 |"
+    )
+    assert filas["| M-02, exactitud equilibrada de la voz"].endswith("n = 4 |")
+    assert "| 50,0 % |" in filas["| M-03, error de la voz femenina"]
+    assert "| 0,0 % |" in filas["| M-03, error de la voz masculina"]
+    assert "| 50,0 puntos |" in filas["| M-03, diferencia entre grupos"]
+
+
+def test_el_informe_publica_m09_con_la_mediana():  # RNF-01: mediana de 3 audios
+    filas = filas_del(evaluar.informe([], [], tiempos=[2.0, 3.0, 10.0]))
+    fila = filas["| M-09, minutos de proceso por hora de audio (mediana)"]
+    assert "| 3,0 min |" in fila
+    assert fila.endswith("n = 3 |")
+
+
+def test_main_lee_los_tiempos_guardados(carpetas, capsys):  # M-09
+    ami, salidas, etiquetas = carpetas
+    cronometrar.guardar(salidas / "EN2002a.tiempo.json", duracion_audio=3600.0, segundos=360.0)
+    evaluar.main(["--salidas", str(salidas), "--ami", str(ami), "--etiquetas", str(etiquetas)])
+    assert "| 6,0 min |" in capsys.readouterr().out

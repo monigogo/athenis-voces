@@ -234,3 +234,44 @@ def test_bootstrap_ignora_las_muestras_en_las_que_no_se_aplica():  # RN-13: un N
 
     assert metricas.intervalo_bootstrap([0, 1], estadistico=solo_con_eventos) == (1.0, 1.0)
     assert metricas.intervalo_bootstrap([0], estadistico=solo_con_eventos) is None
+
+
+# --- M-02 y M-03: acierto de la propuesta de voz, por hablante --------------------------------
+
+F, M, IND = c.EtiquetaVoz.FEMENINO, c.EtiquetaVoz.MASCULINO, c.EtiquetaVoz.INDETERMINADO
+
+
+def test_error_de_un_grupo():  # M-03
+    pares = [(F, F), (F, M), (M, M), (M, M)]  # (referencia, propuesta)
+    assert metricas.error_de_grupo(pares, F) == 0.5
+    assert metricas.error_de_grupo(pares, M) == 0.0
+
+
+def test_indeterminado_cuenta_como_fallo():  # decisión del 25 oct 2026
+    assert metricas.error_de_grupo([(F, IND), (F, F)], F) == 0.5
+
+
+def test_error_de_un_grupo_sin_voces_no_se_aplica():  # RN-13
+    assert metricas.error_de_grupo([(M, M)], F) is None
+
+
+def test_exactitud_equilibrada_es_la_media_del_acierto_de_cada_grupo():  # M-02
+    pares = [(F, F), (F, F), (F, M), (M, M)]  # acierta 2 de 3 F y 1 de 1 M
+    assert metricas.exactitud_equilibrada(pares) == pytest.approx((2 / 3 + 1) / 2)
+
+
+def test_exactitud_con_un_solo_grupo_es_su_acierto():
+    assert metricas.exactitud_equilibrada([(F, F), (F, IND)]) == 0.5
+
+
+def test_exactitud_sin_voces_no_se_aplica():
+    assert metricas.exactitud_equilibrada([]) is None
+
+
+def test_diferencia_entre_grupos_en_puntos():  # M-03, RNF-06
+    pares = [(F, F), (F, IND), (M, M), (M, M), (M, M), (M, F)]  # 50 % frente a 25 %
+    assert metricas.diferencia_entre_grupos(pares) == pytest.approx(25.0)
+
+
+def test_diferencia_sin_uno_de_los_grupos_no_se_aplica():  # RN-13
+    assert metricas.diferencia_entre_grupos([(F, F), (F, M)]) is None

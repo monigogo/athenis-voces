@@ -1,4 +1,4 @@
-"""Métricas de evaluación (funcional, 12.1): M-01, M-04, M-05 y M-08, la línea base y el bootstrap.
+"""Métricas de evaluación (funcional, 12.1): M-01 a M-05 y M-08, la línea base y el bootstrap.
 
 None significa «no aplicable» (RN-13). El remuestreo usa una semilla fija (11.4).
 """
@@ -8,11 +8,14 @@ import statistics
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from contrato import EntradaAnalisis
+from contrato import EntradaAnalisis, EtiquetaVoz
 from evaluacion.lectura import Anotacion, Tramo
 
 SEMILLA = 20261024
 NINGUNO = "ninguno"  # lo que marca una anotadora y la otra no (M-08)
+GRUPOS = (EtiquetaVoz.FEMENINO, EtiquetaVoz.MASCULINO)
+
+ParVoz = tuple[EtiquetaVoz, EtiquetaVoz]  # (referencia, propuesta del modelo) de un hablante
 
 
 def emparejar(
@@ -188,3 +191,29 @@ def intervalo_bootstrap(
     bajo = medias[int((1 - nivel) / 2 * len(medias))]
     alto = medias[int((1 + nivel) / 2 * len(medias)) - 1]
     return round(bajo, 4), round(alto, 4)
+
+
+# --- M-02 y M-03: propuesta de voz, por hablante ------------------------------------------------
+# «Indeterminado» frente a una referencia femenina o masculina cuenta como fallo (anexo C, D-19).
+
+
+def error_de_grupo(pares: Sequence[ParVoz], grupo: EtiquetaVoz) -> float | None:
+    """M-03: parte de las voces del grupo cuya propuesta no es la de su grupo."""
+    del_grupo = [propuesta for referencia, propuesta in pares if referencia is grupo]
+    if not del_grupo:
+        return None
+    return sum(propuesta is not grupo for propuesta in del_grupo) / len(del_grupo)
+
+
+def exactitud_equilibrada(pares: Sequence[ParVoz]) -> float | None:
+    """M-02: media del acierto de cada grupo presente en la referencia."""
+    errores = [e for g in GRUPOS if (e := error_de_grupo(pares, g)) is not None]
+    return 1 - statistics.fmean(errores) if errores else None
+
+
+def diferencia_entre_grupos(pares: Sequence[ParVoz]) -> float | None:
+    """M-03: diferencia de error entre los dos grupos, en puntos porcentuales (RNF-06)."""
+    errores = [error_de_grupo(pares, g) for g in GRUPOS]
+    if None in errores:
+        return None
+    return abs(errores[0] - errores[1]) * 100

@@ -235,4 +235,38 @@ def test_el_wav_temporal_no_se_queda_en_la_carpeta_de_salida(tmp_path, mod):
         2: PropuestaVoz(etiqueta=EtiquetaVoz.MASCULINO, confianza=0.8),
     }
     salida = _analizar_dos_voces(mod, tmp_path, propuestas)
-    assert sorted(p.suffix for p in salida.iterdir()) == [".json", ".rttm"]
+    assert sorted(p.name for p in salida.iterdir()) == [
+        "EN2002a.json",
+        "EN2002a.rttm",
+        "EN2002a.tiempo.json",
+    ]
+
+
+# --- Tiempo de proceso para M-09 -------------------------------------------------------------
+
+
+def test_guarda_cuanto_tarda_el_proceso_completo(tmp_path, mod):  # M-09, RNF-01
+    from evaluacion import cronometrar
+
+    propuestas = {
+        1: PropuestaVoz(etiqueta=EtiquetaVoz.FEMENINO, confianza=0.9),
+        2: PropuestaVoz(etiqueta=EtiquetaVoz.MASCULINO, confianza=0.8),
+    }
+    salida = _analizar_dos_voces(mod, tmp_path, propuestas)
+    duracion, segundos = cronometrar.leer_uno(salida / "EN2002a.tiempo.json")
+    assert duracion == pytest.approx(40.0)
+    assert segundos >= 0
+
+
+def test_si_no_termina_no_guarda_el_tiempo(tmp_path, mod):
+    """Un proceso que se para antes no es representativo de lo que tarda."""
+    audio = tmp_path / "corto.wav"
+    audio.touch()
+    salida = tmp_path / "salidas"
+    with (
+        patch.object(mod, "_raiz_repositorio", return_value=None),
+        patch("audio.preparar.preparar", return_value=5.0),
+        patch("audio.diarizacion.diarizar", return_value=([_turno(0.0, 5.0, 1)], [])),
+    ):
+        mod.analizar(audio, salida)
+    assert not (salida / "corto.tiempo.json").exists()

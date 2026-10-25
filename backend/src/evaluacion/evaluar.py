@@ -4,17 +4,20 @@ Uso, desde backend/:
 
     PYTHONPATH=src uv run --group evaluacion python -m evaluacion.evaluar --salidas <carpeta>
 
-- AMI (M-01, M-04 y la ablación): solo las reuniones de prueba (11.3, RD-05). Por cada una hace
+- AMI (M-01 a M-04 y la ablación): solo las reuniones de prueba (11.3, RD-05). Por cada una hace
   falta, en la carpeta de salidas, <reunión>.rttm (la separación de voces de pyannote), que basta
-  para el DER. M-04 y la ablación necesitan además <reunión>.json (el Resultado del sistema).
+  para el DER. M-04 y la ablación necesitan además <reunión>.json (el Resultado del sistema). M-02 y
+  M-03 solo usan las voces que etiquetó el modelo en ese .json (las de analizar_audio.py).
 - Audios anotados (M-05, su línea base y M-08): en la carpeta de etiquetas, <audio>_referencia.txt
   (el consenso de A y C, guía de anotación 8) y, para la kappa, <audio>_A.txt y <audio>_C.txt. En la
   carpeta de salidas, <audio>.json.
+- Tiempo (M-09): los <audio>.tiempo.json de la carpeta de salidas, que guarda analizar_audio.py.
 
 Lo que falta no se evalúa y no cuenta en n. Ninguna salida se usa para ajustar nada (constitución 9).
 """
 
 import argparse
+import statistics
 import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -31,7 +34,7 @@ from contrato import (
     Resultado,
     Turno,
 )
-from evaluacion import lectura, metricas
+from evaluacion import cronometrar, lectura, metricas
 
 REUNIONES_PRUEBA = ("EN2002a", "EN2002c", "ES2004a", "IS1009a", "TS3003a")
 RAIZ = Path(__file__).resolve().parents[3]
@@ -48,6 +51,7 @@ class Reunion:
     # interrupciones con pyannote frente a con la referencia de AMI
     ablacion: metricas.Deteccion | None
     ideal: bool = False  # True si M-04 y la ablación usan la confirmación ideal (sin .json)
+    voces: tuple[metricas.ParVoz, ...] = ()  # M-02 y M-03: (sexo en AMI, propuesta del modelo)
 
 
 @dataclass(frozen=True)
@@ -81,6 +85,38 @@ def cuota_femenina(resultado: Resultado) -> float | None:
     return next(g.cuota_tiempo for g in resultado.grupos if g.etiqueta is EtiquetaVoz.FEMENINO)
 
 
+def _sexo_de_quien_mas_coincide(
+    turnos: Sequence[Turno], tramos_referencia: Sequence[lectura.Tramo]
+) -> dict[int, EtiquetaVoz]:
+    """Sexo registrado en AMI de la persona con la que más tiempo coincide cada voz (11.2).
+
+    Una voz que no coincide con nadie de AMI no aparece.
+    """
+    coincide: dict[int, dict[str, float]] = {}
+    for t in turnos:
+        for persona, ref_inicio, ref_fin in tramos_referencia:
+            comun = min(t.fin, ref_fin) - max(t.inicio, ref_inicio)
+            if comun > 0:
+                coincide.setdefault(t.hablante, {})
+                coincide[t.hablante][persona] = coincide[t.hablante].get(persona, 0.0) + comun
+    return {n: lectura.SEXO[max(c, key=c.get)[0]] for n, c in coincide.items()}
+
+
+def voces_propuestas(
+    resultado: Resultado, tramos_referencia: Sequence[lectura.Tramo]
+) -> list[metricas.ParVoz]:
+    """(Sexo en AMI, propuesta del modelo) de cada voz que etiquetó el modelo (M-02 y M-03).
+
+    Las voces que confirmó una persona no miden el modelo y no entran.
+    """
+    sexo = _sexo_de_quien_mas_coincide(resultado.turnos, tramos_referencia)
+    return [
+        (sexo[h.hablante], h.etiqueta)
+        for h in sorted(resultado.hablantes, key=lambda h: h.hablante)
+        if h.origen is OrigenEtiqueta.MODELO and h.hablante in sexo
+    ]
+
+
 def resultado_ideal(
     tramos_sistema: Sequence[lectura.Tramo],
     tramos_referencia: Sequence[lectura.Tramo],
@@ -106,24 +142,14 @@ def resultado_ideal(
     )
 
     segundos: dict[int, float] = {}
-    coincide: dict[int, dict[str, float]] = {}
-    for codigo, inicio, fin in tramos_sistema:
-        n = numero[codigo]
-        segundos[n] = segundos.get(n, 0.0) + fin - inicio
-        for persona, ref_inicio, ref_fin in tramos_referencia:
-            comun = min(fin, ref_fin) - max(inicio, ref_inicio)
-            if comun > 0:
-                coincide.setdefault(n, {})
-                coincide[n][persona] = coincide[n].get(persona, 0.0) + comun
+    for t in turnos:
+        segundos[t.hablante] = segundos.get(t.hablante, 0.0) + t.fin - t.inicio
+    sexo = _sexo_de_quien_mas_coincide(turnos, tramos_referencia)
 
     etiquetas = [
-        EtiquetaConfirmada(
-            hablante=n,
-            etiqueta=lectura.SEXO[max(coincide[n], key=coincide[n].get)[0]],
-            origen=OrigenEtiqueta.PERSONA,
-        )
+        EtiquetaConfirmada(hablante=n, etiqueta=sexo[n], origen=OrigenEtiqueta.PERSONA)
         for n in sorted(segundos)
-        if segundos[n] >= config.presencia_desde_segundos and n in coincide
+        if segundos[n] >= config.presencia_desde_segundos and n in sexo
     ]
     return analizar(
         EntradaAnalisis(
@@ -158,6 +184,7 @@ def evaluar_ami(
                 ),
                 ablacion=metricas.deteccion(inicios(sistema), inicios(de_referencia)),
                 ideal=ideal,
+                voces=() if ideal else tuple(voces_propuestas(sistema, tramos)),
             )
         )
     return evaluadas
@@ -220,9 +247,16 @@ def _media(valores: list[float]) -> float | None:
     return sum(valores) / len(valores) if valores else None
 
 
-def informe(reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion]) -> str:
-    """Tabla de la sección 12.1 en Markdown. El IC remuestrea audios enteros (11.3)."""
+def informe(
+    reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion], tiempos: Sequence[float] = ()
+) -> str:
+    """Tabla de la sección 12.1 en Markdown.
+
+    El IC remuestrea audios enteros, salvo en la voz, donde la unidad es el hablante (11.3).
+    """
     con_m04 = [r.error_femenino for r in reuniones if r.error_femenino is not None]
+    voces = [par for r in reuniones for par in r.voces]
+    puntos = "{:.1f} puntos".format
     con_kappa = [g.kappa for g in grabaciones if g.kappa is not None]
     porcentaje = "{:.1%}".format
     f1 = "{:.2f}".format
@@ -237,6 +271,20 @@ def informe(reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion]) -> s
             lambda m: metricas.der_conjunto(m).valor,
             lambda v: porcentaje(v).replace("%", " %"),
         ),
+        _fila("M-02, exactitud equilibrada de la voz", voces, metricas.exactitud_equilibrada, f1),
+        _fila(
+            "M-03, error de la voz femenina",
+            voces,
+            lambda p: metricas.error_de_grupo(p, EtiquetaVoz.FEMENINO),
+            lambda v: f"{v * 100:.1f} %",
+        ),
+        _fila(
+            "M-03, error de la voz masculina",
+            voces,
+            lambda p: metricas.error_de_grupo(p, EtiquetaVoz.MASCULINO),
+            lambda v: f"{v * 100:.1f} %",
+        ),
+        _fila("M-03, diferencia entre grupos", voces, metricas.diferencia_entre_grupos, puntos),
         _fila("M-04, error del % femenino", con_m04, _media, "{:.2f} puntos".format),
         _fila(
             "M-05, F1 de interrupciones (± 1 s)",
@@ -256,6 +304,12 @@ def informe(reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion]) -> s
             [r.ablacion for r in reuniones if r.ablacion is not None],
             lambda m: metricas.sumar(m).f1,
             f1,
+        ),
+        _fila(
+            "M-09, minutos de proceso por hora de audio (mediana)",
+            list(tiempos),
+            statistics.median,
+            "{:.1f} min".format,
         ),
         "",
         "Con pocos datos, los resultados son orientativos (11.3).",
@@ -281,7 +335,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
     print(
         informe(
-            evaluar_ami(args.ami, args.salidas), evaluar_grabaciones(args.etiquetas, args.salidas)
+            evaluar_ami(args.ami, args.salidas),
+            evaluar_grabaciones(args.etiquetas, args.salidas),
+            cronometrar.leer(args.salidas),
         ),
         end="",
     )
