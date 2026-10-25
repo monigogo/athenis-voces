@@ -47,17 +47,20 @@
   - **Con mock de `subprocess.run`**: `subprocess.run` lanza `subprocess.TimeoutExpired` → `preparar()` lanza excepción
   - **Con mock de `subprocess.run`**: ruta de destino en directorio inexistente → `preparar()` lanza excepción
 
-- [ ] T006 [US1] Escribir `backend/tests/test_diarizacion.py` con los siguientes casos (deben fallar antes de implementar); usar un mock de pyannote (el import de `pyannote.audio` va dentro de la función, no al inicio del archivo) para no descargar modelos ni necesitar HF_TOKEN:
+- [X] T006 [US1] Escribir `backend/tests/test_diarizacion.py` con los siguientes casos (deben fallar antes de implementar); usar un mock de pyannote (el import de `pyannote.audio` va dentro de la función, no al inicio del archivo) para no descargar modelos ni necesitar HF_TOKEN:
   - WAV con ≥ 2 hablantes → devuelve `list[Turno]` y `list[Solapamiento]` válidos (RF-05)
   - Todos los solapamientos detectados se devuelven, aunque sean muy cortos (sin filtro de duración)
-  - Audio sin ninguna voz → lanza excepción con motivo (caso límite spec)
-  - Audio con solo un hablante → lanza excepción con motivo
+  - Con cero o un hablante, diarizar devuelve los turnos y solapamientos detectados, sin lanzar excepción
+  - Hablantes numerados 1, 2, 3 por orden de primera aparición; la numeración es estable para el mismo audio
+  - Tramos de duración cero descartados del resultado
+  - Si el modelo no carga o falta HF_TOKEN → excepción con motivo claro, sin incluir el valor del token
+  - diarizar no devuelve ni guarda embeddings ni huellas de voz (RD-04)
   - Hablantes numerados desde 1, sin nombres ni identidades (RN-10)
 
 ### Implementación — Historia 1
 
 - [X] T007 [US1] Implementar `backend/src/audio/preparar.py`: función `preparar(audio: Path, destino: Path) -> float` que convierte a WAV mono `config.frecuencia_muestreo` Hz llamando a ffmpeg con `subprocess.run` (sin `shell=True`, con `timeout`); calcula la duración leyendo el WAV resultante con `wave.open` (`nframes / framerate`); lanza excepción ante error (firma: contracts/pipeline-pasos.md)
-- [ ] T008 [US1] Implementar `backend/src/audio/diarizacion.py`: función `diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]` con pyannote `speaker-diarization-community-1`; devuelve todos los solapamientos detectados sin filtrar por duración; numera hablantes desde 1; lanza excepción si < 2 hablantes (firma: contracts/pipeline-pasos.md)
+- [X] T008 [US1] Implementar `backend/src/audio/diarizacion.py`: función `diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]` con pyannote `speaker-diarization-community-1`; devuelve todos los solapamientos detectados sin filtrar por duración; numera hablantes desde 1 por orden de primera aparición; lee HF_TOKEN del entorno, nunca lo registra en logs ni excepciones (RD-04); funciona en CPU (FR-011); el error por pocas voces lo da el pipeline (D-17, voces_presentes_minimas), no diarizar (firma: contracts/pipeline-pasos.md)
 
 **Checkpoint**: Historia 1 completa y testeable de forma independiente. Ejecutar `quickstart.md` secciones 3 y 4.
 
@@ -146,6 +149,8 @@
 - [ ] T016 Ejecutar la validación completa de `quickstart.md` sección 8 y confirmar que todos los tests pasan
 - [ ] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
 - [ ] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
+- [ ] T019 [US1] Escribir test y añadir `backend/scripts/analizar_audio.py`: recibe un audio y una carpeta de salida por argumento (CLI); rechaza rutas de salida dentro del repositorio (RD-04); ejecuta `preparar` y `diarizar`; escribe `<nombre>.rttm` con líneas `SPEAKER <nombre> 1 <inicio> <duración> <NA> <NA> <hablante> <NA> <NA>`, donde `<hablante>` es `hablante_1`, `hablante_2`, … (sin espacios, porque `evaluacion/evaluar.py` separa por espacios y lee el campo 8); depende de T008; test primero
+- [ ] T020 [US1] Ampliar `backend/scripts/analizar_audio.py` para ejecutar el pipeline completo y escribir `<nombre>.json` con el formato de `Resultado`; en este comando de evaluación las voces se confirman automáticamente con la propuesta del modelo; depende de T010, T012 y de la respuesta de Mónica sobre la confirmación automática
 
 ---
 
