@@ -88,7 +88,7 @@ def elegir_fragmentos(
 **Postcondiciones**:
 - Solo aparecen hablantes con `segundos_habla ≥ config.presencia_desde_segundos` (10 s).
 - Hablantes con menos de `config.fragmentos_por_hablante` (3) tramos válidos no aparecen en el dict
-  (serán descartados en el pipeline; no pasan a confirmación).
+  (no son voces presentes: el pipeline no los pasa a confirmación y su tiempo cuenta como voz corta, D-18).
 - Cada `Fragmento` proviene de un tramo sin solapamiento del hablante.
 - Duración de cada fragmento: `[config.fragmento_min_segundos, config.fragmento_max_segundos]`.
 - Los fragmentos de un mismo hablante no se solapan entre sí (clarificación 2026-10-24).

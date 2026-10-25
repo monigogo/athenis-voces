@@ -79,9 +79,11 @@ Un hablante tal como llega a la pantalla Confirmar voces.
 | `propuesta` | `PropuestaVoz \| None` | `None` en modo manual (RF-08) |
 | `fragmentos` | `list[Fragmento]` | ≥ 3 fragmentos si el hablante es presente |
 
-**Hablante presente** (RN-01 [VALIDAR]): `segundos_habla ≥ config.presencia_desde_segundos` (10 s).
+**Hablante presente** (RN-01 [VALIDAR]): `segundos_habla ≥ config.presencia_desde_segundos` (10 s)
+y al menos `config.fragmentos_por_hablante` (3) fragmentos (D-18).
 Los hablantes no presentes no aparecen en esta lista; su tiempo se acumula en
-`Resultado.segundos_voces_cortas` (D-15).
+`Resultado.segundos_voces_cortas` (D-15). Si quedan menos de
+`config.voces_presentes_minimas` (2) voces presentes, el análisis acaba en «error» (D-17).
 
 ### HablantesParaConfirmar (`contrato.HablantesParaConfirmar`)
 

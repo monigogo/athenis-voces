@@ -66,8 +66,8 @@ Para que una persona confirme o corrija la propuesta escuchando, el sistema elig
 
 **Escenarios de aceptación**:
 
-1. **Dado** un hablante presente (10 s o más de habla, RN-01 [VALIDAR]), **cuando** se generan los fragmentos, **entonces** hay al menos 3, cada uno de 3 a 5 s (RF-07).
-2. **Dado** un hablante presente que no tiene 3 tramos de 3 s o más, **cuando** se generan los fragmentos, **entonces** se descarta por falta de tiempo y no pasa a confirmación.
+1. **Dado** un hablante presente (10 s o más de habla y 3 tramos de 3 s o más sin solapamiento, RN-01 [VALIDAR]), **cuando** se generan los fragmentos, **entonces** hay al menos 3, cada uno de 3 a 5 s (RF-07).
+2. **Dado** un hablante con 10 s o más de habla que no tiene 3 tramos de 3 s o más sin solapamiento, **cuando** se generan los fragmentos, **entonces** no es una voz presente: no pasa a confirmación y su tiempo se muestra aparte como voz corta (D-18).
 
 ---
 
@@ -89,9 +89,9 @@ Una analista elige el modo manual: ningún modelo infiere cómo suena la voz y l
 ### Casos límite
 
 - **Hablante con menos de 10 s de habla:** no cuenta como presente (RN-01): no recibe propuesta ni fragmentos y no pasa a confirmación, pero su tiempo se muestra aparte en el resultado (D-15).
-- **Audio sin ninguna voz** o en el que solo se detecta una: se descarta, porque el análisis necesita más de una voz; el análisis queda en «error» con su motivo (RNF-16).
+- **Audio sin ninguna voz presente** o con una sola: el análisis queda en «error» con un motivo claro («solo se ha detectado una voz que se pueda confirmar»), porque con una sola voz no hay nada que comparar (D-17, RNF-16).
 - **Audio largo en CPU:** en desarrollo se trabaja con fragmentos de 5 min; los audios completos van a GPU (plan, Parte 5.2).
-- **Hablante con poco audio:** es un estado que la pantalla Confirmar voces debe cubrir (sección 8.2); qué fragmentos recibe es la pregunta de la historia 3.
+- **Hablante con poco audio:** no es una voz presente (D-18): no aparece en Confirmar voces y su tiempo se muestra aparte.
 
 ## Requisitos *(obligatorio)*
 
