@@ -85,6 +85,44 @@ def _pipeline_ok(segmentos: list[tuple[float, float, str]]) -> MagicMock:
 _PATCH_PIPELINE = "audio.diarizacion._cargar_pipeline"
 
 
+class _Tensor:
+    """Falso de un tensor de torch: apunta las operaciones que se le piden."""
+
+    def __init__(self, datos: bytes, operaciones: tuple[str, ...] = ()) -> None:
+        self.datos = datos
+        self.operaciones = operaciones
+
+    def _con(self, operacion: str) -> "_Tensor":
+        return _Tensor(self.datos, (*self.operaciones, operacion))
+
+    def float(self) -> "_Tensor":
+        return self._con("float")
+
+    def div(self, divisor: float) -> "_Tensor":
+        return self._con(f"div({divisor:g})")
+
+    def unsqueeze(self, dimension: int) -> "_Tensor":
+        return self._con(f"unsqueeze({dimension})")
+
+
+class _Torch(types.ModuleType):
+    """Falso de torch: solo lo que usan la carga del modelo y la lectura del audio."""
+
+    int16 = "int16"
+
+    def __init__(self, hay_gpu: bool) -> None:
+        super().__init__("torch")
+        self.cuda = types.SimpleNamespace(is_available=lambda: hay_gpu)
+
+    @staticmethod
+    def device(nombre: str) -> str:
+        return f"device({nombre})"
+
+    @staticmethod
+    def frombuffer(datos: bytearray, dtype: str) -> _Tensor:
+        return _Tensor(bytes(datos), (f"frombuffer({dtype})",))
+
+
 # ---------------------------------------------------------------------------
 # RF-05: resultado básico con ≥ 2 hablantes
 # ---------------------------------------------------------------------------
@@ -356,16 +394,10 @@ def test_diarizar_acepta_una_anotacion_sin_envolver(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-class _Torch(types.ModuleType):
-    """Falso de torch: solo lo que usa la carga del modelo."""
-
-    def __init__(self, hay_gpu: bool) -> None:
-        super().__init__("torch")
-        self.cuda = types.SimpleNamespace(is_available=lambda: hay_gpu)
-
-    @staticmethod
-    def device(nombre: str) -> str:
-        return f"device({nombre})"
+@pytest.fixture(autouse=True)
+def torch_falso(monkeypatch: pytest.MonkeyPatch) -> None:
+    """torch no está en la CI rápida (grupo audio): todas las pruebas usan el falso."""
+    monkeypatch.setitem(sys.modules, "torch", _Torch(hay_gpu=False))
 
 
 @pytest.fixture
@@ -470,3 +502,71 @@ def test_dispositivo_mal_escrito_falla_antes_de_descargar_el_modelo(
     with pytest.raises(ValueError, match="auto, cpu o cuda"):
         _cargar_pipeline()
     from_pretrained.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# El audio se lee en memoria: pyannote no necesita torchcodec ni FFmpeg
+# ---------------------------------------------------------------------------
+
+
+def test_el_pipeline_recibe_el_audio_cargado_y_no_la_ruta(tmp_path: Path) -> None:
+    """Con torchcodec roto (OVH) pyannote no puede abrir la ruta: se le da el audio ya leído."""
+    from audio.diarizacion import diarizar
+
+    wav = tmp_path / "audio.wav"
+    _crear_wav(wav, duracion_s=2.0)
+    pipeline = _pipeline_ok([(0.0, 1.0, "SPEAKER_00"), (1.0, 2.0, "SPEAKER_01")])
+    with patch(_PATCH_PIPELINE, return_value=pipeline):
+        diarizar(wav)
+
+    (entrada,), _ = pipeline.call_args
+    assert set(entrada) == {"waveform", "sample_rate"}
+    assert entrada["sample_rate"] == 16_000
+
+
+def test_la_onda_son_las_muestras_del_wav_normalizadas(tmp_path: Path) -> None:
+    from audio.diarizacion import _cargar_audio
+
+    wav = tmp_path / "audio.wav"
+    _crear_wav(wav, duracion_s=0.5)
+    entrada = _cargar_audio(wav)
+
+    onda = entrada["waveform"]
+    assert len(onda.datos) == 8_000 * 2  # 0,5 s a 16 kHz, 16 bits
+    assert onda.operaciones == (
+        "frombuffer(int16)",  # las muestras tal cual
+        "float",
+        "div(32768)",  # de -1 a 1
+        "unsqueeze(0)",  # (canal, tiempo), mono
+    )
+
+
+@pytest.mark.parametrize(
+    ("canales", "bytes_por_muestra", "frecuencia"),
+    [(2, 2, 16_000), (1, 2, 44_100), (1, 1, 16_000)],
+)
+def test_un_wav_que_no_es_mono_16_khz_16_bits_se_rechaza(
+    tmp_path: Path, canales: int, bytes_por_muestra: int, frecuencia: int
+) -> None:
+    """preparar.py lo deja en este formato (RF-03); otro formato es un error de quien llama."""
+    from audio.diarizacion import _cargar_audio
+
+    wav = tmp_path / "raro.wav"
+    with wave.open(str(wav), "w") as f:
+        f.setnchannels(canales)
+        f.setsampwidth(bytes_por_muestra)
+        f.setframerate(frecuencia)
+        f.writeframes(b"\x00" * bytes_por_muestra * canales * frecuencia)
+
+    with pytest.raises(ValueError, match="mono"):
+        _cargar_audio(wav)
+
+
+def test_un_wav_sin_muestras_se_rechaza(tmp_path: Path) -> None:
+    from audio.diarizacion import _cargar_audio
+
+    wav = tmp_path / "vacio.wav"
+    _crear_wav(wav, duracion_s=0.0)
+
+    with pytest.raises(ValueError, match="no tiene muestras"):
+        _cargar_audio(wav)
