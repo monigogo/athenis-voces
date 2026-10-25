@@ -7,6 +7,8 @@ Restricciones:
 - El import de pyannote.audio está dentro de _cargar_pipeline(), no al inicio
   del módulo, para no requerir el grupo «audio» en la CI rápida.
 - HF_TOKEN se lee del entorno; nunca se registra en logs ni en mensajes de error.
+- Lee el WAV en memoria y se lo pasa a pyannote ya cargado: no depende de torchcodec ni de FFmpeg
+  (en la V100S de OVH torchcodec no carga). Es el WAV mono 16 kHz que deja preparar.py (RF-03).
 - Usa la GPU si la hay y, si no, la CPU (FR-011, SC-007). La variable de entorno
   DISPOSITIVO (auto, cpu o cuda) lo fuerza; por defecto, auto.
 - No devuelve ni almacena embeddings ni huellas de voz (RD-04).
@@ -17,9 +19,11 @@ Restricciones:
 from __future__ import annotations
 
 import os
+import wave
 from pathlib import Path
 from typing import Any
 
+from config import CONFIG
 from contrato import Solapamiento, Turno
 
 # ---------------------------------------------------------------------------
@@ -87,6 +91,34 @@ def _cargar_pipeline() -> Any:
 
 
 # ---------------------------------------------------------------------------
+# Lectura del audio
+# ---------------------------------------------------------------------------
+
+
+def _cargar_audio(wav: Path) -> dict[str, Any]:
+    """Lee el WAV mono 16 kHz de 16 bits y lo deja como pide pyannote: onda y frecuencia.
+
+    La onda tiene forma (canal, tiempo) y valores de -1 a 1. Un WAV con otro formato es un error
+    de quien llama: preparar.py ya deja todo en este formato (RF-03).
+    """
+    import torch  # type: ignore[import-untyped]
+
+    with wave.open(str(wav), "rb") as audio:
+        formato = (audio.getnchannels(), audio.getsampwidth(), audio.getframerate())
+        if formato != (1, 2, CONFIG.frecuencia_muestreo):
+            raise ValueError(
+                f"{wav.name} debe ser un WAV mono a {CONFIG.frecuencia_muestreo} Hz de 16 bits; "
+                f"tiene {formato[0]} canal(es), {formato[1] * 8} bits y {formato[2]} Hz"
+            )
+        muestras = audio.readframes(audio.getnframes())
+    if not muestras:
+        raise ValueError(f"{wav.name} no tiene muestras de audio")
+
+    onda = torch.frombuffer(bytearray(muestras), dtype=torch.int16).float().div(32768).unsqueeze(0)
+    return {"waveform": onda, "sample_rate": CONFIG.frecuencia_muestreo}
+
+
+# ---------------------------------------------------------------------------
 # Función principal
 # ---------------------------------------------------------------------------
 
@@ -102,7 +134,7 @@ def diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]:
     pipeline (D-17, voces_presentes_minimas).
     """
     pipeline = _cargar_pipeline()
-    salida = pipeline(str(wav))
+    salida = pipeline(_cargar_audio(wav))
     # community-1 devuelve un DiarizeOutput con la anotación dentro; otros pipelines, la anotación
     anotacion = getattr(salida, "speaker_diarization", salida)
 
