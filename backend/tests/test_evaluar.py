@@ -206,3 +206,25 @@ def test_main_avisa_si_falta_una_carpeta(tmp_path, capsys):
     codigo = evaluar.main(["--salidas", str(tmp_path / "no_existe")])
     assert codigo == 2
     assert "no_existe" in capsys.readouterr().err
+
+
+def test_solo_con_el_rttm_se_calcula_el_der(carpetas):  # el comando de A guarda solo el .rttm
+    pytest.importorskip("pyannote.metrics")
+    ami, salidas, _ = carpetas
+    escribir_rttm(ami / "EN2002a.rttm", TRAMOS)
+    escribir_rttm(salidas / "EN2002a.rttm", TRAMOS)
+
+    (reunion,) = evaluar.evaluar_ami(ami, salidas)
+    assert reunion.der.valor == 0.0
+    assert reunion.error_femenino is None  # sin el .json no hay M-04
+    assert reunion.ablacion is None  # ni ablación
+
+
+def test_sin_json_m04_y_la_ablacion_no_cuentan_en_n():  # RN-13: lo que falta no se inventa
+    reunion = evaluar.Reunion("EN2002a", metricas.Der(2.0, 10.0), None, None)
+    texto = evaluar.informe([reunion], [])
+    filas = {linea.split(" | ")[0]: linea for linea in texto.splitlines() if linea.startswith("| ")}
+    assert filas["| M-01, DER (reuniones de AMI)"].endswith("n = 1 |")
+    assert filas["| M-04, error del % femenino"].endswith("n = 0 |")
+    ablacion = next(v for k, v in filas.items() if k.startswith("| Ablación"))
+    assert ablacion.endswith("n = 0 |")

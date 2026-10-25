@@ -4,9 +4,9 @@ Uso, desde backend/:
 
     PYTHONPATH=src uv run --group evaluacion python -m evaluacion.evaluar --salidas <carpeta>
 
-- AMI (M-01, M-04 y la ablación): solo las reuniones de prueba (11.3, RD-05). Por cada una hacen
-  falta, en la carpeta de salidas, <reunión>.rttm (la separación de voces de pyannote) y
-  <reunión>.json (el Resultado del sistema).
+- AMI (M-01, M-04 y la ablación): solo las reuniones de prueba (11.3, RD-05). Por cada una hace
+  falta, en la carpeta de salidas, <reunión>.rttm (la separación de voces de pyannote), que basta
+  para el DER. M-04 y la ablación necesitan además <reunión>.json (el Resultado del sistema).
 - Audios anotados (M-05, su línea base y M-08): en la carpeta de etiquetas, <audio>_referencia.txt
   (el consenso de A y C, guía de anotación 8) y, para la kappa, <audio>_A.txt y <audio>_C.txt. En la
   carpeta de salidas, <audio>.json.
@@ -37,7 +37,8 @@ class Reunion:
     nombre: str
     der: metricas.Der  # M-01
     error_femenino: float | None  # M-04, en puntos
-    ablacion: metricas.Deteccion  # interrupciones con pyannote frente a con la referencia de AMI
+    # interrupciones con pyannote frente a con la referencia de AMI; None sin el .json
+    ablacion: metricas.Deteccion | None
 
 
 @dataclass(frozen=True)
@@ -77,19 +78,23 @@ def evaluar_ami(
     evaluadas = []
     for nombre in reuniones:
         rttm, json = salidas / f"{nombre}.rttm", salidas / f"{nombre}.json"
-        if not (carpeta_ami / f"{nombre}.rttm").exists() or not rttm.exists() or not json.exists():
+        if not (carpeta_ami / f"{nombre}.rttm").exists() or not rttm.exists():
             continue
         tramos = lectura.leer_rttm(carpeta_ami / f"{nombre}.rttm")
-        de_referencia = analizar(lectura.entrada_de_referencia(tramos)[0])
-        sistema = lectura.leer_resultado(json)
+        error_femenino, ablacion = None, None  # sin el .json, solo el DER
+        if json.exists():
+            de_referencia = analizar(lectura.entrada_de_referencia(tramos)[0])
+            sistema = lectura.leer_resultado(json)
+            error_femenino = metricas.error_porcentaje_femenino(
+                cuota_femenina(de_referencia), cuota_femenina(sistema)
+            )
+            ablacion = metricas.deteccion(inicios(sistema), inicios(de_referencia))
         evaluadas.append(
             Reunion(
                 nombre=nombre,
                 der=metricas.der(tramos, lectura.leer_rttm(rttm)),
-                error_femenino=metricas.error_porcentaje_femenino(
-                    cuota_femenina(de_referencia), cuota_femenina(sistema)
-                ),
-                ablacion=metricas.deteccion(inicios(sistema), inicios(de_referencia)),
+                error_femenino=error_femenino,
+                ablacion=ablacion,
             )
         )
     return evaluadas
@@ -185,7 +190,7 @@ def informe(reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion]) -> s
         _fila("M-08, kappa entre anotadoras", con_kappa, _media, f1),
         _fila(
             "Ablación: F1 con pyannote frente a con la referencia de AMI",
-            [r.ablacion for r in reuniones],
+            [r.ablacion for r in reuniones if r.ablacion is not None],
             lambda m: metricas.sumar(m).f1,
             f1,
         ),
