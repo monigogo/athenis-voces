@@ -192,6 +192,30 @@ def test_preparar_error_mensaje_maximo_5_lineas_stderr(tmp_path: Path) -> None:
     )
 
 
+def test_preparar_error_no_muestra_la_ruta_ni_el_nombre_del_audio(tmp_path: Path) -> None:
+    """El nombre del archivo subido puede llevar el de una persona: no sale en el error (T017)."""
+    from audio.preparar import preparar
+
+    origen = tmp_path / "Reunion con Ana Garcia.mp3"
+    origen.write_bytes(b"datos")
+    destino = tmp_path / "salida.wav"
+
+    stderr = f"file:{origen}: Invalid data found when processing input".encode()
+    resultado_fallido = subprocess.CompletedProcess(
+        args=[], returncode=1, stdout=b"", stderr=stderr
+    )
+    with (
+        patch("subprocess.run", return_value=resultado_fallido),
+        pytest.raises(RuntimeError) as exc_info,
+    ):
+        preparar(origen, destino)
+
+    mensaje = str(exc_info.value)
+    assert "Ana Garcia" not in mensaje
+    assert str(tmp_path) not in mensaje
+    assert "Invalid data found when processing input" in mensaje
+
+
 def test_preparar_comando_incluye_opciones_requeridas(tmp_path: Path) -> None:
     """El comando ffmpeg incluye -nostdin, -hide_banner, -loglevel error, -vn, -f wav,
     -c:a pcm_s16le y la entrada como 'file:<ruta>'."""

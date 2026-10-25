@@ -60,7 +60,9 @@ def preparar(audio: Path, destino: Path) -> float:
 
     if resultado.returncode != 0:
         destino.unlink(missing_ok=True)
-        stderr_lineas = resultado.stderr.decode(errors="replace").splitlines()
+        # El nombre del archivo subido puede identificar a alguien: no llega al motivo del error
+        stderr = resultado.stderr.decode(errors="replace").replace(f"file:{audio}", "el audio")
+        stderr_lineas = stderr.replace(str(audio), "el audio").splitlines()
         stderr_recortado = "\n".join(stderr_lineas[-5:])
         raise RuntimeError(f"ffmpeg falló (código {resultado.returncode}):\n{stderr_recortado}")
 
