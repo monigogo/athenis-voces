@@ -83,6 +83,7 @@ def test_reunion_igual_que_la_referencia(carpetas):
     assert reunion.der.valor == 0.0
     assert reunion.error_femenino == 0.0  # M-04
     assert reunion.ablacion.falsos == reunion.ablacion.perdidos == 0
+    assert not reunion.ideal  # con el .json se usa el resultado del sistema
 
 
 def test_m04_compara_con_la_referencia_de_ami(carpetas):
@@ -216,8 +217,10 @@ def test_solo_con_el_rttm_se_calcula_el_der(carpetas):  # el comando de A guarda
 
     (reunion,) = evaluar.evaluar_ami(ami, salidas)
     assert reunion.der.valor == 0.0
-    assert reunion.error_femenino is None  # sin el .json no hay M-04
-    assert reunion.ablacion is None  # ni ablación
+    # sin el .json, M-04 y la ablación salen con la confirmación ideal
+    assert reunion.ideal
+    assert reunion.error_femenino == 0.0
+    assert reunion.ablacion.falsos == reunion.ablacion.perdidos == 0
 
 
 def test_sin_json_m04_y_la_ablacion_no_cuentan_en_n():  # RN-13: lo que falta no se inventa
@@ -228,3 +231,44 @@ def test_sin_json_m04_y_la_ablacion_no_cuentan_en_n():  # RN-13: lo que falta no
     assert filas["| M-04, error del % femenino"].endswith("n = 0 |")
     ablacion = next(v for k, v in filas.items() if k.startswith("| Ablación"))
     assert ablacion.endswith("n = 0 |")
+
+
+# --- Confirmación ideal: solo para medir en AMI, donde nadie confirma a mano ---------------
+
+
+def etiquetas_de(resultado):
+    return {h.hablante: h.etiqueta for h in resultado.hablantes}
+
+
+def test_cada_voz_recibe_el_sexo_de_quien_mas_coincide():  # funcional, 11.2
+    sistema = [("hablante_1", 0.0, 20.2), ("hablante_2", 20.2, 35.0), ("hablante_3", 41.0, 45.0)]
+    resultado = evaluar.resultado_ideal(sistema, TRAMOS)
+    # el 3 habla 4 s: voz corta, sin etiqueta (RN-01)
+    assert etiquetas_de(resultado) == {1: c.EtiquetaVoz.FEMENINO, 2: c.EtiquetaVoz.MASCULINO}
+
+
+def test_las_voces_se_numeran_por_orden_de_aparicion():  # como diarizacion.py
+    sistema = [("B", 20.0, 35.0), ("A", 0.0, 20.0)]
+    resultado = evaluar.resultado_ideal(sistema, TRAMOS)
+    assert etiquetas_de(resultado) == {1: c.EtiquetaVoz.FEMENINO, 2: c.EtiquetaVoz.MASCULINO}
+
+
+def test_una_voz_que_junta_a_dos_personas_se_queda_con_la_mayoria():
+    sistema = [("x", 0.0, 35.0)]  # 20 s de FIE038 y 15,5 s de MIO091
+    resultado = evaluar.resultado_ideal(sistema, TRAMOS)
+    assert etiquetas_de(resultado) == {1: c.EtiquetaVoz.FEMENINO}
+
+
+def test_una_voz_donde_ami_no_tiene_a_nadie_queda_sin_etiqueta():
+    sistema = [("x", 0.0, 20.0), ("y", 50.0, 70.0)]  # en AMI nadie habla después de 45 s
+    resultado = evaluar.resultado_ideal(sistema, TRAMOS)
+    assert etiquetas_de(resultado) == {1: c.EtiquetaVoz.FEMENINO}
+    assert resultado.segundos_voces_cortas == 20.0  # su tiempo se ve aparte (D-15)
+
+
+def test_el_informe_avisa_de_la_confirmacion_ideal():
+    reunion = evaluar.Reunion(
+        "EN2002a", metricas.Der(2.0, 10.0), 1.5, metricas.Deteccion(2, 0, 0), ideal=True
+    )
+    assert "confirmación ideal" in evaluar.informe([reunion], [])
+    assert "confirmación ideal" not in evaluar.informe([], [])

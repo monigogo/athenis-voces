@@ -22,7 +22,15 @@ from datetime import date
 from pathlib import Path
 
 from analisis.analizar import analizar
-from contrato import EntradaAnalisis, EtiquetaConfirmada, EtiquetaVoz, Resultado
+from config import CONFIG, Config
+from contrato import (
+    EntradaAnalisis,
+    EtiquetaConfirmada,
+    EtiquetaVoz,
+    OrigenEtiqueta,
+    Resultado,
+    Turno,
+)
 from evaluacion import lectura, metricas
 
 REUNIONES_PRUEBA = ("EN2002a", "EN2002c", "ES2004a", "IS1009a", "TS3003a")
@@ -37,8 +45,9 @@ class Reunion:
     nombre: str
     der: metricas.Der  # M-01
     error_femenino: float | None  # M-04, en puntos
-    # interrupciones con pyannote frente a con la referencia de AMI; None sin el .json
+    # interrupciones con pyannote frente a con la referencia de AMI
     ablacion: metricas.Deteccion | None
+    ideal: bool = False  # True si M-04 y la ablación usan la confirmación ideal (sin .json)
 
 
 @dataclass(frozen=True)
@@ -72,6 +81,61 @@ def cuota_femenina(resultado: Resultado) -> float | None:
     return next(g.cuota_tiempo for g in resultado.grupos if g.etiqueta is EtiquetaVoz.FEMENINO)
 
 
+def resultado_ideal(
+    tramos_sistema: Sequence[lectura.Tramo],
+    tramos_referencia: Sequence[lectura.Tramo],
+    config: Config = CONFIG,
+) -> Resultado:
+    """Resultado del sistema con una confirmación ideal. Solo para medir en AMI.
+
+    En la aplicación una persona confirma cada voz (constitución, regla 8). En AMI nadie confirma,
+    así que cada voz de pyannote recibe el sexo de la persona de AMI con la que más tiempo coincide
+    (F o M en su código, funcional 11.2). Así M-04 y la ablación miden lo que estropea la separación
+    de voces, no el clasificador (eso es M-02 y M-03). No cambia nada del sistema.
+
+    Las voces se numeran por orden de aparición, como en diarizacion.py. Sin fragmentos, solo se
+    aplica la regla de los 10 s (RN-01), no la de los 3 tramos limpios (D-18). Una voz que no
+    coincide con nadie de AMI queda sin etiqueta: es una voz corta (D-15).
+    """
+    numero: dict[str, int] = {}
+    for codigo, _, _ in sorted(tramos_sistema, key=lambda x: x[1]):
+        numero.setdefault(codigo, len(numero) + 1)
+    turnos = sorted(
+        (Turno(hablante=numero[codigo], inicio=i, fin=f) for codigo, i, f in tramos_sistema),
+        key=lambda t: (t.inicio, t.hablante),
+    )
+
+    segundos: dict[int, float] = {}
+    coincide: dict[int, dict[str, float]] = {}
+    for codigo, inicio, fin in tramos_sistema:
+        n = numero[codigo]
+        segundos[n] = segundos.get(n, 0.0) + fin - inicio
+        for persona, ref_inicio, ref_fin in tramos_referencia:
+            comun = min(fin, ref_fin) - max(inicio, ref_inicio)
+            if comun > 0:
+                coincide.setdefault(n, {})
+                coincide[n][persona] = coincide[n].get(persona, 0.0) + comun
+
+    etiquetas = [
+        EtiquetaConfirmada(
+            hablante=n,
+            etiqueta=lectura.SEXO[max(coincide[n], key=coincide[n].get)[0]],
+            origen=OrigenEtiqueta.PERSONA,
+        )
+        for n in sorted(segundos)
+        if segundos[n] >= config.presencia_desde_segundos and n in coincide
+    ]
+    return analizar(
+        EntradaAnalisis(
+            duracion=max(t.fin for t in turnos),
+            turnos=turnos,
+            solapamientos=lectura.solapamientos_de(turnos),
+            etiquetas=etiquetas,
+        ),
+        config,
+    )
+
+
 def evaluar_ami(
     carpeta_ami: Path, salidas: Path, reuniones: Sequence[str] = REUNIONES_PRUEBA
 ) -> list[Reunion]:
@@ -81,20 +145,19 @@ def evaluar_ami(
         if not (carpeta_ami / f"{nombre}.rttm").exists() or not rttm.exists():
             continue
         tramos = lectura.leer_rttm(carpeta_ami / f"{nombre}.rttm")
-        error_femenino, ablacion = None, None  # sin el .json, solo el DER
-        if json.exists():
-            de_referencia = analizar(lectura.entrada_de_referencia(tramos)[0])
-            sistema = lectura.leer_resultado(json)
-            error_femenino = metricas.error_porcentaje_femenino(
-                cuota_femenina(de_referencia), cuota_femenina(sistema)
-            )
-            ablacion = metricas.deteccion(inicios(sistema), inicios(de_referencia))
+        tramos_sistema = lectura.leer_rttm(rttm)
+        de_referencia = analizar(lectura.entrada_de_referencia(tramos)[0])
+        ideal = not json.exists()  # sin el Resultado del sistema, la confirmación ideal
+        sistema = resultado_ideal(tramos_sistema, tramos) if ideal else lectura.leer_resultado(json)
         evaluadas.append(
             Reunion(
                 nombre=nombre,
-                der=metricas.der(tramos, lectura.leer_rttm(rttm)),
-                error_femenino=error_femenino,
-                ablacion=ablacion,
+                der=metricas.der(tramos, tramos_sistema),
+                error_femenino=metricas.error_porcentaje_femenino(
+                    cuota_femenina(de_referencia), cuota_femenina(sistema)
+                ),
+                ablacion=metricas.deteccion(inicios(sistema), inicios(de_referencia)),
+                ideal=ideal,
             )
         )
     return evaluadas
@@ -197,6 +260,12 @@ def informe(reuniones: Sequence[Reunion], grabaciones: Sequence[Grabacion]) -> s
         "",
         "Con pocos datos, los resultados son orientativos (11.3).",
     ]
+    if any(r.ideal for r in reuniones):
+        lineas.append(
+            "En AMI, M-04 y la ablación usan una confirmación ideal: cada voz de pyannote recibe el "
+            "sexo de la persona de AMI con la que más coincide. Miden la separación de voces, no "
+            "el clasificador."
+        )
     return "\n".join(lineas) + "\n"
 
 
