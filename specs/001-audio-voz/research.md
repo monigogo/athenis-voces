@@ -40,7 +40,7 @@ más de 0,3 s lo aplica la persona B en su regla de interrupciones (`solapamient
 
 ## Decisión 3 — Propuesta de voz (RF-06)
 
-**Elegido**: inaSpeechSegmenter `GenderIdentifier` preentrenado, sin entrenar ningún modelo.
+**Elegido**: inaSpeechSegmenter `Segmenter` preentrenado, sin entrenar ningún modelo.
 
 **Justificación**: librería gratuita (MIT) que devuelve `male`, `female` o `noEnergy` con una
 confianza entre 0 y 1. Se aplica segmento a segmento sobre el WAV del hablante. La zona dudosa

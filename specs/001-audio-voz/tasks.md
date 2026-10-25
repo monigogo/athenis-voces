@@ -76,7 +76,7 @@
 
 ### Tests — Historia 2 (escribir primero; deben fallar)
 
-- [ ] T009 [US2] Escribir `backend/tests/test_clasificador.py` con los siguientes casos (deben fallar antes de implementar); usar un mock de `inaSpeechSegmenter` (el import va dentro de la función, no al inicio del archivo) para no descargar modelos ni necesitar torch:
+- [X] T009 [US2] Escribir `backend/tests/test_clasificador.py` con los siguientes casos (deben fallar antes de implementar); usar un mock de `inaSpeechSegmenter` (el import va dentro de la función, no al inicio del archivo) para no descargar modelos ni necesitar torch:
   - hablante con audio claro → propuesta con etiqueta y `confianza ∈ [0, 1]` (RF-06)
   - confianza en zona dudosa [0,35; 0,65] → etiqueta `indeterminado` (FR-004, RF-06)
   - confianza < 0,35 → etiqueta `masculino` o `femenino` según el modelo
@@ -86,7 +86,7 @@
 
 ### Implementación — Historia 2
 
-- [ ] T010 [US2] Implementar `backend/src/voz/clasificador.py`: función `proponer_voz(wav: Path, turnos: list[Turno]) -> dict[int, PropuestaVoz]` con `inaSpeechSegmenter.GenderIdentifier` (import dentro de la función); aplica zona dudosa desde `config.zona_dudosa_min` / `config.zona_dudosa_max`; procesa por segmento del hablante (firma: contracts/pipeline-pasos.md)
+- [X] T010 [US2] Implementar `backend/src/voz/clasificador.py`: función `proponer_voz(wav: Path, turnos: list[Turno]) -> dict[int, PropuestaVoz]` con `inaSpeechSegmenter.Segmenter` (import dentro de la función); aplica zona dudosa desde `config.zona_dudosa_min` / `config.zona_dudosa_max`; ejecuta el modelo una sola vez sobre el WAV completo y asigna los segmentos female/male a cada hablante por tiempo, sin contar los tramos compartidos con otros hablantes (firma: contracts/pipeline-pasos.md)
 
 **Checkpoint**: Historia 2 completa. Ejecutar `quickstart.md` sección 5.
 
