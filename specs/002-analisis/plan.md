@@ -10,7 +10,7 @@
 
 Calcular, a partir de los turnos y las etiquetas confirmadas, la presencia, la participación, quién
 abre y quién cierra, las interrupciones por reglas de tiempo y los índices RR, BI e IP. Además,
-medir cuánto acierta el sistema (M-01, M-04, M-05, M-08, M-09) con un único script que regenera las
+medir cuánto acierta el sistema (M-01 a M-05, M-08 y M-09) con un único script que regenera las
 tablas de la sección 12.1 sin volver a procesar el audio.
 
 El análisis es una sola función, `analizar(EntradaAnalisis) -> Resultado`, que cumple la firma
@@ -97,7 +97,8 @@ backend/src/
 │   └── falso.py             # análisis de mentira con los tres ejemplos
 ├── evaluacion/
 │   ├── lectura.py           # lee RTTM, JSON y etiquetas de Audacity
-│   ├── metricas.py          # DER, error del % femenino, F1, kappa, bootstrap
+│   ├── metricas.py          # DER, voz, error del % femenino, F1, kappa, bootstrap
+│   ├── cronometrar.py       # minutos de proceso por hora de audio (M-09)
 │   └── evaluar.py           # un solo script que regenera la tabla 12.1
 └── config.py                # umbrales y pesos, en un solo sitio
 
@@ -108,7 +109,8 @@ backend/tests/
 ├── test_indices.py          # SC-003
 ├── test_analizar.py         # extremo a extremo con casos sintéticos
 ├── test_evaluacion.py       # métricas
-└── test_evaluar.py          # el script de evaluación
+├── test_evaluar.py          # el script de evaluación
+└── test_cronometrar.py      # M-09
 ```
 
 ---

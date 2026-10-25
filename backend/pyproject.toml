@@ -1,7 +1,7 @@
 [project]
 name = "athenis-backend"
 version = "0.1.0"
-description = "Backend for the Women in Open AI challenge"
+description = "Backend de athenis-voces para el reto Women in Open AI"
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.14.1",
@@ -9,6 +9,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "bandit>=1.9.4",
+    "pip-audit>=2.10.1",
+    "pip-licenses>=5.5.5",
     "pre-commit>=4.7.0",
     "pytest>=8.0",
     "ruff>=0.6",

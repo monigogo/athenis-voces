@@ -142,12 +142,12 @@
 
 - [X] T022 [US6] `backend/tests/test_evaluacion.py`: DER (M-01), error del % femenino (M-04), emparejamiento con ± 1 s, precisión, exhaustividad y F1 (M-05), línea base de cualquier solapamiento, kappa de Cohen (M-08) y bootstrap con semilla fija
 - [X] T023 [US6] `backend/tests/test_evaluar.py`: lee RTTM, JSON y etiquetas; lo que falta no se evalúa y no cuenta en n; la confirmación ideal asigna el sexo de AMI por solapamiento (decisión 6 de research.md)
-- [ ] T024 [US6] `backend/tests/test_cronometrar.py`: `minutos_por_hora(duracion_audio, segundos_proceso)` da los minutos de proceso por hora de audio (M-09); duración 0 da `None`
+- [X] T024 [US6] `backend/tests/test_cronometrar.py`: `minutos_por_hora(duracion_audio, segundos_proceso)` da los minutos de proceso por hora de audio (M-09); duración 0 da `None`
 
 ### Implementación — Historia 6
 
 - [X] T025 [US6] `backend/src/evaluacion/lectura.py`, `metricas.py` y `evaluar.py` (FR-015, FR-016, FR-017)
-- [ ] T026 [US6] `backend/src/evaluacion/cronometrar.py`: `minutos_por_hora` y una línea de M-09 en la tabla de `evaluar.py` cuando hay tiempos guardados (escenario 5)
+- [X] T026 [US6] `backend/src/evaluacion/cronometrar.py`: `minutos_por_hora` y una línea de M-09 en la tabla de `evaluar.py` cuando hay tiempos guardados (escenario 5)
 
 **Checkpoint**: Historia 6 completa cuando T024 pase. Después, la ejecución real con los datos (Phase 9).
 

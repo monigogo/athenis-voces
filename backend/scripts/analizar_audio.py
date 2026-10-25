@@ -8,6 +8,7 @@ Escribe en <carpeta_salida>, donde <nombre> es el nombre del audio sin extensió
 - <nombre>.rttm: quién habla y cuándo (para el DER).
 - <nombre>.json: el Resultado del contrato. Las voces se confirman solas con la propuesta del
   modelo (origen «modelo»): es solo para medir; en la web las confirma una persona (RN-02).
+- <nombre>.tiempo.json: duración del audio y segundos del proceso completo (M-09).
 
 Si no hay voces suficientes (D-17) o un paso falla, queda el .rttm, no el .json, y se explica el
 motivo por el error estándar.
@@ -21,6 +22,7 @@ import argparse
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 # Permite ejecutar el script directamente desde backend/ sin PYTHONPATH=src
@@ -82,6 +84,7 @@ def analizar(audio: Path, carpeta_salida: Path) -> Path:
     from audio.fragmentos import elegir_fragmentos
     from audio.preparar import preparar
     from contrato import Confirmacion, EstadoAnalisis, EtiquetaConfirmada, OrigenEtiqueta
+    from evaluacion import cronometrar
     from pipeline import Pasos, analizar_confirmado, preparar_para_confirmar
     from voz.clasificador import proponer_voz
 
@@ -102,6 +105,7 @@ def analizar(audio: Path, carpeta_salida: Path) -> Path:
         analizar=analizar_voces,
     )
     estados: list[EstadoAnalisis] = []
+    inicio = time.perf_counter()
     with tempfile.TemporaryDirectory() as tmpdir:
         preparado = preparar_para_confirmar(nombre, audio, Path(tmpdir), pasos, estados.append)
         if preparado is None:
@@ -121,6 +125,11 @@ def analizar(audio: Path, carpeta_salida: Path) -> Path:
         return rttm
 
     (carpeta_salida / f"{nombre}.json").write_text(resultado.model_dump_json(), encoding="utf-8")
+    cronometrar.guardar(
+        carpeta_salida / f"{nombre}{cronometrar.SUFIJO}",
+        duracion_audio=resultado.duracion,
+        segundos=time.perf_counter() - inicio,
+    )
     return rttm
 
 

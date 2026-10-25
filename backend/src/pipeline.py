@@ -9,8 +9,8 @@ Solo pasan a confirmación las voces presentes (RN-01): 10 s o más de habla y a
 para escucharlas (D-18). Las demás no se confirman y su tiempo cuenta como voz corta (D-15). Con
 menos de dos voces presentes no hay nada que comparar y el análisis acaba en «error» (D-17).
 
-Los pasos llegan desde fuera en Pasos: cada módulo real, o su falso mientras no esté listo, cumple
-la misma firma. El estado se comunica con la función notificar, y quien la pase (la API) lo guarda.
+Los pasos llegan desde fuera en Pasos: cada módulo real, o un falso en las pruebas, cumple la
+misma firma. El estado se comunica con la función notificar, y quien la pase (la API) lo guarda.
 """
 
 from collections.abc import Callable

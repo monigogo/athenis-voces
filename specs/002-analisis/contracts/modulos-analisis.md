@@ -62,9 +62,9 @@ PYTHONPATH=src uv run --group evaluacion python -m evaluacion.evaluar --salidas 
 
 | Opción | Descripción |
 |--------|-------------|
-| `--salidas` | Carpeta con `<reunión>.rttm` y `<reunión>.json` (obligatoria) |
+| `--salidas` | Carpeta con `<audio>.rttm`, `<audio>.json` y `<audio>.tiempo.json` (obligatoria) |
 | `--ami` | Carpeta con los RTTM de referencia de AMI |
 | `--etiquetas` | Carpeta con las etiquetas de Audacity (`_A.txt`, `_C.txt`, `_referencia.txt`) |
 
-Escribe la tabla 12.1 por pantalla. Devuelve 2 si una carpeta no existe. Lo que falta no se evalúa y
+Escribe la tabla 12.1 por pantalla: M-01 a M-05, M-08, la línea base, la ablación y M-09. Devuelve 2 si una carpeta no existe. Lo que falta no se evalúa y
 no cuenta en n.

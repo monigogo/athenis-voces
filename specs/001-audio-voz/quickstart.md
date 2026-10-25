@@ -156,15 +156,14 @@ uv run pytest tests/test_pipeline.py -k "manual" -v
 
 ---
 
-## 8. Recorrido completo con el falso de análisis
+## 8. Todas las pruebas
 
 ```bash
 cd backend
 uv run pytest tests/ -m "not slow" -v
 ```
 
-Todos los tests rápidos deben pasar. El falso de análisis (`analisis/falso.py`) cubre la fase 2
-mientras el análisis real no está listo.
+Todos los tests rápidos deben pasar.
 
 Para incluir también los tests de integración con modelos reales:
 

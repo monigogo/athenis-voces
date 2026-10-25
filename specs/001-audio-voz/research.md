@@ -9,12 +9,15 @@ umbrales son valores iniciales de config.py ajustables con la partición de desa
 
 ## Decisión 1 — Conversión de audio (RF-03)
 
-**Elegido**: pydub (backend en ffmpeg) para convertir cualquier formato de entrada a WAV mono 16 kHz.
+**Elegido**: llamar a ffmpeg directamente, sin shell y con tiempo máximo, para convertir cualquier
+formato de entrada a WAV mono 16 kHz (`backend/src/audio/preparar.py`).
 
-**Justificación**: pydub admite mp3, wav, m4a, ogg y flac sin instalar nada extra en el proyecto
-si ffmpeg está en el sistema (ya está en el devcontainer). La operación es `audio.set_frame_rate(16000).set_channels(1)` y exportar como WAV. Librería gratuita y de código abierto (LGPL / MIT).
+**Justificación**: ffmpeg admite mp3, wav, m4a, ogg y flac. Llamarlo sin intermediarios cumple
+RNF-10 (sin shell y con tiempo máximo) y no añade dependencias de Python. ffmpeg se instala en el
+sistema: el devcontainer lo instala al crearse. Software libre (LGPL / GPL).
 
 **Alternativas descartadas**:
+- pydub: añade una dependencia que solo envuelve ffmpeg y no permite fijar un tiempo máximo.
 - soundfile + librosa: soundfile no lee mp3 sin libsndfile; librosa añade dependencias pesadas para
   un paso que solo necesita remuestrear y convertir a mono.
 

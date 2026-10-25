@@ -56,5 +56,6 @@ Dos ejecuciones seguidas dan exactamente la misma tabla (semilla fija).
 
 ## 6. Medir el tiempo (M-09)
 
-Procesar 3 audios completos en GPU y cronometrar. **Esperado**: menos de 15 min de proceso por hora
-de audio (RNF-01).
+Procesar 3 audios completos en GPU con `backend/scripts/analizar_audio.py`, que guarda solo el
+tiempo de cada uno en `<audio>.tiempo.json`. La tabla del apartado 5 publica la mediana.
+**Esperado**: menos de 15 min de proceso por hora de audio (RNF-01).

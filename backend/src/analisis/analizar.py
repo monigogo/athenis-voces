@@ -1,7 +1,7 @@
 """Junta todo el análisis en una sola función: EntradaAnalisis -> Resultado (Pasos.analizar).
 
-Sustituye al falso del análisis. La entrada no trae el identificador del análisis: aquí se deja uno
-provisional y el pipeline pone el de verdad.
+La entrada no trae el identificador del análisis: aquí se deja uno provisional y el pipeline pone
+el de verdad.
 """
 
 from analisis import indices, interrupciones, participacion, posicion

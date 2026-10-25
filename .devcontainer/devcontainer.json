@@ -4,6 +4,7 @@
   "features": {
     "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {}
   },
+  "postCreateCommand": "sudo apt-get update; sudo apt-get install -y --no-install-recommends ffmpeg",
   "containerEnv": {
     "UV_SYSTEM_PYTHON": "1",
     "UV_PYTHON_PREFERENCE": "only-system",
