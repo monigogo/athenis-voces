@@ -12,7 +12,10 @@ Convención de mock:
   - Un segmento es (inicio, fin, etiqueta_hablante) en segundos.
 """
 
+import sys
+import types
 import wave
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -43,17 +46,27 @@ class _Segment:
         self.end = end
 
 
-def _anotacion_pyannote(segmentos: list[tuple[float, float, str]]) -> Any:
-    """Construye un objeto anotación falso que itera como pyannote lo hace.
+class _Anotacion:
+    """Falso de pyannote.core.Annotation: los tramos solo salen con itertracks()."""
 
-    pyannote devuelve un objeto iterable de (Segment, track, label).
-    """
-    items = [(_Segment(ini, fin), "A", etiq) for ini, fin, etiq in segmentos]
-    mock = MagicMock()
-    mock.__iter__ = MagicMock(return_value=iter(items))
-    # get_timeline().support() se usa en la detección de solapamientos
-    mock.get_timeline.return_value = MagicMock(support=MagicMock(return_value=mock))
-    return mock
+    def __init__(self, segmentos: list[tuple[float, float, str]]) -> None:
+        self._items = [(_Segment(ini, fin), "A", etiq) for ini, fin, etiq in segmentos]
+
+    def itertracks(self, yield_label: bool = False) -> Any:
+        assert yield_label, "hace falta yield_label=True para saber quién habla"
+        return iter(self._items)
+
+
+class _DiarizeOutput:
+    """Falso de lo que devuelve community-1 en pyannote 4: la anotación va dentro."""
+
+    def __init__(self, anotacion: _Anotacion) -> None:
+        self.speaker_diarization = anotacion
+
+
+def _anotacion_pyannote(segmentos: list[tuple[float, float, str]]) -> Any:
+    """Lo que devuelve el pipeline de pyannote 4.0.7 con speaker-diarization-community-1."""
+    return _DiarizeOutput(_Anotacion(segmentos))
 
 
 def _pipeline_ok(segmentos: list[tuple[float, float, str]]) -> MagicMock:
@@ -316,3 +329,144 @@ def test_diarizar_no_devuelve_embeddings(tmp_path: Path) -> None:
     campos = set(Turno.model_fields.keys())
     assert "embedding" not in campos
     assert "huella" not in campos
+
+
+# ---------------------------------------------------------------------------
+# pyannote 4 también puede devolver la anotación sin envolver
+# ---------------------------------------------------------------------------
+
+
+def test_diarizar_acepta_una_anotacion_sin_envolver(tmp_path: Path) -> None:
+    """apply() de pyannote 4 devuelve DiarizeOutput o Annotation: se aceptan los dos."""
+    from audio.diarizacion import diarizar
+
+    wav = tmp_path / "audio.wav"
+    _crear_wav(wav, duracion_s=5.0)
+
+    pipeline = _pipeline_ok([])
+    pipeline.return_value = _Anotacion([(0.0, 2.0, "SPEAKER_00"), (2.5, 4.5, "SPEAKER_01")])
+    with patch(_PATCH_PIPELINE, return_value=pipeline):
+        turnos, _ = diarizar(wav)
+
+    assert len(turnos) == 2
+
+
+# ---------------------------------------------------------------------------
+# Carga del modelo con la API real de pyannote 4.0.7
+# ---------------------------------------------------------------------------
+
+
+class _Torch(types.ModuleType):
+    """Falso de torch: solo lo que usa la carga del modelo."""
+
+    def __init__(self, hay_gpu: bool) -> None:
+        super().__init__("torch")
+        self.cuda = types.SimpleNamespace(is_available=lambda: hay_gpu)
+
+    @staticmethod
+    def device(nombre: str) -> str:
+        return f"device({nombre})"
+
+
+@pytest.fixture
+def pyannote_falso(monkeypatch: pytest.MonkeyPatch) -> Callable[..., MagicMock]:
+    """Sustituye pyannote.audio y torch por falsos y devuelve el pipeline cargado."""
+
+    def instalar(hay_gpu: bool = False) -> MagicMock:
+        pipeline = MagicMock()
+        modulo = types.ModuleType("pyannote.audio")
+        modulo.Pipeline = MagicMock()  # type: ignore[attr-defined]
+        modulo.Pipeline.from_pretrained.return_value = pipeline  # type: ignore[attr-defined]
+        monkeypatch.setitem(sys.modules, "pyannote.audio", modulo)
+        monkeypatch.setitem(sys.modules, "torch", _Torch(hay_gpu))
+        return modulo.Pipeline.from_pretrained  # type: ignore[attr-defined]
+
+    return instalar
+
+
+def test_carga_el_modelo_con_token(
+    pyannote_falso: Callable[..., MagicMock], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """pyannote 4.0.7 ya no acepta use_auth_token: el parámetro se llama token."""
+    from audio.diarizacion import _cargar_pipeline
+
+    monkeypatch.setenv("HF_TOKEN", "hf_prueba")
+    monkeypatch.delenv("DISPOSITIVO", raising=False)
+    from_pretrained = pyannote_falso()
+    _cargar_pipeline()
+
+    from_pretrained.assert_called_once_with(
+        "pyannote/speaker-diarization-community-1", token="hf_prueba"
+    )
+
+
+@pytest.mark.parametrize(
+    ("valor", "hay_gpu", "esperado"),
+    [
+        (None, True, "cuda"),  # por defecto, auto: la GPU si la hay
+        (None, False, "cpu"),  # y si no, la CPU (FR-011, RNF-20)
+        ("auto", True, "cuda"),
+        ("cpu", True, "cpu"),  # se puede forzar la CPU aunque haya GPU
+        ("cuda", True, "cuda"),
+        (" CUDA ", True, "cuda"),
+    ],
+)
+def test_elegir_dispositivo(valor: str | None, hay_gpu: bool, esperado: str) -> None:
+    from audio.diarizacion import elegir_dispositivo
+
+    assert elegir_dispositivo(valor, hay_gpu) == esperado
+
+
+def test_pedir_gpu_sin_gpu_da_un_error_claro() -> None:
+    """Sin pasar a la CPU en silencio: se mediría otra cosa (RNF-01)."""
+    from audio.diarizacion import elegir_dispositivo
+
+    with pytest.raises(RuntimeError, match="no hay GPU"):
+        elegir_dispositivo("cuda", hay_gpu=False)
+
+
+def test_dispositivo_desconocido_dice_las_opciones() -> None:
+    from audio.diarizacion import elegir_dispositivo
+
+    with pytest.raises(ValueError, match="auto, cpu o cuda"):
+        elegir_dispositivo("gpu", hay_gpu=True)
+
+
+@pytest.mark.parametrize(("hay_gpu", "esperado"), [(True, "cuda"), (False, "cpu")])
+def test_el_modelo_va_al_dispositivo_elegido(
+    pyannote_falso: Callable[..., MagicMock],
+    monkeypatch: pytest.MonkeyPatch,
+    hay_gpu: bool,
+    esperado: str,
+) -> None:
+    from audio.diarizacion import _cargar_pipeline
+
+    monkeypatch.delenv("DISPOSITIVO", raising=False)
+    pyannote_falso(hay_gpu=hay_gpu)
+    pipeline = _cargar_pipeline()
+
+    pipeline.to.assert_called_once_with(f"device({esperado})")
+
+
+def test_la_variable_dispositivo_manda(
+    pyannote_falso: Callable[..., MagicMock], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from audio.diarizacion import _cargar_pipeline
+
+    monkeypatch.setenv("DISPOSITIVO", "cpu")
+    pyannote_falso(hay_gpu=True)
+    pipeline = _cargar_pipeline()
+
+    pipeline.to.assert_called_once_with("device(cpu)")
+
+
+def test_dispositivo_mal_escrito_falla_antes_de_descargar_el_modelo(
+    pyannote_falso: Callable[..., MagicMock], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from audio.diarizacion import _cargar_pipeline
+
+    monkeypatch.setenv("DISPOSITIVO", "gpu")
+    from_pretrained = pyannote_falso(hay_gpu=True)
+    with pytest.raises(ValueError, match="auto, cpu o cuda"):
+        _cargar_pipeline()
+    from_pretrained.assert_not_called()
