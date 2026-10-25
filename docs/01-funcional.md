@@ -169,7 +169,7 @@ Contar minutos no basta: una mujer puede hablar mucho y aun así no abrir ni cer
 | S1 | La demo es en español; la evaluación usa también reuniones en inglés del corpus AMI | Confirmado por el equipo el 24 oct 2026 |
 | S2 | Hay audios con licencia suficiente para desarrollar, evaluar y enseñar en la demo | Inventario en docs/datos.md (tarea A09) |
 | S3 | El token de AI Endpoints aguanta el uso de los agentes de programación | Medir el consumo real el sábado 24 |
-| S4 | La GPU de Monica, o de reserva la V100S con PyTorch para CUDA 12.6, ejecuta pyannote en los audios largos | Prueba el domingo 25 (tarea B13) |
+| S4 | La GPU de Monica, o de reserva la V100S con PyTorch para CUDA 12.6, ejecuta pyannote en los audios largos | Probado el 25 oct 2026 (B13): funciona con PyTorch 2.11.0 para CUDA 12.6; con la 2.14.1 falla (C6, R3) |
 | S5 | Una persona confirma las voces de un episodio en menos de 2 minutos | Prueba de usabilidad (RNF-15) |
 
 Un supuesto que falla se convierte en riesgo (sección 4.2) y se anota en el anexo C.
@@ -191,7 +191,7 @@ Las restricciones duras son el plazo, el código abierto y la normativa. El ries
 | C3 | Todo el software, de código abierto | E | Inventario automático de licencias |
 | C4 | LLM agnóstico y compatible con modelos abiertos, si se usan | B | No aplica: el sistema no usa LLM |
 | C5 | Backend con uv y frontend con pnpm | E | Dos gestores separados, sin mezclarlos |
-| C6 | GPU V100S: sin bfloat16 y con PyTorch para CUDA 12.6 | B | Versión de PyTorch fijada si pyannote corre en la V100S |
+| C6 | GPU V100S: sin bfloat16 y con PyTorch 2.11.0 para CUDA 12.6, probado el 25 oct 2026. La 2.14.1 falla: su cuDNN 9.27 pide una GPU de capacidad 7.5 o más y la V100S tiene la 7.0 | B | Versión de PyTorch fijada a 2.11.0 en la V100S |
 | C7 | Token de AI Endpoints con límites de peticiones | B | Solo lo usan los agentes de programación |
 | C8 | Tres personas y unas 35 horas por persona, del 24 al 29 de octubre | E | Priorización MoSCoW estricta |
 | C9 | Marco ético europeo y normativa vigente | B | Secciones 4.3 y 10 |
@@ -208,7 +208,7 @@ Solo R5 y R9 combinan probabilidad e impacto altos. Revisad la posición de cada
 | --- | --- | --- | --- | --- | --- |
 | R1 | La propuesta de voz falla más con un grupo | Diferencia de error entre grupos mayor que el umbral de RNF-06 | Datos equilibrados, zona dudosa y confirmación humana | Publicar el sesgo y ampliar la zona dudosa | A |
 | R2 | El sistema encaja como alto riesgo en la Ley de IA | Análisis 4.3 o respuesta de las mentoras | Modo manual y confirmación humana; evaluación documentada | Solo modo manual en producción | A |
-| R3 | La diarización no funciona en la GPU | Error de arquitectura o «no kernel image» | En la V100S, PyTorch para CUDA 12.6, versión 2.14 o anterior | La otra GPU (la de Monica o la V100S) o fragmentos más cortos en CPU | A |
+| R3 | La diarización no funciona en la GPU | Error de arquitectura o «no kernel image» | En la V100S, PyTorch 2.11.0 para CUDA 12.6 (la 2.14.1 falla por su cuDNN) | La otra GPU (la de Monica o la V100S) o fragmentos más cortos en CPU | A |
 | R4 | Se agotan los límites del token de los agentes de programación | Respuestas 429 o vacías | Un modelo solo para los agentes; la aplicación no hace llamadas | Programar sin agente mientras se recupera | B |
 | R5 | Los solapamientos se detectan mal y se subestiman las interrupciones | Exhaustividad baja en desarrollo | Motor con detección de solapamiento; ajuste en desarrollo | Declarar el límite y mostrar casos para revisar | B |
 | R6 | Retirado en la v0.2: el sistema no usa LLM | — | — | — | — |
