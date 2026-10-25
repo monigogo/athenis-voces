@@ -49,10 +49,11 @@ Solo «con éxito» e «intento» cuentan como interrupción (RN-07).
 
 | Entidad | Campos | Origen |
 |---------|--------|--------|
-| `Reunion` | nombre, DER (M-01), error del % femenino (M-04), ablación, si la confirmación fue ideal | `evaluacion/evaluar.py` |
+| `Reunion` | nombre, DER (M-01), error del % femenino (M-04), ablación, si la confirmación fue ideal y, por voz, el sexo en AMI y la propuesta del modelo (M-02, M-03) | `evaluacion/evaluar.py` |
 | `Grabacion` | nombre, detección del sistema (M-05), línea base y kappa (M-08) | `evaluacion/evaluar.py` |
 | `Deteccion` | verdaderos, falsos, precisión, exhaustividad, F1 | `evaluacion/metricas.py` |
 | `Der` | segundos con error y segundos de voz (el DER es su cociente) | `evaluacion/metricas.py` |
+| Tiempo | duración del audio y segundos del proceso, en `<audio>.tiempo.json` (M-09) | `evaluacion/cronometrar.py` |
 
 Cada resultado indica su n (episodios y minutos) y su intervalo de confianza del 95 % por bootstrap
 (FR-017).
