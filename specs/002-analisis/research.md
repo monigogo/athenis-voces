@@ -61,14 +61,20 @@ Sus segundos sí cuentan como tiempo de habla.
 - F1 de interrupciones (M-05): emparejamiento uno a uno, de los instantes más cercanos a los más
   lejanos, con tolerancia de ± 1 s.
 - Kappa de Cohen (M-08): propia. Empareja los eventos de A y C (± 1 s) y compara el tipo que puso cada una; si solo una marcó un evento, la otra cuenta como «ninguno».
-- Intervalos de confianza: bootstrap con semilla fija (1000 remuestreos), remuestreando reuniones
-  enteras y no filas sueltas.
+- Voz (M-02 y M-03): propias, por hablante. Cada voz que etiquetó el modelo se compara con el sexo
+  registrado en AMI de la persona con la que más coincide. «Indeterminado» cuenta como fallo (D-19).
+  M-02 es la media del acierto de cada grupo; M-03, el error de cada grupo y su diferencia en puntos.
+- Tiempo (M-09): `analizar_audio.py` guarda la duración del audio y los segundos del proceso en
+  `<audio>.tiempo.json`; la tabla publica la mediana (RNF-01).
+- Intervalos de confianza: bootstrap con semilla fija (1000 remuestreos), remuestreando audios
+  enteros y no filas sueltas; en la voz, la unidad es el hablante (11.3).
 
 **Justificación**: pyannote-metrics es la implementación de referencia del DER. El resto son pocas
 líneas y se prueban a mano. La semilla fija hace que la tabla sea reproducible (11.4, RNF-07).
 
 **Alternativas descartadas**:
-- scikit-learn para la kappa: una dependencia pesada para una fórmula de cinco líneas.
+- scikit-learn para la kappa y la exactitud equilibrada: una dependencia pesada para fórmulas de
+  pocas líneas. El funcional lo cita para M-02, pero el cálculo es el mismo.
 
 ---
 
