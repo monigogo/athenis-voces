@@ -66,8 +66,8 @@ Para que una persona confirme o corrija la propuesta escuchando, el sistema elig
 
 **Escenarios de aceptación**:
 
-1. **Dado** un hablante presente (10 s o más de habla y 3 tramos de 3 s o más sin solapamiento, RN-01 [VALIDAR]), **cuando** se generan los fragmentos, **entonces** hay al menos 3, cada uno de 3 a 5 s (RF-07).
-2. **Dado** un hablante con 10 s o más de habla que no tiene 3 tramos de 3 s o más sin solapamiento, **cuando** se generan los fragmentos, **entonces** no es una voz presente: no pasa a confirmación y su tiempo se muestra aparte como voz corta (D-18).
+1. **Dado** un hablante presente (10 s o más de habla y sitio para 3 trozos de 3 a 5 s sin solapamiento, partiendo los tramos largos si hace falta, RN-01 [VALIDAR]), **cuando** se generan los fragmentos, **entonces** hay al menos 3, cada uno de 3 a 5 s (RF-07).
+2. **Dado** un hablante con 10 s o más de habla que no tiene sitio para 3 trozos de 3 a 5 s sin solapamiento, ni partiendo los tramos largos, **cuando** se generan los fragmentos, **entonces** no es una voz presente: no pasa a confirmación y su tiempo se muestra aparte como voz corta (D-18).
 
 ---
 
