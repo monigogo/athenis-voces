@@ -66,6 +66,24 @@ def entrada_de_referencia(
     for codigo, inicio, fin in tramos:
         segundos[codigo] += fin - inicio
 
+    etiquetas = [
+        EtiquetaConfirmada(
+            hablante=numero[codigo], etiqueta=SEXO[codigo[0]], origen=OrigenEtiqueta.PERSONA
+        )
+        for codigo in codigos
+        if segundos[codigo] >= config.presencia_desde_segundos
+    ]
+    entrada = EntradaAnalisis(
+        duracion=max(t.fin for t in turnos),
+        turnos=turnos,
+        solapamientos=solapamientos_de(turnos),
+        etiquetas=etiquetas,
+    )
+    return entrada, {n: codigo for codigo, n in numero.items()}
+
+
+def solapamientos_de(turnos: list[Turno]) -> list[Solapamiento]:
+    """Tramos en los que se pisan dos hablantes, de turnos ordenados por inicio."""
     solapamientos = []
     for k, a in enumerate(turnos):
         for b in turnos[k + 1 :]:
@@ -79,21 +97,7 @@ def entrada_de_referencia(
                         fin=round(min(a.fin, b.fin), 3),
                     )
                 )
-
-    etiquetas = [
-        EtiquetaConfirmada(
-            hablante=numero[codigo], etiqueta=SEXO[codigo[0]], origen=OrigenEtiqueta.PERSONA
-        )
-        for codigo in codigos
-        if segundos[codigo] >= config.presencia_desde_segundos
-    ]
-    entrada = EntradaAnalisis(
-        duracion=max(t.fin for t in turnos),
-        turnos=turnos,
-        solapamientos=solapamientos,
-        etiquetas=etiquetas,
-    )
-    return entrada, {n: codigo for codigo, n in numero.items()}
+    return solapamientos
 
 
 def leer_resultado(ruta: Path) -> Resultado:
