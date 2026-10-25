@@ -41,7 +41,7 @@ def diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]:
 
 **Postcondiciones**:
 - Todos los `Turno` y `Solapamiento` son instancias válidas de `contrato.py`.
-- Solo se incluyen solapamientos con duración ≥ `config.solapamiento_registro_desde_segundos` (0,5 s).
+- Se incluyen todos los solapamientos detectados, sin filtrar por duración (el filtro de 0,3 s es de la persona B).
 - Los hablantes se numeran desde 1 (`Hablante n`); nunca se identifica a nadie.
 - Si el audio no tiene ninguna voz, o solo una, lanza excepción con el motivo.
 - Lanza cualquier excepción ante fallo técnico; el pipeline la captura.
