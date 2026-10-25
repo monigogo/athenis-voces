@@ -17,8 +17,8 @@
 
 **Propósito**: crear la estructura de carpetas e instalar las dependencias nuevas.
 
-- [ ] T001 Crear `backend/src/audio/__init__.py` y `backend/src/voz/__init__.py` (nuevos paquetes)
-- [ ] T002 Añadir `pyannote.audio` e `inaSpeechSegmenter` al grupo `audio` en `[dependency-groups]` de `backend/pyproject.toml` (no a las dependencias base ni al grupo `dev`); ejecutar `uv lock` y, para usar los modelos, `uv sync --group audio`
+- [X] T001 Crear `backend/src/audio/__init__.py` y `backend/src/voz/__init__.py` (nuevos paquetes)
+- [X] T002 Añadir `pyannote.audio` e `inaSpeechSegmenter` al grupo `audio` en `[dependency-groups]` de `backend/pyproject.toml` (no a las dependencias base ni al grupo `dev`); ejecutar `uv lock` y, para usar los modelos, `uv sync --group audio`
 
 ---
 
@@ -41,7 +41,7 @@
 
 ### Tests — Historia 1 (escribir primero; deben fallar)
 
-- [ ] T005 [US1] Escribir `backend/tests/test_preparar.py` con los siguientes casos (deben fallar antes de implementar):
+- [X] T005 [US1] Escribir `backend/tests/test_preparar.py` con los siguientes casos (deben fallar antes de implementar):
   - **Con ffmpeg real** (`@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg no disponible")`): generar un WAV sintético de 2 s con el módulo `wave` (o con ffmpeg: `ffmpeg -f lavfi -i sine=frequency=440:duration=2 sintético.wav`), llamar a `preparar()` y comprobar con `wave.open` que el resultado es mono (1 canal), 16 000 Hz y duración ± 0,1 s (SC-001, RF-03)
   - **Con mock de `subprocess.run`**: formato no admitido (p. ej. `.xyz`) → `subprocess.run` lanza `FileNotFoundError` o devuelve `returncode != 0` → `preparar()` lanza excepción con mensaje claro (FR-008)
   - **Con mock de `subprocess.run`**: `subprocess.run` lanza `subprocess.TimeoutExpired` → `preparar()` lanza excepción
@@ -56,7 +56,7 @@
 
 ### Implementación — Historia 1
 
-- [ ] T007 [US1] Implementar `backend/src/audio/preparar.py`: función `preparar(audio: Path, destino: Path) -> float` que convierte a WAV mono `config.frecuencia_muestreo` Hz llamando a ffmpeg con `subprocess.run` (sin `shell=True`, con `timeout`); calcula la duración leyendo el WAV resultante con `wave.open` (`nframes / framerate`); lanza excepción ante error (firma: contracts/pipeline-pasos.md)
+- [X] T007 [US1] Implementar `backend/src/audio/preparar.py`: función `preparar(audio: Path, destino: Path) -> float` que convierte a WAV mono `config.frecuencia_muestreo` Hz llamando a ffmpeg con `subprocess.run` (sin `shell=True`, con `timeout`); calcula la duración leyendo el WAV resultante con `wave.open` (`nframes / framerate`); lanza excepción ante error (firma: contracts/pipeline-pasos.md)
 - [ ] T008 [US1] Implementar `backend/src/audio/diarizacion.py`: función `diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]` con pyannote `speaker-diarization-community-1`; devuelve todos los solapamientos detectados sin filtrar por duración; numera hablantes desde 1; lanza excepción si < 2 hablantes (firma: contracts/pipeline-pasos.md)
 
 **Checkpoint**: Historia 1 completa y testeable de forma independiente. Ejecutar `quickstart.md` secciones 3 y 4.
