@@ -38,6 +38,9 @@ RAIZ = Path(__file__).resolve().parents[3]
 AMI = RAIZ / "datos" / "ami" / "anotaciones_but" / "only_words" / "rttms" / "test"
 ETIQUETAS = RAIZ / "evaluacion" / "etiquetas"
 REFERENCIA = "_referencia.txt"
+# Audios anotados solo en parte: segundo en que acaba la anotación (guía de anotación, apartado 2).
+# Lo que el sistema detecta después no se compara, porque nadie lo ha anotado.
+ANOTADO_HASTA = {"EN2002a": 300.0}
 
 
 @dataclass(frozen=True)
@@ -163,6 +166,10 @@ def evaluar_ami(
     return evaluadas
 
 
+def _antes_de(hasta: float, instantes: list[float]) -> list[float]:
+    return [x for x in instantes if x < hasta]
+
+
 def evaluar_grabaciones(carpeta_etiquetas: Path, salidas: Path) -> list[Grabacion]:
     evaluadas = []
     for ruta in sorted(carpeta_etiquetas.glob(f"*{REFERENCIA}")):
@@ -171,7 +178,8 @@ def evaluar_grabaciones(carpeta_etiquetas: Path, salidas: Path) -> list[Grabacio
         if not json.exists():
             continue
         sistema = lectura.leer_resultado(json)
-        referencia = [a.inicio for a in lectura.leer_etiquetas(ruta) if a.cuenta]
+        hasta = ANOTADO_HASTA.get(nombre, float("inf"))
+        referencia = _antes_de(hasta, [a.inicio for a in lectura.leer_etiquetas(ruta) if a.cuenta])
         a, c = (carpeta_etiquetas / f"{nombre}_{x}.txt" for x in ("A", "C"))
         kappa = (
             metricas.kappa_entre_anotadoras(lectura.leer_etiquetas(a), lectura.leer_etiquetas(c))
@@ -181,9 +189,10 @@ def evaluar_grabaciones(carpeta_etiquetas: Path, salidas: Path) -> list[Grabacio
         evaluadas.append(
             Grabacion(
                 nombre=nombre,
-                sistema=metricas.deteccion(inicios(sistema), referencia),
+                sistema=metricas.deteccion(_antes_de(hasta, inicios(sistema)), referencia),
                 linea_base=metricas.deteccion(
-                    metricas.linea_base(entrada_del_resultado(sistema)), referencia
+                    _antes_de(hasta, metricas.linea_base(entrada_del_resultado(sistema))),
+                    referencia,
                 ),
                 kappa=kappa,
             )
