@@ -154,6 +154,31 @@ def test_grabacion_anotada(carpetas):
     assert grabacion.kappa == 1.0  # M-08
 
 
+def test_en2002a_solo_esta_anotada_hasta_el_minuto_5():  # guía de anotación, apartado 2
+    assert evaluar.ANOTADO_HASTA == {"EN2002a": 300.0}
+
+
+def test_solo_se_compara_la_parte_anotada_del_audio(carpetas, monkeypatch):
+    """Lo que el sistema detecta después de donde acaba la anotación no cuenta como fallo."""
+    _, salidas, etiquetas = carpetas
+    resultado = cargar_ejemplo("muchas_interrupciones")
+    escribir_resultado(salidas / "grabacion1.json", resultado)
+    todas = evaluar.inicios(resultado)
+    assert len(todas) >= 2
+    hasta = (todas[0] + todas[1]) / 2  # solo la primera interrupción queda en la parte anotada
+    monkeypatch.setattr(evaluar, "ANOTADO_HASTA", {"grabacion1": hasta})
+    escribir_etiquetas(
+        etiquetas / "grabacion1_referencia.txt",
+        [lectura.Anotacion(todas[0], todas[0] + 1.0, "intento")],
+    )
+
+    (grabacion,) = evaluar.evaluar_grabaciones(etiquetas, salidas)
+    assert grabacion.sistema == metricas.Deteccion(verdaderos=1, falsos=0, perdidos=0)
+    base = metricas.linea_base(evaluar.entrada_del_resultado(resultado))
+    esperada = metricas.deteccion([x for x in base if x < hasta], [todas[0]])
+    assert grabacion.linea_base == esperada
+
+
 def test_sin_la_otra_anotadora_la_kappa_no_se_aplica(carpetas):
     _, salidas, etiquetas = carpetas
     escribir_resultado(salidas / "g.json", cargar_ejemplo("con_voces_femeninas"))
