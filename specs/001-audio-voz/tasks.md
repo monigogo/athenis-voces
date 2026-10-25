@@ -128,14 +128,14 @@
 
 ### Tests — Historia 4 (escribir primero; deben fallar si el clasificador se llama)
 
-- [ ] T013 [US4] Añadir casos de modo manual a `backend/tests/test_pipeline.py`:
+- [X] T013 [US4] Añadir casos de modo manual a `backend/tests/test_pipeline.py`:
   - `modo_manual=True` → `proponer_voz` no se ejecuta (SC-005, FR-007); usar mock para verificar 0 llamadas
   - `modo_manual=True` → todos los hablantes en `HablantesParaConfirmar` tienen `propuesta=None` (RF-08)
   - `modo_manual=False` (por defecto) → `proponen_voz` sí se ejecuta
 
 ### Implementación — Historia 4
 
-- [ ] T014 [US4] Verificar en `backend/src/pipeline.py` que `modo_manual=False` es el valor por defecto de `preparar_para_confirmar` y que el bloque condicional existente es correcto con los módulos reales; ajustar si algún test de T013 falla por razones distintas a la lógica del clasificador
+- [X] T014 [US4] Verificar en `backend/src/pipeline.py` que `modo_manual=False` es el valor por defecto de `preparar_para_confirmar` y que el bloque condicional existente es correcto con los módulos reales; ajustar si algún test de T013 falla por razones distintas a la lógica del clasificador
 
 **Checkpoint**: Historia 4 completa. Ejecutar `quickstart.md` sección 7.
 
@@ -145,12 +145,12 @@
 
 **Propósito**: integración completa del pipeline con los módulos reales y validación end-to-end.
 
-- [ ] T015 [P] Añadir `backend/tests/test_pipeline_integracion.py`: prueba que `preparar_para_confirmar` con los cuatro módulos reales (no falsos) procesa `IB4002_fragmento_5min.mp3` y devuelve `HablantesParaConfirmar` válido; marcar con `@pytest.mark.slow` para excluirlo de la CI rápida; la CI ejecuta `uv run pytest tests/ -m "not slow"` (sin instalar el grupo `audio`); los tests slow se ejecutan localmente con `uv sync --group audio && uv run pytest tests/ -m slow`
+- [X] T015 [P] Añadir `backend/tests/test_pipeline_integracion.py`: prueba que `preparar_para_confirmar` con los cuatro módulos reales (no falsos) procesa `IB4002_fragmento_5min.mp3` y devuelve `HablantesParaConfirmar` válido; marcar con `@pytest.mark.slow` para excluirlo de la CI rápida; la CI ejecuta `uv run pytest tests/ -m "not slow"` (sin instalar el grupo `audio`); los tests slow se ejecutan localmente con `uv sync --group audio && uv run pytest tests/ -m slow`
 - [ ] T016 Ejecutar la validación completa de `quickstart.md` sección 8 y confirmar que todos los tests pasan
-- [ ] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
-- [ ] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
+- [X] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
+- [X] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
 - [X] T019 [US1] Escribir test y añadir `backend/scripts/analizar_audio.py`: recibe un audio y una carpeta de salida por argumento (CLI); rechaza rutas de salida dentro del repositorio (RD-04); ejecuta `preparar` y `diarizar`; escribe `<nombre>.rttm` con líneas `SPEAKER <nombre> 1 <inicio> <duración> <NA> <NA> <hablante> <NA> <NA>`, donde `<hablante>` es `hablante_1`, `hablante_2`, … (sin espacios, porque `evaluacion/evaluar.py` separa por espacios y lee el campo 8); depende de T008; test primero
-- [ ] T020 [US1] Ampliar `backend/scripts/analizar_audio.py` para ejecutar el pipeline completo y escribir `<nombre>.json` con el formato de `Resultado`; en este comando de evaluación las voces se confirman automáticamente con la propuesta del modelo; depende de T010, T012 y de la respuesta de Mónica sobre la confirmación automática
+- [X] T020 [US1] Ampliar `backend/scripts/analizar_audio.py` para ejecutar el pipeline completo y escribir `<nombre>.json` con el formato de `Resultado`; en este comando de evaluación las voces se confirman automáticamente con la propuesta del modelo; depende de T010, T012 y de la respuesta de Mónica sobre la confirmación automática
 
 ---
 

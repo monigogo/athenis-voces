@@ -14,8 +14,11 @@ dev = [
     "ruff>=0.6",
 ]
 audio = [
-    "pyannote.audio",
-    "inaSpeechSegmenter",
+    "pyannote.audio>=4.0",  # el código usa la API de la 4: token= y speaker_diarization
+    "inaSpeechSegmenter>=0.8",
+    # La V100S de OVH tiene capacidad 7.0: la 2.14.1 falla por su cuDNN (C6, R3)
+    "torch==2.11.0",
+    "torchaudio==2.11.0",
 ]
 evaluacion = [
     "pyannote-metrics>=4.2.0",
@@ -23,6 +26,15 @@ evaluacion = [
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
