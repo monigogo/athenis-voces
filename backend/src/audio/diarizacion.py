@@ -7,7 +7,8 @@ Restricciones:
 - El import de pyannote.audio está dentro de _cargar_pipeline(), no al inicio
   del módulo, para no requerir el grupo «audio» en la CI rápida.
 - HF_TOKEN se lee del entorno; nunca se registra en logs ni en mensajes de error.
-- Funciona en CPU (FR-011); no requiere GPU.
+- Usa la GPU si la hay y, si no, la CPU (FR-011, SC-007). La variable de entorno
+  DISPOSITIVO (auto, cpu o cuda) lo fuerza; por defecto, auto.
 - No devuelve ni almacena embeddings ni huellas de voz (RD-04).
 - Con cero o un hablante devuelve los turnos detectados sin lanzar excepción;
   el error por pocas voces lo gestiona el pipeline (D-17, voces_presentes_minimas).
@@ -22,12 +23,34 @@ from typing import Any
 from contrato import Solapamiento, Turno
 
 # ---------------------------------------------------------------------------
+# Dispositivo: GPU o CPU
+# ---------------------------------------------------------------------------
+
+DISPOSITIVOS = ("auto", "cpu", "cuda")
+
+
+def elegir_dispositivo(valor: str | None, hay_gpu: bool) -> str:
+    """«cuda» o «cpu» según DISPOSITIVO; con «auto» (o sin valor), la GPU si la hay.
+
+    Pedir «cuda» sin GPU es un error: pasar a la CPU en silencio haría medir otra cosa (RNF-01).
+    """
+    pedido = (valor or "auto").strip().lower()
+    if pedido not in DISPOSITIVOS:
+        raise ValueError(f"DISPOSITIVO={valor!r} no es válido; usa auto, cpu o cuda")
+    if pedido == "auto":
+        return "cuda" if hay_gpu else "cpu"
+    if pedido == "cuda" and not hay_gpu:
+        raise RuntimeError("DISPOSITIVO=cuda, pero no hay GPU disponible; usa auto o cpu")
+    return pedido
+
+
+# ---------------------------------------------------------------------------
 # Carga del modelo (aislada para facilitar el mock en tests)
 # ---------------------------------------------------------------------------
 
 
 def _cargar_pipeline() -> Any:
-    """Carga Pipeline de pyannote y la configura para CPU.
+    """Carga Pipeline de pyannote y la lleva a la GPU o a la CPU (elegir_dispositivo).
 
     Separada de diarizar() para que los tests puedan parchearla directamente.
     Lanza excepción descriptiva si el modelo no está disponible o falta HF_TOKEN,
@@ -40,11 +63,16 @@ def _cargar_pipeline() -> Any:
             "pyannote.audio no está instalado. Ejecuta: uv sync --group audio"
         ) from exc
 
+    import torch  # type: ignore[import-untyped]
+
+    # Antes de descargar el modelo, para que un DISPOSITIVO mal escrito falle al momento
+    dispositivo = elegir_dispositivo(os.environ.get("DISPOSITIVO"), torch.cuda.is_available())
+
     token = os.environ.get("HF_TOKEN")
     try:
         pipeline = Pipeline.from_pretrained(
             "pyannote/speaker-diarization-community-1",
-            use_auth_token=token,
+            token=token,  # pyannote 4 ya no acepta use_auth_token
         )
     except Exception as exc:
         # No incluimos el valor del token en el mensaje (RD-04)
@@ -54,10 +82,7 @@ def _cargar_pipeline() -> Any:
             f"Motivo técnico: {type(exc).__name__}"
         ) from exc
 
-    # Forzar CPU (FR-011)
-    import torch  # type: ignore[import-untyped]
-
-    pipeline.to(torch.device("cpu"))
+    pipeline.to(torch.device(dispositivo))
     return pipeline
 
 
@@ -77,13 +102,15 @@ def diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]:
     pipeline (D-17, voces_presentes_minimas).
     """
     pipeline = _cargar_pipeline()
-    anotacion = pipeline(str(wav))
+    salida = pipeline(str(wav))
+    # community-1 devuelve un DiarizeOutput con la anotación dentro; otros pipelines, la anotación
+    anotacion = getattr(salida, "speaker_diarization", salida)
 
     # -----------------------------------------------------------------------
     # Construir segmentos brutos: (inicio, fin, etiqueta_pyannote)
     # -----------------------------------------------------------------------
     segmentos: list[tuple[float, float, str]] = []
-    for segmento, _track, etiqueta in anotacion:
+    for segmento, _track, etiqueta in anotacion.itertracks(yield_label=True):
         inicio = float(segmento.start)
         fin = float(segmento.end)
         if fin <= inicio:  # descarta tramos de duración cero o negativos
