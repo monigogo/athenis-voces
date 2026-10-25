@@ -8,21 +8,14 @@ persona, las señales de escucha no cuentan como turno (D-14) y los 2 s de «con
 desde que B empieza a hablar.
 """
 
-from pathlib import Path
-
 import pytest
+from ayudas import ESCENARIOS
+from ayudas import cargar_ejemplo as cargar
 
 import contrato as c
 
-CARPETA = Path(__file__).parent / "ejemplos"
-ESCENARIOS = ["con_voces_femeninas", "sin_voces_femeninas", "muchas_interrupciones"]
 DIEZ_MINUTOS = 600.0
 FEM, MASC = c.EtiquetaVoz.FEMENINO, c.EtiquetaVoz.MASCULINO
-
-
-def cargar(nombre):
-    texto = (CARPETA / f"{nombre}.json").read_text(encoding="utf-8")
-    return c.Resultado.model_validate_json(texto)
 
 
 @pytest.fixture(params=ESCENARIOS)

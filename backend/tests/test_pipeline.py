@@ -21,9 +21,10 @@ PROPUESTAS = {
     2: c.PropuestaVoz(etiqueta="masculino", confianza=0.8),
     3: c.PropuestaVoz(etiqueta="indeterminado", confianza=0.5),
 }
+# 3 fragmentos por voz presente (RF-07, D-18); el hablante 3 no tiene: habla solo 4 s
 FRAGMENTOS = {
-    1: [c.Fragmento(inicio=0.0, fin=3.0), c.Fragmento(inicio=5.0, fin=9.0)],
-    2: [c.Fragmento(inicio=25.0, fin=29.0)],
+    1: [c.Fragmento(inicio=i, fin=i + 3.0) for i in (0.0, 8.0, 15.0)],
+    2: [c.Fragmento(inicio=i, fin=i + 3.0) for i in (21.0, 28.0, 35.0)],
 }
 EJEMPLO = Path(__file__).parent / "ejemplos" / "con_voces_femeninas.json"
 
@@ -31,10 +32,12 @@ EJEMPLO = Path(__file__).parent / "ejemplos" / "con_voces_femeninas.json"
 class Falsos:
     """Pasos falsos que apuntan lo que se llama y con qué."""
 
-    def __init__(self, falla=None, propuestas=PROPUESTAS):
+    def __init__(self, falla=None, propuestas=PROPUESTAS, fragmentos=FRAGMENTOS, turnos=TURNOS):
         self.llamadas = []
         self.falla = falla
         self.propuestas = propuestas
+        self.fragmentos = fragmentos
+        self.turnos = turnos
         self.destino = None
         self.entrada = None
 
@@ -50,7 +53,7 @@ class Falsos:
 
     def diarizar(self, wav):
         self._anotar("diarizar")
-        return TURNOS, SOLAPAMIENTOS
+        return self.turnos, SOLAPAMIENTOS
 
     def proponer_voz(self, wav, turnos):
         self._anotar("proponer_voz")
@@ -58,7 +61,7 @@ class Falsos:
 
     def elegir_fragmentos(self, turnos, solapamientos):
         self._anotar("elegir_fragmentos")
-        return FRAGMENTOS
+        return self.fragmentos
 
     def analizar(self, entrada):
         self._anotar("analizar")
@@ -124,6 +127,28 @@ def test_solo_pasan_a_confirmar_las_voces_presentes(tmp_path):  # RN-01
     hablantes = preparado.hablantes.hablantes
     assert [h.hablante for h in hablantes] == [1, 2]
     assert [h.segundos_habla for h in hablantes] == [20.0, 20.5]
+
+
+def test_una_voz_sin_3_fragmentos_no_se_confirma_pero_se_guardan_sus_turnos(tmp_path):  # D-18
+    turnos = [*TURNOS, c.Turno(hablante=4, inicio=30.0, fin=44.0)]  # habla 14 s
+    fragmentos = {**FRAGMENTOS, 4: FRAGMENTOS[1][:2]}  # pero solo tiene 2 fragmentos
+    preparado = fase_1(tmp_path, Falsos(turnos=turnos, fragmentos=fragmentos), [])
+    assert [h.hablante for h in preparado.hablantes.hablantes] == [1, 2]
+    assert preparado.turnos == turnos  # el análisis contará su tiempo como voz corta (D-15)
+
+
+@pytest.mark.parametrize(
+    ("fragmentos", "motivo"),
+    [
+        ({1: FRAGMENTOS[1]}, "Solo se ha detectado una voz que se pueda confirmar"),
+        ({}, "No se ha detectado ninguna voz que se pueda confirmar"),
+    ],
+)
+def test_con_menos_de_dos_voces_presentes_acaba_en_error(tmp_path, fragmentos, motivo):  # D-17
+    estados = []
+    assert fase_1(tmp_path, Falsos(fragmentos=fragmentos), estados) is None
+    assert estados[-1].estado is c.Estado.ERROR
+    assert motivo in estados[-1].motivo_error
 
 
 def test_cada_voz_lleva_su_propuesta_y_sus_fragmentos(tmp_path):  # RF-06, RF-07

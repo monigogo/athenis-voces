@@ -294,7 +294,7 @@ class Resultado(Mensaje):
     duracion: float = Field(gt=0)
     voz_femenina_presente: bool  # MD-01
     primera_intervencion_femenina: Segundos | None = None  # MD-03
-    # D-15: segundos de las voces de menos de 10 s, que no cuentan como voz (RN-01)
+    # D-15 y D-18: segundos de las voces que no son presentes (RN-01); no cuentan como voz
     segundos_voces_cortas: Segundos
     grupos: list[MetricasGrupo]
     hablantes: list[MetricasHablante]

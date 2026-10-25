@@ -14,6 +14,8 @@ from dataclasses import dataclass, fields
 class Config:
     # Presencia: una voz cuenta si suma al menos 10 s (RN-01) [VALIDAR]
     presencia_desde_segundos: float = 10.0
+    # Con menos voces presentes no hay nada que comparar: el análisis acaba en «error» (D-17)
+    voces_presentes_minimas: int = 2
 
     # Propuesta de voz: dentro de la zona dudosa se propone «indeterminado» (RF-06) [VALIDAR]
     zona_dudosa_min: float = 0.35
