@@ -358,6 +358,26 @@ def test_el_informe_publica_m02_y_m03_por_hablante():  # RNF-03 y RNF-06: Must p
     assert "| 50,0 % |" in filas["| M-03, error de la voz femenina"]
     assert "| 0,0 % |" in filas["| M-03, error de la voz masculina"]
     assert "| 50,0 puntos |" in filas["| M-03, diferencia entre grupos"]
+    assert filas["| M-03, error de la voz femenina"].endswith("n = 2 |")  # n de su grupo
+    assert filas["| M-03, error de la voz masculina"].endswith("n = 2 |")
+
+
+def test_con_todas_las_voces_acertadas_el_intervalo_no_es_1_a_1():  # lo medido el 26 oct 2026
+    voces = ((F, F),) * 9 + ((M, M),) * 8
+    reunion = evaluar.Reunion("EN2002a", metricas.Der(0.0, 10.0), None, None, voces=voces)
+    filas = filas_del(evaluar.informe([reunion], []))
+    assert filas["| M-02, exactitud equilibrada de la voz"] == (
+        "| M-02, exactitud equilibrada de la voz | 1,00 | 0,78 a 1,00 | n = 17 |"
+    )
+    assert filas["| M-03, error de la voz femenina"] == (
+        "| M-03, error de la voz femenina | 0,0 % | 0,0 % a 29,9 % | n = 9 |"
+    )
+    assert filas["| M-03, error de la voz masculina"] == (
+        "| M-03, error de la voz masculina | 0,0 % | 0,0 % a 32,4 % | n = 8 |"
+    )
+    assert filas["| M-03, diferencia entre grupos"] == (
+        "| M-03, diferencia entre grupos | 0,0 puntos | 0,0 puntos a 32,4 puntos | n = 9 + 8 |"
+    )
 
 
 def test_el_informe_publica_m09_con_la_mediana():  # RNF-01: mediana de 3 audios
