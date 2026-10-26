@@ -141,10 +141,14 @@ def diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]:
     # -----------------------------------------------------------------------
     # Construir segmentos brutos: (inicio, fin, etiqueta_pyannote)
     # -----------------------------------------------------------------------
+    with wave.open(str(wav), "rb") as audio:
+        duracion = audio.getnframes() / audio.getframerate()
+
     segmentos: list[tuple[float, float, str]] = []
     for segmento, _track, etiqueta in anotacion.itertracks(yield_label=True):
         inicio = float(segmento.start)
-        fin = float(segmento.end)
+        # pyannote puede pasarse unas milésimas del final; el contrato no lo admite
+        fin = min(float(segmento.end), duracion)
         if fin <= inicio:  # descarta tramos de duración cero o negativos
             continue
         segmentos.append((inicio, fin, etiqueta))
