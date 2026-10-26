@@ -245,7 +245,7 @@ Conclusión provisional: no es una práctica prohibida, pero inferir el sexo a p
 | Etiquetas de evaluación | Seudonimizada, sin texto ni nombres | evaluacion/etiquetas | Proyecto | Sí, si la fuente lo permite |
 | Grabaciones propias del equipo | Personal (voz), con consentimiento por escrito | Ordenadores del equipo y servidor de la demo | Hasta el final del reto [DECIDIR] | No |
 | Reuniones del corpus AMI | Personal (voz) de terceros, licencia CC BY 4.0 | datos/, en local; se descargan con scripts/descargar\_datos.sh | Proyecto | No |
-| Sesión del Congreso | Personal (voz) de cargos públicos; reutilización citando la fuente [VALIDAR] | datos/, en local | Proyecto | No |
+| Sesión del Congreso | Personal (voz) de cargos públicos; reutilización citando la fuente y la fecha (Aviso legal del Congreso, comprobado el 26 oct 2026); vídeos de sesiones de uso libre; sin grabación de interpretación simultánea | datos/, en local | Proyecto | No |
 | Claves (token de Hugging Face) | Secreto | .env | — | Nunca |
 
 El sexo no es una categoría especial del art. 9 del RGPD. La voz solo lo es cuando se trata para identificar de forma unívoca, y el sistema no identifica a nadie.
@@ -563,7 +563,7 @@ Los siete requisitos de las Directrices éticas para una IA fiable, convertidos 
 
 - **Analizar:** la excepción de minería de textos y datos de la Directiva (UE) 2019/790 (arts. 3 y 4), traspuesta en España por el Real Decreto-ley 24/2021, cubre el análisis salvo que el titular se haya reservado ese uso.
 - **Mostrar no es analizar:** reproducir fragmentos en una demo pública es comunicarlos al público. En la demo, solo audios con licencia que lo permita o grabaciones propias con consentimiento.
-- **Software, modelos y datos:** atribución del modelo de diarización (licencia CC-BY-4.0) y del corpus AMI (CC BY 4.0), condiciones de reutilización del Congreso [VALIDAR] e inventario de licencias en el README (RNF-18).
+- **Software, modelos y datos:** atribución del modelo de diarización (licencia CC-BY-4.0) y del corpus AMI (CC BY 4.0), condiciones de reutilización del Congreso (Aviso legal, comprobado el 26 oct 2026; vídeos de sesiones de uso libre; sin grabación de interpretación simultánea) e inventario de licencias en el README (RNF-18).
 
 ### 10.5 Ley de IA
 
@@ -747,7 +747,7 @@ Cada criterio de evaluación tiene requisitos que lo cubren y una evidencia que 
 | D-03 | Motor de la propuesta de voz | Modelo preentrenado: inaSpeechSegmenter, con el tono medio como línea base | Clasificador propio entrenado | Elegida A: no requiere entrenar y cabe en las horas disponibles; su acierto por grupo se mide (M-02, M-03) | Decidida | 24 oct 2026 |
 | D-04 | Modo de etiquetado por defecto | Asistido | Manual | Elegida A en el MVP, con confirmación humana siempre; B por defecto en producción hasta tener la evaluación legal (4.3) | Decidida | 24 oct 2026 |
 | D-05 | Trazas del LLM | Langfuse autoalojado | Sin trazas | Elegida B: el sistema no usa LLM | Decidida | 24 oct 2026 |
-| D-06 | Licencia del proyecto | Apache-2.0 | MIT | Reconocida por OSI y FSF, compatible con las dependencias y con protección de patentes | Propuesta | — |
+| D-06 | Licencia del proyecto | Apache-2.0 | MIT | Elegida B (MIT): reconocida por OSI y FSF y compatible con las dependencias; más simple y sin cambios en el repositorio, pero sin la concesión expresa de patentes de Apache-2.0 | Decidida | 26 oct 2026 |
 | D-07 | Modelos de OVHcloud | Agentes de programación: Qwen3.8-27B | — | La aplicación no usa LLM. Licencia Apache 2.0; nombre exacto del modelo, sin modelos virtuales; ni Mistral (OVHcloud lo retira el 4 nov 2026) ni Llama (licencia no abierta) | Decidida | 24 oct 2026 |
 | D-08 | Retención del audio y subidas en la demo pública | [COMPLETAR, p. ej. 24 h] | Borrar al terminar el análisis | Poder escuchar fragmentos frente a minimizar datos | Abierta | — |
 | D-09 | Umbrales iniciales | Valores de 6.7 | — | Se fijan con la partición de desarrollo | Propuesta | — |

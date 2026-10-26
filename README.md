@@ -140,7 +140,7 @@ concreto. Es idempotente: lo que ya está bien no se vuelve a bajar.
 | [Corpus AMI](https://groups.inf.ed.ac.uk/ami/corpus/) | Audio de reuniones en inglés (Mix-Headset, WAV mono 16 kHz) | [CC BY 4.0](https://groups.inf.ed.ac.uk/ami/corpus/license.shtml) |
 | [Anotaciones de BUT](https://github.com/BUTSpeechFIT/AMI-diarization-setup) | Quién habla y cuándo en cada reunión (RTTM) | Apache-2.0 |
 | Grabaciones propias del equipo | 2 conversaciones en español, con consentimiento por escrito | Solo para este reto |
-| Sesión del Congreso | Una sesión pública, para la demo | Reutilización citando la fuente [pendiente de validar] |
+| Sesión del Congreso | Una sesión pública, para la demo | Reutilización citando la fuente y la fecha de la última actualización (Aviso legal del Congreso, comprobado el 26 oct 2026); vídeos de sesiones de uso libre; sin grabación de interpretación simultánea |
 
 Los audios nunca entran en el repositorio. Las etiquetas de interrupción anotadas por el
 equipo sí están, en `evaluacion/etiquetas/`, sin audio, texto ni nombres.

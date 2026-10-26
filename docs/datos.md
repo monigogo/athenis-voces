@@ -24,7 +24,7 @@ lo que ya está bien no se vuelve a bajar. Ocupa unos 430 MB.
 | [Corpus AMI](https://groups.inf.ed.ac.uk/ami/corpus/) | Audio de reuniones en inglés, mezcla de los micrófonos de cabeza (`Mix-Headset`), WAV mono a 16 kHz | [CC BY 4.0](https://groups.inf.ed.ac.uk/ami/corpus/license.shtml) | `datos/ami/audios/` | No |
 | [Anotaciones de BUT](https://github.com/BUTSpeechFIT/AMI-diarization-setup) | Quién habla y cuándo en cada reunión (RTTM), sacado de las anotaciones manuales de AMI 1.6.2. Usamos `only_words` | Apache-2.0 | `datos/ami/anotaciones_but/`, commit `2509d89` | No |
 | Grabaciones propias del equipo | 2 conversaciones en español, de 3 a 5 min, con consentimiento por escrito | Solo para este reto | Ordenadores del equipo | No |
-| Sesión del Congreso | Una sesión pública, para la demo | Reutilización citando la fuente [VALIDAR] | `datos/`, en local | No |
+| Sesión del Congreso | Una sesión pública, para la demo | Reutilización citando la fuente y la fecha (Aviso legal del Congreso, comprobado el 26 oct 2026); vídeos de sesiones de uso libre; sin grabación de interpretación simultánea. Citar: Congreso de los Diputados, sesión del [COMPLETAR: fecha, órgano y enlace de la sesión], Archivo Audiovisual, consultado el 26 oct 2026 | `datos/`, en local | No |
 
 Las etiquetas de interrupciones que anotan A y C sí entran en el repositorio, en
 `evaluacion/etiquetas/`: no llevan audio, ni texto, ni nombres.
