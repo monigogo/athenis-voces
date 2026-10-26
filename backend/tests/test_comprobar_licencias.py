@@ -80,3 +80,37 @@ def test_apache_no_se_confunde_por_hablar_de_danos_comerciales(mod):
         "Apache License\nVersion 2.0, January 2004\n\n" + "x\n" * 50 + "other commercial damages"
     )
     assert mod.estado("UNKNOWN", texto) == mod.ABIERTA_SEGUN_FICHERO
+
+
+# --- D-22: las librerías CUDA de NVIDIA, solo para usar la GPU que cede OVHcloud ---------------
+
+
+@pytest.mark.parametrize(
+    ("nombre", "licencia"),
+    [
+        ("nvidia-cublas-cu12", "Other/Proprietary License"),
+        ("nvidia-nccl-cu12", "LicenseRef-NVIDIA-Proprietary"),
+        ("nvidia-cusparselt-cu12", "NVIDIA Proprietary Software"),
+        ("cuda-toolkit", "UNKNOWN"),
+    ],
+)
+def test_las_librerias_cuda_estan_permitidas_por_d22(mod, nombre, licencia):
+    assert mod.estado(licencia, "", nombre) == mod.PERMITIDA
+
+
+@pytest.mark.parametrize("nombre", ["nvidia-x", "otra-cosa-cu12", "sdk-cerrado"])
+def test_la_excepcion_no_vale_para_otros_paquetes(mod, nombre):
+    assert mod.estado("NVIDIA Proprietary Software", "", nombre) == mod.NO_ABIERTA
+
+
+def test_main_no_falla_por_las_librerias_cuda_pero_las_lista(mod, tmp_path, capsys):
+    paquetes = [
+        {"Name": "pydantic", "Version": "2.0", "License": "MIT"},
+        {"Name": "nvidia-cublas-cu12", "Version": "12.6", "License": "Other/Proprietary License"},
+    ]
+    ruta = tmp_path / "licencias.json"
+    ruta.write_text(json.dumps(paquetes), encoding="utf-8")
+    assert mod.main([str(ruta)]) == 0
+    salida = capsys.readouterr().out
+    assert "| nvidia-cublas-cu12 | 12.6 | Other/Proprietary License | permitida (D-22) |" in salida
+    assert "1 de 2 paquetes con licencia cerrada permitida por D-22" in salida

@@ -178,6 +178,13 @@ El modelo de diarización de pyannote se distribuye bajo licencia **CC-BY-4.0**
 La versión de PyTorch está fijada a 2.11.0 porque la GPU V100S (capacidad 7.0) no es
 compatible con versiones posteriores debido a su cuDNN (restricción C6 del funcional).
 
+**Software de terceros no abierto: las librerías CUDA de NVIDIA.** PyTorch, TensorFlow e
+inaSpeechSegmenter instalan las librerías CUDA de NVIDIA (`nvidia-*-cu12` y `cuda-toolkit`), que
+son gratuitas pero tienen licencia privativa de NVIDIA. Solo sirven para usar la GPU que cede
+OVHcloud, y por eso entran en la excepción de la regla 4 de la constitución (decisión D-22 del
+funcional). `listar_licencias.sh` las marca como «permitida (D-22)»; cualquier otra licencia
+cerrada lo hace fallar. El código del proyecto sigue bajo licencia MIT.
+
 ---
 
 ## Ética y uso responsable
