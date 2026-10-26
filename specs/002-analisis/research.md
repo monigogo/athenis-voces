@@ -67,7 +67,9 @@ Sus segundos sí cuentan como tiempo de habla.
 - Tiempo (M-09): `analizar_audio.py` guarda la duración del audio y los segundos del proceso en
   `<audio>.tiempo.json`; la tabla publica la mediana (RNF-01).
 - Intervalos de confianza: bootstrap con semilla fija (1000 remuestreos), remuestreando audios
-  enteros y no filas sueltas; en la voz, la unidad es el hablante (11.3).
+  enteros y no filas sueltas. En la voz, la unidad es el hablante y el intervalo es de Wilson
+  (MOVER-Wilson para la exactitud equilibrada y Newcombe para la diferencia; D-21): con todas las voces
+  acertadas, el bootstrap da «1 a 1» y promete más de lo que dicen los datos.
 
 **Justificación**: pyannote-metrics es la implementación de referencia del DER. El resto son pocas
 líneas y se prueban a mano. La semilla fija hace que la tabla sea reproducible (11.4, RNF-07).
