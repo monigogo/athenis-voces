@@ -291,6 +291,31 @@ def test_diarizar_descarta_tramos_duracion_cero(tmp_path: Path) -> None:
     assert all(d > 0 for d in duraciones), "ningún turno debe tener duración 0"
 
 
+def test_diarizar_no_pasa_del_final_del_audio(tmp_path: Path) -> None:
+    """pyannote puede dar un final unas milésimas después del audio; el contrato no lo admite.
+
+    Visto en EN2002a en la V100S: sin recortar, el análisis acababa en error.
+    """
+    from audio.diarizacion import diarizar
+
+    wav = tmp_path / "audio.wav"
+    _crear_wav(wav, duracion_s=5.0)
+
+    segmentos = [
+        (0.0, 2.0, "SPEAKER_00"),
+        (3.0, 5.016, "SPEAKER_01"),  # acaba 16 ms después del final
+        (4.5, 5.03, "SPEAKER_00"),  # se pisa con el anterior también después del final
+        (5.02, 5.5, "SPEAKER_00"),  # empieza ya pasado el final: se descarta
+    ]
+    with patch(_PATCH_PIPELINE, return_value=_pipeline_ok(segmentos)):
+        turnos, solapamientos = diarizar(wav)
+
+    assert max(t.fin for t in turnos) == 5.0
+    assert all(t.inicio < 5.0 for t in turnos)
+    assert len(turnos) == 3
+    assert max(s.fin for s in solapamientos) == 5.0
+
+
 # ---------------------------------------------------------------------------
 # Fallo de carga del modelo / HF_TOKEN ausente
 # ---------------------------------------------------------------------------
