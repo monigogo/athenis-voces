@@ -146,7 +146,7 @@
 **Propósito**: integración completa del pipeline con los módulos reales y validación end-to-end.
 
 - [X] T015 [P] Añadir `backend/tests/test_pipeline_integracion.py`: prueba que `preparar_para_confirmar` con los cuatro módulos reales (no falsos) procesa `IB4002_fragmento_5min.mp3` y devuelve `HablantesParaConfirmar` válido; marcar con `@pytest.mark.slow` para excluirlo de la CI rápida; la CI ejecuta `uv run pytest tests/ -m "not slow"` (sin instalar el grupo `audio`); los tests slow se ejecutan localmente con `uv sync --group audio && uv run pytest tests/ -m slow`
-- [ ] T016 Ejecutar la validación completa de `quickstart.md` sección 8 y confirmar que todos los tests pasan
+- [X] T016 Ejecutar la validación completa de `quickstart.md` sección 8 y confirmar que todos los tests pasan
 - [X] T017 [P] Revisar que ningún log, excepción ni fichero temporal expone el contenido del audio o identifica a personas (constitución punto 7, RF-009)
 - [X] T018 [P] Actualizar `backend/pyproject.toml` si alguna dependencia añadida en T002 necesita versión mínima explícita
 - [X] T019 [US1] Escribir test y añadir `backend/scripts/analizar_audio.py`: recibe un audio y una carpeta de salida por argumento (CLI); rechaza rutas de salida dentro del repositorio (RD-04); ejecuta `preparar` y `diarizar`; escribe `<nombre>.rttm` con líneas `SPEAKER <nombre> 1 <inicio> <duración> <NA> <NA> <hablante> <NA> <NA>`, donde `<hablante>` es `hablante_1`, `hablante_2`, … (sin espacios, porque `evaluacion/evaluar.py` separa por espacios y lee el campo 8); depende de T008; test primero

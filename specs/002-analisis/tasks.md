@@ -159,8 +159,8 @@
 
 - [ ] T027 Esperar las anotaciones de A y C de `conversacion1`, `conversacion2` y `EN2002a` (hasta el minuto 5:00) en `evaluacion/etiquetas/`, y que acuerden la referencia (`<audio>_referencia.txt`), según `evaluacion/guia_anotacion.md` (M-05, M-08)
 - [ ] T028 Comprobar la kappa (SC-006): si es menor de 0,6 [VALIDAR], se revisa la guía y se vuelve a anotar
-- [ ] T029 Cronometrar 3 audios completos en GPU y guardar los tiempos fuera del repositorio (M-09, SC-008)
-- [ ] T030 Ejecutar `evaluacion.evaluar` sobre la partición de prueba, una vez por versión (FR-016), y guardar la tabla
+- [X] T029 Cronometrar 3 audios completos en GPU y guardar los tiempos fuera del repositorio (M-09, SC-008)
+- [X] T030 Ejecutar `evaluacion.evaluar` sobre la partición de prueba, una vez por versión (FR-016), y guardar la tabla
 - [ ] T031 [P] Crear `informe_evaluacion.ipynb` que llama a `evaluar.py` y muestra las tablas de 12.1 con su n y su IC 95 % (RNF-07). Sin audios ni nombres reales (RD-04)
 - [ ] T032 [P] Anotar en el anexo C de `docs/01-funcional.md` cada cambio de regla o de umbral con su motivo y su fecha (FR-013, RD-06)
 - [ ] T033 Comprobar la cobertura del módulo de análisis: 80 % de líneas o más (SC-007); añadir las pruebas que falten con la prueba escrita primero
