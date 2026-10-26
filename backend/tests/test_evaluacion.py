@@ -275,3 +275,53 @@ def test_diferencia_entre_grupos_en_puntos():  # M-03, RNF-06
 
 def test_diferencia_sin_uno_de_los_grupos_no_se_aplica():  # RN-13
     assert metricas.diferencia_entre_grupos([(F, F), (F, M)]) is None
+
+
+# --- Intervalos de la voz: Wilson y MOVER-Wilson (por qué no bootstrap: con todo acertado, da 1 a 1)
+
+
+def test_wilson_con_todo_acertado_no_da_un_intervalo_vacio():
+    bajo, alto = metricas.intervalo_wilson(17, 17)
+    assert bajo == pytest.approx(0.8157, abs=1e-4)
+    assert alto == pytest.approx(1.0)
+
+
+def test_wilson_sin_ningun_fallo():
+    assert metricas.intervalo_wilson(0, 9) == pytest.approx((0.0, 0.2991), abs=1e-4)
+
+
+def test_wilson_sin_casos_no_se_aplica():
+    assert metricas.intervalo_wilson(0, 0) is None
+
+
+PERFECTO = [(F, F)] * 9 + [(M, M)] * 8  # lo medido en OVH el 26 oct 2026
+
+
+def test_intervalo_del_error_de_un_grupo():  # M-03
+    assert metricas.intervalo_error_de_grupo(PERFECTO, F) == pytest.approx((0.0, 0.2991), abs=1e-4)
+    assert metricas.intervalo_error_de_grupo(PERFECTO, M) == pytest.approx((0.0, 0.3244), abs=1e-4)
+    assert metricas.intervalo_error_de_grupo([(M, M)], F) is None
+
+
+def test_intervalo_de_la_exactitud_equilibrada_junta_los_dos_grupos():  # M-02, MOVER-Wilson
+    bajo, alto = metricas.intervalo_exactitud_equilibrada(PERFECTO)
+    assert bajo == pytest.approx(0.7794, abs=1e-4)
+    assert alto == pytest.approx(1.0)
+
+
+def test_intervalo_de_la_exactitud_con_un_solo_grupo_es_su_wilson():
+    assert metricas.intervalo_exactitud_equilibrada([(F, F)] * 9) == pytest.approx(
+        metricas.intervalo_wilson(9, 9)
+    )
+
+
+def test_intervalo_de_la_diferencia_entre_grupos_en_puntos():  # M-03, Newcombe
+    bajo, alto = metricas.intervalo_diferencia_entre_grupos(PERFECTO)
+    assert bajo == 0.0  # la diferencia es un valor absoluto
+    assert alto == pytest.approx(32.44, abs=0.01)
+    assert metricas.intervalo_diferencia_entre_grupos([(F, F)]) is None
+
+
+def test_voces_de_cada_grupo():
+    assert metricas.voces_de_grupo(PERFECTO, F) == 9
+    assert metricas.voces_de_grupo(PERFECTO, M) == 8

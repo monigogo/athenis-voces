@@ -217,3 +217,64 @@ def diferencia_entre_grupos(pares: Sequence[ParVoz]) -> float | None:
     if None in errores:
         return None
     return abs(errores[0] - errores[1]) * 100
+
+
+# --- Intervalos de la voz -----------------------------------------------------------------------
+# El bootstrap no sirve aquí: si el modelo acierta todas las voces, todas las muestras dan 1 y el
+# intervalo sale «1 a 1», que promete más de lo que dicen los datos. Wilson sí da un intervalo útil
+# con 0 fallos; para la media y la diferencia de dos grupos se combinan sus Wilson (MOVER, Newcombe).
+
+
+def intervalo_wilson(aciertos: int, n: int, nivel: float = 0.95) -> tuple[float, float] | None:
+    """Intervalo de Wilson de una proporción."""
+    if n == 0:
+        return None
+    z = statistics.NormalDist().inv_cdf((1 + nivel) / 2)
+    p = aciertos / n
+    centro = (p + z * z / (2 * n)) / (1 + z * z / n)
+    margen = z * (p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5 / (1 + z * z / n)
+    return max(0.0, centro - margen), min(1.0, centro + margen)
+
+
+def voces_de_grupo(pares: Sequence[ParVoz], grupo: EtiquetaVoz) -> int:
+    return sum(referencia is grupo for referencia, _ in pares)
+
+
+def intervalo_error_de_grupo(
+    pares: Sequence[ParVoz], grupo: EtiquetaVoz
+) -> tuple[float, float] | None:
+    """M-03: Wilson del error de un grupo."""
+    n = voces_de_grupo(pares, grupo)
+    fallos = sum(referencia is grupo and propuesta is not grupo for referencia, propuesta in pares)
+    return intervalo_wilson(fallos, n)
+
+
+def intervalo_exactitud_equilibrada(pares: Sequence[ParVoz]) -> tuple[float, float] | None:
+    """M-02: MOVER-Wilson de la media del acierto de cada grupo presente."""
+    grupos = []
+    for g in GRUPOS:
+        n = voces_de_grupo(pares, g)
+        if n:
+            aciertos = sum(r is g and p is g for r, p in pares)
+            grupos.append((aciertos / n, intervalo_wilson(aciertos, n)))
+    if not grupos:
+        return None
+    media = statistics.fmean(p for p, _ in grupos)
+    k = len(grupos)
+    bajo = media - sum((p - i[0]) ** 2 for p, i in grupos) ** 0.5 / k
+    alto = media + sum((i[1] - p) ** 2 for p, i in grupos) ** 0.5 / k
+    return max(0.0, bajo), min(1.0, alto)
+
+
+def intervalo_diferencia_entre_grupos(pares: Sequence[ParVoz]) -> tuple[float, float] | None:
+    """M-03: Newcombe de la diferencia de error entre grupos, en puntos y en valor absoluto."""
+    errores = [error_de_grupo(pares, g) for g in GRUPOS]
+    intervalos = [intervalo_error_de_grupo(pares, g) for g in GRUPOS]
+    if None in errores or None in intervalos:
+        return None
+    (e_f, e_m), ((bf, af), (bm, am)) = errores, intervalos
+    bajo = (e_f - e_m) - ((e_f - bf) ** 2 + (am - e_m) ** 2) ** 0.5
+    alto = (e_f - e_m) + ((af - e_f) ** 2 + (e_m - bm) ** 2) ** 0.5
+    if bajo <= 0 <= alto:  # la diferencia puede ser 0: el valor absoluto empieza en 0
+        return 0.0, max(-bajo, alto) * 100
+    return min(abs(bajo), abs(alto)) * 100, max(abs(bajo), abs(alto)) * 100

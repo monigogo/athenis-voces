@@ -252,6 +252,22 @@ def _fila(
     return f"| {metrica} | {_numero(valor, formato)} | {ic} | n = {len(unidades)} |"
 
 
+def _fila_voz(
+    metrica: str,
+    valor: float | None,
+    intervalo: tuple[float, float] | None,
+    n: str,
+    formato: Callable[[float], str],
+) -> str:
+    """Fila de la voz con su intervalo propio (Wilson), no el bootstrap: ver metricas.py."""
+    ic = (
+        NO_APLICA
+        if valor is None or intervalo is None
+        else f"{_numero(intervalo[0], formato)} a {_numero(intervalo[1], formato)}"
+    )
+    return f"| {metrica} | {_numero(valor, formato)} | {ic} | n = {n} |"
+
+
 def _media(valores: list[float]) -> float | None:
     return sum(valores) / len(valores) if valores else None
 
@@ -261,7 +277,7 @@ def informe(
 ) -> str:
     """Tabla de la sección 12.1 en Markdown.
 
-    El IC remuestrea audios enteros, salvo en la voz, donde la unidad es el hablante (11.3).
+    El IC remuestrea audios enteros; en la voz, la unidad es el hablante y el IC es de Wilson (D-21).
     """
     con_m04 = [r.error_femenino for r in reuniones if r.error_femenino is not None]
     voces = [par for r in reuniones for par in r.voces]
@@ -280,20 +296,34 @@ def informe(
             lambda m: metricas.der_conjunto(m).valor,
             lambda v: porcentaje(v).replace("%", " %"),
         ),
-        _fila("M-02, exactitud equilibrada de la voz", voces, metricas.exactitud_equilibrada, f1),
-        _fila(
-            "M-03, error de la voz femenina",
-            voces,
-            lambda p: metricas.error_de_grupo(p, EtiquetaVoz.FEMENINO),
-            lambda v: f"{v * 100:.1f} %",
+        _fila_voz(
+            "M-02, exactitud equilibrada de la voz",
+            metricas.exactitud_equilibrada(voces),
+            metricas.intervalo_exactitud_equilibrada(voces),
+            str(len(voces)),
+            f1,
         ),
-        _fila(
-            "M-03, error de la voz masculina",
-            voces,
-            lambda p: metricas.error_de_grupo(p, EtiquetaVoz.MASCULINO),
-            lambda v: f"{v * 100:.1f} %",
+        *(
+            _fila_voz(
+                f"M-03, error de la voz {nombre}",
+                metricas.error_de_grupo(voces, grupo),
+                metricas.intervalo_error_de_grupo(voces, grupo),
+                str(metricas.voces_de_grupo(voces, grupo)),
+                lambda v: f"{v * 100:.1f} %",
+            )
+            for nombre, grupo in (
+                ("femenina", EtiquetaVoz.FEMENINO),
+                ("masculina", EtiquetaVoz.MASCULINO),
+            )
         ),
-        _fila("M-03, diferencia entre grupos", voces, metricas.diferencia_entre_grupos, puntos),
+        _fila_voz(
+            "M-03, diferencia entre grupos",
+            metricas.diferencia_entre_grupos(voces),
+            metricas.intervalo_diferencia_entre_grupos(voces),
+            f"{metricas.voces_de_grupo(voces, EtiquetaVoz.FEMENINO)}"
+            f" + {metricas.voces_de_grupo(voces, EtiquetaVoz.MASCULINO)}",
+            puntos,
+        ),
         _fila("M-04, error del % femenino", con_m04, _media, "{:.2f} puntos".format),
         _fila(
             "M-05, F1 de interrupciones (± 1 s)",
