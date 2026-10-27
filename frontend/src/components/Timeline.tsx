@@ -1,6 +1,7 @@
 import { Layers, Volume2, ZoomIn, ZoomOut } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { tramoDeEvento, tramoDeVoz } from "../services/api";
 import type { Interrupcion, MetricasHablante, Solapamiento, Turno } from "../types/contrato";
 
 interface Props {
@@ -274,14 +275,15 @@ export const Timeline: React.FC<Props> = ({
                       <button
                         type="button"
                         key={`${turno.inicio}-${turno.fin}-${idx}`}
-                        onClick={() =>
+                        onClick={() => {
+                          const tramo = tramoDeVoz(turno.inicio, turno.fin, duracion);
                           onPlaySegment(
-                            turno.inicio,
-                            turno.fin,
+                            tramo.inicio,
+                            tramo.fin,
                             hab.hablante,
                             `Hablante ${hab.hablante} (${dur}s)`,
-                          )
-                        }
+                          );
+                        }}
                         onMouseEnter={() =>
                           setHoveredEvent(
                             `Hablante ${hab.hablante}: ${turno.inicio.toFixed(1)}s - ${turno.fin.toFixed(1)}s (${dur}s)`,
@@ -364,14 +366,15 @@ export const Timeline: React.FC<Props> = ({
                   <button
                     type="button"
                     key={`inter-${inter.inicio}-${idx}`}
-                    onClick={() =>
+                    onClick={() => {
+                      const tramo = tramoDeEvento(inter.inicio, inter.fin, duracion);
                       onPlaySegment(
-                        Math.max(0, inter.inicio - 1.0),
-                        inter.fin + 0.5,
+                        tramo.inicio,
+                        tramo.fin,
                         inter.interrumpe,
                         `Interrupción: Hablante ${inter.interrumpe} a Hablante ${inter.interrumpido}`,
-                      )
-                    }
+                      );
+                    }}
                     onMouseEnter={() =>
                       setHoveredEvent(
                         `Interrupción ${inter.tipo}: Hablante ${inter.interrumpe} entra sobre Hablante ${inter.interrumpido} en ${inter.inicio.toFixed(1)}s`,

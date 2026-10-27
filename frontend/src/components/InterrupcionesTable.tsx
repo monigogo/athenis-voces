@@ -1,14 +1,17 @@
 import { CheckCircle2, Filter, MessageSquare, Play, XCircle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { tramoDeEvento } from "../services/api";
 import type { Interrupcion, TipoSolapamiento } from "../types/contrato";
 
 interface Props {
   interrupciones: Interrupcion[];
+  /** Duración del audio, para que el fragmento no pase de ella (RF-18). */
+  duracion: number;
   onPlay: (inicio: number, fin: number, hablante: number, titulo: string) => void;
 }
 
-export const InterrupcionesTable: React.FC<Props> = ({ interrupciones, onPlay }) => {
+export const InterrupcionesTable: React.FC<Props> = ({ interrupciones, duracion, onPlay }) => {
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
 
   const eventosFiltrados = interrupciones.filter((i) => {
@@ -124,8 +127,7 @@ export const InterrupcionesTable: React.FC<Props> = ({ interrupciones, onPlay })
               eventosFiltrados.map((item, idx) => {
                 const badge = getTipoBadge(item.tipo);
                 const dur = (item.fin - item.inicio).toFixed(2);
-                const inicioReal = Math.max(0, item.inicio - 1.0);
-                const finReal = item.fin + 0.5;
+                const tramo = tramoDeEvento(item.inicio, item.fin, duracion);
 
                 return (
                   <tr key={`inter-${item.inicio}-${idx}`}>
@@ -184,8 +186,8 @@ export const InterrupcionesTable: React.FC<Props> = ({ interrupciones, onPlay })
                       <button
                         onClick={() =>
                           onPlay(
-                            inicioReal,
-                            finReal,
+                            tramo.inicio,
+                            tramo.fin,
                             item.interrumpe,
                             `Interrupción: Hablante ${item.interrumpe} a Hablante ${item.interrumpido}`,
                           )

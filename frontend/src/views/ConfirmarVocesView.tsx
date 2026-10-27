@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { api, tramoDeVoz } from "../services/api";
 import {
   type Confirmacion,
   type EtiquetaConfirmada,
@@ -323,14 +323,15 @@ export const ConfirmarVocesView: React.FC<Props> = ({
                     return (
                       <button
                         key={`${f.inicio}-${idx}`}
-                        onClick={() =>
+                        onClick={() => {
+                          const tramo = tramoDeVoz(f.inicio, f.fin);
                           onPlayAudio(
-                            f.inicio,
-                            f.fin,
+                            tramo.inicio,
+                            tramo.fin,
                             h.hablante,
                             `Hablante ${h.hablante} · Muestra ${idx + 1} (${dur}s)`,
-                          )
-                        }
+                          );
+                        }}
                         className="btn btn-secondary btn-sm"
                         style={{ display: "inline-flex", gap: "0.35rem" }}
                         title={`Escuchar fragmento ${idx + 1}`}
