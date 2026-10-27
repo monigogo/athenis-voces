@@ -228,23 +228,20 @@ def _detectar_solapamientos(
     # Ordenar: mismo tiempo → primero los finales (evita solapamientos de duración 0)
     eventos.sort(key=lambda e: (e[0], e[1]))
 
-    activos: set[int] = set()
-    solapamientos: list[Solapamiento] = []
+    # Cuántos tramos tiene abiertos cada hablante: si pyannote le da dos que se pisan, que acabe uno
+    # no quiere decir que calle
+    abiertos: dict[int, int] = {}
+    tramos: list[tuple[float, float, list[int]]] = []
     t_anterior = 0.0
 
     for tiempo, tipo, num in eventos:
+        activos = sorted(h for h, n in abiertos.items() if n > 0)
         if len(activos) >= 2 and tiempo > t_anterior:
-            solapamientos.append(
-                Solapamiento(
-                    inicio=t_anterior,
-                    fin=tiempo,
-                    hablantes=sorted(activos),
-                )
-            )
+            if tramos and tramos[-1][1] == t_anterior and tramos[-1][2] == activos:
+                tramos[-1] = (tramos[-1][0], tiempo, activos)  # sigue el mismo solapamiento
+            else:
+                tramos.append((t_anterior, tiempo, activos))
         t_anterior = tiempo
-        if tipo == +1:
-            activos.add(num)
-        else:
-            activos.discard(num)
+        abiertos[num] = abiertos.get(num, 0) + tipo
 
-    return solapamientos
+    return [Solapamiento(inicio=i, fin=f, hablantes=h) for i, f, h in tramos]

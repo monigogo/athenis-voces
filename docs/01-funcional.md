@@ -417,7 +417,7 @@ Cada requisito no funcional tiene un umbral y un método de medición. Los umbra
 
 | ID | Categoría | Requisito | Umbral | Cómo se mide | Prior. |
 | --- | --- | --- | --- | --- | --- |
-| RNF-01 | Rendimiento | Analizar un episodio de 60 min en GPU (la de Monica o la V100S) | 15 min o menos [VALIDAR el domingo 25] | Mediana de 3 audios cronometrados | Should |
+| RNF-01 | Rendimiento | Analizar un episodio de 60 min en GPU (la de Monica o la V100S) | 15 min o menos. Medido el 26 oct 2026: 2,7 min por hora de audio (mediana de 5 reuniones de AMI en la V100S) | Mediana de 3 audios cronometrados | Should |
 | RNF-02 | Rendimiento | Mostrar un resultado precalculado | 2 s o menos | Medición en el navegador | Must |
 | RNF-03 | Calidad | Acierto de la etiqueta de voz por hablante (M-02) | Exactitud equilibrada de 0,90 o más [VALIDAR] | Conjunto de prueba, con intervalo de confianza del 95 % | Must publicarlo; Should el umbral |
 | RNF-04 | Calidad | Diarización (M-01) | DER del 20 % o menos [VALIDAR] | pyannote.metrics sobre el conjunto de prueba | Should |
@@ -641,15 +641,17 @@ Los umbrales están en la sección 7; aquí se anotan los resultados medidos.
 
 | ID | Métrica | Qué mide | Herramienta | Partición | Resultado (IC 95 %, n) |
 | --- | --- | --- | --- | --- | --- |
-| M-01 | DER, tasa de error de diarización | Errores en quién habla cuándo | pyannote.metrics | Prueba | [COMPLETAR] |
-| M-02 | Exactitud equilibrada de la voz, por hablante | Acierto de la propuesta de voz | scikit-learn | Prueba | [COMPLETAR] |
-| M-03 | Error por grupo y diferencia entre grupos | Equidad del clasificador | Script propio | Prueba | [COMPLETAR] |
-| M-04 | Error absoluto del % de tiempo femenino | Precisión de la métrica principal | Script propio | Prueba | [COMPLETAR] puntos |
-| M-05 | Precisión, exhaustividad y F1 de interrupciones (± 1 s) | Detección de interrupciones | Script propio | Prueba | [COMPLETAR] |
+| M-01 | DER, tasa de error de diarización | Errores en quién habla cuándo | pyannote.metrics | Prueba | 19,0 % (IC 17,5 a 21,1), n = 5 reuniones |
+| M-02 | Exactitud equilibrada de la voz, por hablante | Acierto de la propuesta de voz | Script propio (D-21) | Prueba | 1,00 (IC 0,78 a 1,00), n = 17 voces |
+| M-03 | Error por grupo y diferencia entre grupos | Equidad del clasificador | Script propio (D-21) | Prueba | Voces femeninas 0,0 % (IC 0,0 a 29,9; n = 9); masculinas 0,0 % (IC 0,0 a 32,4; n = 8); diferencia 0,0 puntos (IC 0,0 a 32,4) |
+| M-04 | Error absoluto del % de tiempo femenino | Precisión de la métrica principal | Script propio | Prueba | 1,58 puntos (IC 0,17 a 3,44), n = 5 reuniones |
+| M-05 | Precisión, exhaustividad y F1 de interrupciones (± 1 s) | Detección de interrupciones | Script propio | Prueba | Pendiente: falta la referencia acordada por A y C |
 | M-06 | Retirada en la v0.2: no hay juez LLM | — | — | — | — |
 | M-07 | Retirada en la v0.2: no hay juez LLM | — | — | — | — |
-| M-08 | Kappa entre anotadoras | Fiabilidad de la referencia | Script propio | Prueba | [COMPLETAR] |
-| M-09 | Minutos de proceso por hora de audio | Rendimiento | Cronómetro | 3 audios completos | [COMPLETAR] |
+| M-08 | Kappa entre anotadoras | Fiabilidad de la referencia | Script propio | Prueba | Pendiente: faltan la referencia acordada y las salidas de las grabaciones |
+| M-09 | Minutos de proceso por hora de audio | Rendimiento | Cronómetro (analizar_audio.py) | 5 reuniones completas de AMI | 2,7 min, mediana (IC 2,3 a 3,2), n = 5 |
+
+Medido el 26 oct 2026 en la V100S de OVH con `evaluacion/informe_evaluacion.ipynb`. En AMI las voces las etiquetó el modelo, sin persona que confirme. Ablación (11.3): F1 de las interrupciones con la separación de voces de pyannote frente a la de referencia de AMI, 0,54 (IC 0,43 a 0,57), n = 5: los errores al separar voces cambian cerca de la mitad de las interrupciones detectadas.
 
 ### 12.2 Métricas del proyecto
 

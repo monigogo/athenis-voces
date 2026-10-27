@@ -138,6 +138,8 @@ class Der:
 
 def der(referencia: Sequence[Tramo], sistema: Sequence[Tramo]) -> Der:
     """M-01 con pyannote.metrics, estricto: sin margen en los bordes y con los solapamientos."""
+    if not referencia:
+        raise ValueError("La referencia está vacía: sin ella no se puede calcular el DER")
     from pyannote.core import Annotation, Segment, Timeline
     from pyannote.metrics.diarization import DiarizationErrorRate
 

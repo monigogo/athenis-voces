@@ -392,3 +392,15 @@ def test_main_lee_los_tiempos_guardados(carpetas, capsys):  # M-09
     cronometrar.guardar(salidas / "EN2002a.tiempo.json", duracion_audio=3600.0, segundos=360.0)
     evaluar.main(["--salidas", str(salidas), "--ami", str(ami), "--etiquetas", str(etiquetas)])
     assert "| 6,0 min |" in capsys.readouterr().out
+
+
+def test_reunion_en_la_que_el_sistema_no_detecta_a_nadie(carpetas):  # RTTM del sistema vacío
+    pytest.importorskip("pyannote.metrics")
+    ami, salidas, _ = carpetas
+    escribir_rttm(ami / "EN2002a.rttm", TRAMOS)
+    (salidas / "EN2002a.rttm").write_text("", encoding="utf-8")
+
+    (reunion,) = evaluar.evaluar_ami(ami, salidas)
+    assert reunion.der.valor == 1.0  # cuenta en el DER: se perdió toda la voz
+    assert reunion.error_femenino is None  # sin voces no hay % femenino que comparar
+    assert reunion.ablacion is None

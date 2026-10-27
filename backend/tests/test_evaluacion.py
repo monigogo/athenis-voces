@@ -325,3 +325,17 @@ def test_intervalo_de_la_diferencia_entre_grupos_en_puntos():  # M-03, Newcombe
 def test_voces_de_cada_grupo():
     assert metricas.voces_de_grupo(PERFECTO, F) == 9
     assert metricas.voces_de_grupo(PERFECTO, M) == 8
+
+
+# --- DER con datos vacíos ----------------------------------------------------------------------
+
+
+def test_der_con_la_referencia_vacia_da_un_error_claro():
+    pytest.importorskip("pyannote.metrics")
+    with pytest.raises(ValueError, match="referencia está vacía"):
+        metricas.der([], [("a", 0.0, 1.0)])
+
+
+def test_der_si_el_sistema_no_detecta_a_nadie_es_todo_error():  # no se esconde el fallo
+    pytest.importorskip("pyannote.metrics")
+    assert metricas.der([("FEE001", 0.0, 10.0)], []).valor == 1.0
