@@ -11,7 +11,8 @@
  * - GET /ejemplos
  * - GET /salud
  *
- * Admite modo conectado al backend real y modo integrado local/falso (plan, Parte 8).
+ * Con el backend conectado (GET /salud responde) usa sus rutas de verdad: specs/003-producto/
+ * contracts/api-http.md. Sin backend, sigue el modo demo integrado (plan, Parte 8).
  */
 
 import {
@@ -22,6 +23,7 @@ import {
 import type {
   Confirmacion,
   EjemploPrecalculado,
+  Estado,
   EstadoAnalisis,
   HablantesParaConfirmar,
   Resultado,
@@ -30,7 +32,18 @@ import { audioService } from "./audioPlayer";
 
 const API_BASE = "/api";
 
+interface Opciones {
+  /** Cada cuánto se pregunta el estado de un análisis en marcha. */
+  intervaloMs?: number;
+}
+
 export class ApiClient {
+  private readonly intervaloMs: number;
+
+  constructor(opciones: Opciones = {}) {
+    this.intervaloMs = opciones.intervaloMs ?? 1000;
+  }
+
   private backendAvailable: boolean | null = null;
   private localState: {
     id_analisis: string;
@@ -55,6 +68,36 @@ export class ApiClient {
     return !!this.backendAvailable;
   }
 
+  /** Pide una ruta y devuelve su JSON; si falla, el motivo que da el backend (`detail`). */
+  private async pedir<T>(ruta: string, init?: RequestInit): Promise<T> {
+    const res = await fetch(`${API_BASE}${ruta}`, init);
+    const cuerpo = await res.json().catch(() => null);
+    if (!res.ok) {
+      const detalle = cuerpo?.detail;
+      throw new Error(
+        typeof detalle === "string" ? detalle : `El servidor respondió con el error ${res.status}`,
+      );
+    }
+    return cuerpo as T;
+  }
+
+  /** Pregunta el estado hasta llegar a uno de `hasta`. Un «error» se lanza con su motivo (RNF-16). */
+  private async esperar(
+    id: string,
+    hasta: Estado[],
+    onProgreso?: (estado: EstadoAnalisis) => void,
+  ): Promise<EstadoAnalisis> {
+    for (;;) {
+      const estado = await this.pedir<EstadoAnalisis>(`/analisis/${encodeURIComponent(id)}`);
+      onProgreso?.(estado);
+      if (estado.estado === "error") {
+        throw new Error(estado.motivo_error ?? "El análisis no ha podido terminar.");
+      }
+      if (hasta.includes(estado.estado)) return estado;
+      await new Promise((r) => setTimeout(r, this.intervaloMs));
+    }
+  }
+
   getEjemplos(): EjemploPrecalculado[] {
     return LISTA_EJEMPLOS;
   }
@@ -66,6 +109,24 @@ export class ApiClient {
   async iniciarEjemplo(ejemploId: string): Promise<Resultado> {
     const ejemplo = LISTA_EJEMPLOS.find((e) => e.id === ejemploId) || LISTA_EJEMPLOS[0];
     audioService.stop();
+
+    if (this.backendAvailable) {
+      // El nombre y la descripción son de la web; los datos, del backend (los ids coinciden)
+      const formulario = new FormData();
+      formulario.append("ejemplo", ejemplo.id);
+      const creado = await this.pedir<EstadoAnalisis>("/analisis", {
+        method: "POST",
+        body: formulario,
+      });
+      const resultado = await this.getResultadoDelBackend(creado.id_analisis);
+      this.localState = {
+        id_analisis: creado.id_analisis,
+        estado: creado,
+        hablantes: null,
+        resultado,
+      };
+      return resultado;
+    }
 
     this.localState = {
       id_analisis: ejemplo.id,
@@ -103,6 +164,30 @@ export class ApiClient {
 
     // Cargar en el reproductor de audio para reproducción local
     await audioService.loadUserAudio(archivo);
+
+    if (this.backendAvailable) {
+      const formulario = new FormData();
+      formulario.append("audio", archivo);
+      formulario.append("modo_manual", "false");
+      const creado = await this.pedir<EstadoAnalisis>("/analisis", {
+        method: "POST",
+        body: formulario,
+      });
+      onProgreso(creado);
+      const listo = await this.esperar(
+        creado.id_analisis,
+        ["esperando_confirmacion", "terminado"],
+        onProgreso,
+      );
+      this.localState = {
+        id_analisis: creado.id_analisis,
+        archivoAudio: archivo,
+        estado: listo,
+        hablantes: null,
+        resultado: null,
+      };
+      return { id_analisis: creado.id_analisis };
+    }
 
     const id = `analisis-${Date.now().toString(36)}`;
     this.localState = {
@@ -197,6 +282,11 @@ export class ApiClient {
   }
 
   async getHablantes(idAnalisis: string): Promise<HablantesParaConfirmar> {
+    if (this.backendAvailable) {
+      return this.pedir<HablantesParaConfirmar>(
+        `/analisis/${encodeURIComponent(idAnalisis)}/hablantes`,
+      );
+    }
     if (
       this.localState &&
       this.localState.id_analisis === idAnalisis &&
@@ -247,6 +337,18 @@ export class ApiClient {
    * Envía las etiquetas confirmadas por la analista (Fase 2, RF-07).
    */
   async enviarConfirmacion(idAnalisis: string, confirmacion: Confirmacion): Promise<Resultado> {
+    if (this.backendAvailable) {
+      // El backend comprueba que se confirman justo las voces presentes (RF-07)
+      await this.pedir<EstadoAnalisis>(`/analisis/${encodeURIComponent(idAnalisis)}/confirmacion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(confirmacion),
+      });
+      await this.esperar(idAnalisis, ["terminado"]);
+      const resultado = await this.getResultadoDelBackend(idAnalisis);
+      if (this.localState?.id_analisis === idAnalisis) this.localState.resultado = resultado;
+      return resultado;
+    }
     // Validar que se hayan confirmado todos los hablantes
     const habs = await this.getHablantes(idAnalisis);
     const idsConfirmados = new Set(confirmacion.etiquetas.map((e) => e.hablante));
@@ -294,7 +396,12 @@ export class ApiClient {
     return resultadoFinal;
   }
 
+  private getResultadoDelBackend(idAnalisis: string): Promise<Resultado> {
+    return this.pedir<Resultado>(`/analisis/${encodeURIComponent(idAnalisis)}/resultado`);
+  }
+
   async getResultado(idAnalisis: string): Promise<Resultado> {
+    if (this.backendAvailable) return this.getResultadoDelBackend(idAnalisis);
     if (this.localState?.resultado) {
       return this.localState.resultado;
     }
