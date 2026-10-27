@@ -175,6 +175,9 @@ def evaluar_ami(
             continue
         tramos = lectura.leer_rttm(carpeta_ami / f"{nombre}.rttm")
         tramos_sistema = lectura.leer_rttm(rttm)
+        if not tramos_sistema:  # el sistema no detectó a nadie: todo es error en el DER
+            evaluadas.append(Reunion(nombre, metricas.der(tramos, tramos_sistema), None, None))
+            continue
         de_referencia = analizar(lectura.entrada_de_referencia(tramos)[0])
         ideal = not json.exists()  # sin el Resultado del sistema, la confirmación ideal
         sistema = resultado_ideal(tramos_sistema, tramos) if ideal else lectura.leer_resultado(json)
