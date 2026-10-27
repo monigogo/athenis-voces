@@ -1,4 +1,4 @@
-import { BookOpen, CheckCircle2, FileAudio, Radio, SlidersHorizontal } from "lucide-react";
+import { BookOpen, CheckCircle2, FileAudio, FlaskConical, Radio, SlidersHorizontal } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { AudioPlayerBar } from "./components/AudioPlayerBar";
@@ -7,9 +7,10 @@ import type { Resultado } from "./types/contrato";
 import { AnalizarView } from "./views/AnalizarView";
 import { ComoFuncionaView } from "./views/ComoFuncionaView";
 import { ConfirmarVocesView } from "./views/ConfirmarVocesView";
+import { MetodologiaView } from "./views/MetodologiaView";
 import { ResultadosView } from "./views/ResultadosView";
 
-type Tab = "analizar" | "confirmar" | "resultados" | "como-funciona";
+type Tab = "analizar" | "confirmar" | "resultados" | "como-funciona" | "metodologia";
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("analizar");
@@ -120,6 +121,15 @@ export const App: React.FC = () => {
             <BookOpen size={16} />
             Cómo funciona
           </button>
+
+          <button
+            onClick={() => setActiveTab("metodologia")}
+            className={`nav-tab-button ${activeTab === "metodologia" ? "active" : ""}`}
+            id="tab-metodologia"
+          >
+            <FlaskConical size={16} />
+            Metodología
+          </button>
         </nav>
 
         {/* Estado de conexión */}
@@ -163,6 +173,8 @@ export const App: React.FC = () => {
         )}
 
         {activeTab === "como-funciona" && <ComoFuncionaView />}
+
+        {activeTab === "metodologia" && <MetodologiaView />}
       </main>
 
       {/* Reproductor de audio fijo inferior */}
