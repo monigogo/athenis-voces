@@ -31,6 +31,12 @@ def test_valores_iniciales_del_funcional():
     assert CONFIG.escucha_max_segundos == 15.0  # RF-18, 9.3
 
 
+def test_limites_de_la_subida_y_retencion():  # spec 003, aclaraciones 1 y 2 [VALIDAR]
+    assert CONFIG.subida_max_bytes == 200 * 1024 * 1024
+    assert CONFIG.subida_max_segundos == 3600.0
+    assert CONFIG.retencion_segundos == 86_400.0  # 24 h, D-08
+
+
 def test_no_se_puede_modificar_en_caliente():
     with pytest.raises(dataclasses.FrozenInstanceError):
         CONFIG.turno_largo_mas_de = 20.0
@@ -55,6 +61,9 @@ def test_variante_para_ajustar_con_desarrollo():  # RD-05: el original no cambia
         {"segundos_por_tasa": -600.0},
         {"peso_posicion": -0.1},
         {"escucha_antes_max_segundos": 20.0},  # no cabe en el fragmento
+        {"subida_max_bytes": 0},
+        {"subida_max_segundos": -1.0},
+        {"retencion_segundos": 0.0},
     ],
 )
 def test_rechaza_valores_imposibles(cambios):

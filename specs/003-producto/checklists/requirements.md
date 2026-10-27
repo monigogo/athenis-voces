@@ -13,7 +13,7 @@
 
 ## Requisitos completos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION]
+- [x] No quedan marcadores [NEEDS CLARIFICATION]
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -31,6 +31,6 @@
 
 ## Notas
 
-- Quedan 3 marcadores [NEEDS CLARIFICATION]: los límites de tamaño y duración de RF-01, el plazo de retención (D-08) y si la demo pública admite subidas (D-08). Los dos últimos son decisiones del equipo pendientes para el domingo (plan, Parte 18).
+- Los 3 marcadores [NEEDS CLARIFICATION] (límites de RF-01, plazo de retención y subidas en la demo pública, D-08) se resolvieron el 27 oct con respuestas provisionales, marcadas [VALIDAR] hasta que las confirme el equipo (spec, «Aclaraciones»).
 - La tecnología (D-02) y las rutas de la API (9.3) aparecen solo en «Supuestos», porque son decisiones ya tomadas.
 - FR-015 (RD-02) es una regla de desarrollo, pero se deja porque afecta a cómo la web recibe los datos.

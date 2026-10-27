@@ -50,6 +50,11 @@ class Config:
     escucha_antes_max_segundos: float = 1.0
     escucha_max_segundos: float = 15.0  # [VALIDAR]
 
+    # Subida y retención (RF-01, RNF-10, RF-23; spec 003, aclaraciones 1 y 2) [VALIDAR]
+    subida_max_bytes: int = 200 * 1024 * 1024
+    subida_max_segundos: float = 3600.0
+    retencion_segundos: float = 86_400.0  # 24 h desde la subida (D-08)
+
     def __post_init__(self) -> None:
         pesos = {"peso_participacion", "peso_posicion", "peso_turnos_largos"}
         for campo in fields(self):

@@ -24,7 +24,7 @@ Una analista sube un audio desde la pantalla Analizar y ve en qué punto está e
 
 **Escenarios de aceptación**:
 
-1. **Dado** un archivo mp3, wav, m4a, ogg o flac dentro de los límites [NEEDS CLARIFICATION: tamaño y duración máximos; el funcional los deja como COMPLETAR en RF-01], **cuando** se sube, **entonces** se crea un análisis «en cola» (RF-01).
+1. **Dado** un archivo mp3, wav, m4a, ogg o flac dentro de los límites (200 MB y 60 min como máximo [VALIDAR]), **cuando** se sube, **entonces** se crea un análisis «en cola» (RF-01).
 2. **Dado** un archivo que no es audio, comprobado por su contenido y no por la extensión, **cuando** se sube, **entonces** se rechaza indicando el motivo y no se crea ningún análisis (RF-01, 8.1).
 3. **Dado** un análisis en curso, **cuando** se consulta, **entonces** su estado es uno de estos: en cola, procesando (con % de avance), esperando confirmación, terminado, o error con su motivo (RF-04).
 4. **Dado** un análisis en «error», **cuando** la analista reintenta mientras dure la retención, **entonces** se relanza sin volver a subir el audio (8.1).
@@ -107,7 +107,7 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 
 **Escenarios de aceptación**:
 
-1. **Dado** un análisis cuyo plazo de retención [NEEDS CLARIFICATION: plazo de D-08, abierta en el anexo C] se ha cumplido, **cuando** se revisa el disco, **entonces** no queda ni el audio ni sus fragmentos, solo datos agregados (RF-23).
+1. **Dado** un análisis cuyo plazo de retención (24 h desde la subida [VALIDAR], D-08) se ha cumplido, **cuando** se revisa el disco, **entonces** no queda ni el audio ni sus fragmentos, solo datos agregados (RF-23).
 
 ---
 
@@ -117,14 +117,15 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 - **Archivo malicioso o mal formado:** se rechaza sin colgar el servicio; el nombre del archivo lo genera el sistema (RNF-10).
 - **Petición de un fragmento de más de 15 s:** se rechaza, para que no se pueda descargar el audio completo (9.3).
 - **Hablante con poco audio:** no llega a Confirmar voces (D-18); su tiempo se ve aparte en Resultados.
-- **Demo pública:** sin autenticación, solo debe ofrecer los ejemplos precalculados (2.3). [NEEDS CLARIFICATION: ¿admite subidas la demo pública? Es parte de D-08.]
+- **Demo pública:** sin autenticación, no admite subidas: solo ofrece los ejemplos precalculados (2.3, D-08) [VALIDAR].
+- **Audio demasiado grande o largo:** más de 200 MB o más de 60 min se rechaza con su motivo y no se crea ningún análisis [VALIDAR].
 
 ## Requisitos *(obligatorio)*
 
 ### Requisitos funcionales
 
 - **FR-001**: El sistema DEBE aceptar audios mp3, wav, m4a, ogg y flac, comprobar su tipo real por el contenido y rechazar con motivo los que no lo son (RF-01, Must; RNF-10).
-- **FR-002**: El sistema DEBE aplicar límites de tamaño y duración, dar al archivo un nombre generado por el sistema y procesarlo sin shell y con tiempo máximo (RNF-10, Must).
+- **FR-002**: El sistema DEBE aplicar límites de tamaño (200 MB) y duración (60 min) [VALIDAR], dar al archivo un nombre generado por el sistema y procesarlo sin shell y con tiempo máximo (RNF-10, Must).
 - **FR-003**: El sistema DEBE mostrar el estado del análisis: en cola, procesando con % de avance, esperando confirmación, terminado, o error con su motivo (RF-04, Must).
 - **FR-004**: El sistema DEBE permitir reintentar un análisis en error sin volver a subir el audio, mientras dure la retención (8.1).
 - **FR-005**: El sistema DEBE mostrar por hablante sus fragmentos, la propuesta, la confianza y las tres opciones, y no mostrar resultados hasta confirmar todas las voces presentes (RF-07, Must).
@@ -133,7 +134,8 @@ Pasado el plazo, el audio y sus fragmentos desaparecen y solo quedan datos agreg
 - **FR-008**: El sistema DEBE permitir escuchar cada interrupción con un fragmento que empieza como mucho 1 s antes, acaba después y dura 15 s como máximo (RF-18, Must).
 - **FR-009**: El sistema DEBE ofrecer episodios de ejemplo precalculados cuyos resultados aparecen en 2 s o menos (RF-02, RNF-02, Must).
 - **FR-010**: El sistema DEBE tener una página «Cómo funciona» con definiciones, fórmulas, exactitud por grupo y limitaciones (RF-22, Must).
-- **FR-011**: El sistema DEBE borrar el audio y los fragmentos al cumplirse la retención y conservar solo datos agregados (RF-23, Must).
+- **FR-011**: El sistema DEBE borrar el audio y los fragmentos al cumplirse la retención, 24 h desde la subida [VALIDAR], y conservar solo datos agregados (RF-23, Must; D-08).
+- **FR-016**: La demo pública NO DEBE admitir subidas: solo ofrece los ejemplos precalculados (2.3, D-08) [VALIDAR].
 - **FR-012**: La interfaz DEBE estar en español (RNF-19, Must) y usar los textos clave de la sección 8.4.
 - **FR-013**: La interfaz DEBE seguir los principios de 8.3: cada número abre su fórmula, la incertidumbre se ve, paleta neutra sin rosa ni azul, «Hablante n» por defecto, sin rankings de personas y «voz percibida como femenina» en vez de «mujer».
 - **FR-014**: La interfaz DEBERÍA cumplir WCAG 2.1 AA en contraste, teclado y textos alternativos, y el color nunca es la única señal (RNF-14, Should).
@@ -159,6 +161,16 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **SC-005**: Las pruebas con archivos maliciosos y mal formados se rechazan todas sin colgar el servicio (RNF-10, Must).
 - **SC-006**: Pasado el plazo de retención, una prueba que revisa el disco no encuentra ni audios ni fragmentos (RF-23, RNF-12).
 - **SC-007**: Ninguna petición devuelve más de 15 s de audio (9.3).
+
+## Aclaraciones
+
+### Sesión 2026-10-27
+
+Respuestas provisionales: siguen [VALIDAR] hasta que las confirme el equipo.
+
+- **1. Límites de la subida (RF-01):** 200 MB de tamaño y 60 min de duración como máximo.
+- **2. Retención (D-08, RF-23):** 24 h desde la subida; pasado el plazo se borran el audio y los fragmentos y solo quedan datos agregados.
+- **3. Subidas en la demo pública (D-08):** no se admiten; la demo pública solo ofrece los ejemplos precalculados.
 
 ## Supuestos
 

@@ -4,6 +4,7 @@ Import de inaSpeechSegmenter diferido dentro de _cargar_segmenter() para que
 pytest -m "not slow" y la CI funcionen sin TensorFlow instalado.
 """
 
+import threading
 from pathlib import Path
 
 from config import CONFIG
@@ -22,6 +23,27 @@ def _cargar_segmenter():
         return Segmenter()
     except Exception as exc:
         raise RuntimeError(f"No se pudo cargar el modelo de clasificación de voz: {exc}") from exc
+
+
+# El modelo cargado se guarda y se reutiliza: cargarlo en cada análisis tarda (spec 003, T052).
+_cargado = None
+_cerrojo = threading.Lock()
+
+
+def modelo():
+    """El Segmenter, cargado en la primera llamada. Si la carga falla, no se guarda."""
+    global _cargado
+    with _cerrojo:
+        if _cargado is None:
+            _cargado = _cargar_segmenter()
+        return _cargado
+
+
+def olvidar_modelo() -> None:
+    """Descarta el modelo guardado (para las pruebas)."""
+    global _cargado
+    with _cerrojo:
+        _cargado = None
 
 
 def _solo_intervals(hablante: int, all_turnos: list[Turno]) -> list[tuple[float, float]]:
@@ -72,7 +94,7 @@ def proponer_voz(wav: Path, turnos: list[Turno]) -> dict[int, PropuestaVoz]:
     segmento al hablante por solapamiento de tiempo, descontando los tramos
     compartidos con otros hablantes.
     """
-    segmenter = _cargar_segmenter()
+    segmenter = modelo()
     try:
         segmentos: list[tuple[str, float, float]] = segmenter(str(wav))
     except Exception as exc:

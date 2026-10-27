@@ -120,6 +120,28 @@ uv run scripts/analizar_audio.py <ruta_del_audio> <carpeta_de_salida>
 Si no hay voces suficientes o un paso falla, queda el `.rttm` pero no el `.json`, y el
 motivo sale por la salida de error estándar.
 
+### Arrancar el servidor de la API
+
+El servidor sirve las rutas de la sección 9.3 del funcional (subir un audio, estado, hablantes,
+fragmentos, confirmación, resultado, ejemplos y salud). Necesita el grupo `audio` y ffmpeg:
+
+```bash
+cd backend
+uv sync --group audio
+uv run --env-file ../.env uvicorn api.app:app --app-dir src --port 8000
+```
+
+- `--env-file` carga `HF_TOKEN` y el resto de variables de `.env` (ver `.env.example`).
+- Arranca con **un solo proceso**, sin `--workers`: el registro de análisis vive en su memoria.
+- Las rutas y sus tipos se ven en `http://localhost:8000/docs`.
+- Variables opcionales: `CARPETA_TRABAJO` (por defecto, una carpeta del directorio temporal del
+  sistema), `EJEMPLOS_DIR` (por defecto, `backend/ejemplos`) y `DEMO_PUBLICA=1` para no admitir
+  subidas.
+
+Límites provisionales, pendientes de validar por el equipo: 200 MB y 60 min por audio, y borrado
+del audio a las 24 h de subirlo. Más detalle en
+[`specs/003-producto/quickstart.md`](specs/003-producto/quickstart.md).
+
 ---
 
 ## Datos
