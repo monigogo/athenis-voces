@@ -132,7 +132,7 @@ Los nombres de campo definitivos los fija el contrato de datos (`docs/contrato_d
 - **SC-004**: La diferencia de error de la propuesta de voz entre grupos es de 5 puntos porcentuales o menos [VALIDAR], y se publica siempre con su intervalo (M-03, RNF-06: Must publicarla).
 - **SC-005**: Con el modo manual activo, el clasificador de voz se ejecuta 0 veces (RF-08).
 - **SC-006**: El 100 % de los hablantes presentes llegan a confirmación con al menos 3 fragmentos de 3 a 5 s (RF-07).
-- **SC-007**: Un episodio de 60 min se procesa en GPU en 15 min o menos [VALIDAR el domingo 25], mediana de 3 audios (RNF-01, Should).
+- **SC-007**: Un episodio de 60 min se procesa en GPU en 15 min o menos, mediana de 3 audios (RNF-01, Should). Medido el 26 oct 2026: 2,7 min por hora de audio, mediana de 5 reuniones de AMI en la V100S.
 
 ## Supuestos
 

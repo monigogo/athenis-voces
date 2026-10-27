@@ -35,7 +35,7 @@ repositorio, RD-04)
 **Tipo de proyecto**: backend — módulos de biblioteca llamados por `pipeline.py`
 
 **Objetivo de rendimiento**: fragmento de 5 min en CPU (desarrollo); 60 min en ≤ 15 min en GPU
-(SC-007 [VALIDAR el 2026-10-25])
+(SC-007; medido el 26 oct 2026: 2,7 min por hora de audio en la V100S)
 
 **Restricciones**: sin API externas (RF-010), sin GPU en desarrollo (RNF-20), sin audios en el
 repositorio (RD-04)
