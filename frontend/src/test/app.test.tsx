@@ -29,6 +29,14 @@ describe("Aplicación Athenis Voces Frontend", () => {
     expect(screen.getByText("Resultados del análisis acústico")).toBeInTheDocument();
   });
 
+  it("permite navegar a la página 'Metodología'", () => {
+    render(<App />);
+    fireEvent.click(screen.getByText("Metodología"));
+
+    expect(screen.getByText("¿Qué es Athenis?")).toBeInTheDocument();
+    expect(screen.getByText("Ética y diseño responsable")).toBeInTheDocument();
+  });
+
   it("permite navegar a la página 'Cómo funciona' (RF-22)", () => {
     render(<App />);
     const tabComoFunciona = screen.getByText("Cómo funciona");
