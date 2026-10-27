@@ -15,9 +15,11 @@ repos:
       - id: ruff-format
         files: ^backend/
 
-  # Sin ficheros en frontend/ no hace nada. Solo comprueba: no reescribe nada (biome ci)
+  # Misma versión que frontend/package.json: con otra, Biome no entiende biome.json (lo vigila una prueba)
+  # Solo comprueba: no reescribe nada (biome ci)
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.6.3
+    rev: v1.9.4
     hooks:
       - id: biome-ci
-        files: ^frontend/
+        args: [--config-path=frontend]  # si no, Biome no ve frontend/biome.json y usa sus valores por defecto
+        files: ^frontend/src/

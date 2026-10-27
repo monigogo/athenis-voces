@@ -1,1 +1,3 @@
 *.sh text eol=lf
+# Biome exige finales de línea LF: así salen igual en Windows, aunque git tenga core.autocrlf
+frontend/** text eol=lf
