@@ -24,6 +24,7 @@ export const AnalizarView: React.FC<Props> = ({ onAnalisisIniciado, onEjemploSel
   const [estadoAnalisis, setEstadoAnalisis] = useState<EstadoAnalisis | null>(null);
   const [errorSubida, setErrorSubida] = useState<string | null>(null);
   const [procesandoEjemplo, setProcesandoEjemplo] = useState<string | null>(null);
+  const [modoManual, setModoManual] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const ejemplos = api.getEjemplos();
@@ -43,12 +44,16 @@ export const AnalizarView: React.FC<Props> = ({ onAnalisisIniciado, onEjemploSel
     setArchivoSeleccionado(file);
 
     try {
-      await api.subirAudio(file, (nuevoEstado) => {
-        setEstadoAnalisis(nuevoEstado);
-        if (nuevoEstado.estado === "esperando_confirmacion") {
-          onAnalisisIniciado(nuevoEstado.id_analisis);
-        }
-      });
+      await api.subirAudio(
+        file,
+        (nuevoEstado) => {
+          setEstadoAnalisis(nuevoEstado);
+          if (nuevoEstado.estado === "esperando_confirmacion") {
+            onAnalisisIniciado(nuevoEstado.id_analisis);
+          }
+        },
+        modoManual,
+      );
     } catch (err: unknown) {
       const mensaje = err instanceof Error ? err.message : "Error al procesar el audio";
       setErrorSubida(mensaje);
@@ -134,6 +139,25 @@ export const AnalizarView: React.FC<Props> = ({ onAnalisisIniciado, onEjemploSel
             Admite archivos .mp3, .wav, .m4a, .ogg o .flac. El pipeline detecta voces, diariza y
             extrae fragmentos para confirmación humana obligatoria.
           </p>
+
+          {/* Modo manual: se elige antes de subir; las voces llegan sin propuesta (RF-08) */}
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              fontSize: "0.85rem",
+              marginBottom: "1rem",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={modoManual}
+              onChange={(e) => setModoManual(e.target.checked)}
+            />
+            Modo manual: confirmar las voces sin ver la propuesta del modelo
+          </label>
 
           <input
             ref={fileInputRef}

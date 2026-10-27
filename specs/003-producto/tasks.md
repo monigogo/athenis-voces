@@ -119,12 +119,12 @@
 ### Tests
 
 - [X] T036 [P] [US2] `backend/tests/test_api_modo_manual.py`: con `modo_manual=true`, un `proponer_voz` que falla si se le llama no se llama y `hablantes` llega sin propuesta; sin el campo, sí se llama
-- [ ] T037 [P] [US2] `frontend/src/test/api.test.ts`: `subirAudio` envía `modo_manual`
+- [X] T037 [P] [US2] `frontend/src/test/api.test.ts`: `subirAudio` envía `modo_manual`
 
 ### Implementación
 
 - [X] T038 [US2] Campo `modo_manual` en `POST /analisis`, que llega a `preparar_para_confirmar`
-- [ ] T039 [US2] `frontend/src/views/AnalizarView.tsx` y `ConfirmarVocesView.tsx`: el modo manual se elige antes de subir y la pantalla de confirmar deja de cambiarlo
+- [X] T039 [US2] `frontend/src/views/AnalizarView.tsx` y `ConfirmarVocesView.tsx`: el modo manual se elige antes de subir y la pantalla de confirmar deja de cambiarlo
 
 ---
 

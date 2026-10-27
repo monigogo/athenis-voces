@@ -3,8 +3,6 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
-  Eye,
-  EyeOff,
   Play,
   ShieldAlert,
   User,
@@ -35,7 +33,6 @@ export const ConfirmarVocesView: React.FC<Props> = ({
 }) => {
   const [datosHablantes, setDatosHablantes] = useState<HablantesParaConfirmar | null>(null);
   const [cargando, setCargando] = useState(true);
-  const [modoManual, setModoManual] = useState(false);
   const [elecciones, setElecciones] = useState<Record<number, EtiquetaVoz>>({});
   const [enviando, setEnviando] = useState(false);
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
@@ -49,14 +46,8 @@ export const ConfirmarVocesView: React.FC<Props> = ({
       .then((habs) => {
         if (!cancelado) {
           setDatosHablantes(habs);
-          // Si no está en modo manual, precargar la propuesta del modelo para facilitar la revisión
-          const inicial: Record<number, EtiquetaVoz> = {};
-          for (const h of habs.hablantes) {
-            if (h.propuesta) {
-              inicial[h.hablante] = h.propuesta.etiqueta;
-            }
-          }
-          setElecciones(inicial);
+          // Ninguna voz sale confirmada: cada una la confirma la persona (RN-02)
+          setElecciones({});
           setCargando(false);
         }
       })
@@ -106,8 +97,8 @@ export const ConfirmarVocesView: React.FC<Props> = ({
 
     const etiquetasConfirmadas: EtiquetaConfirmada[] = hablantes.map((h) => {
       const elegida = elecciones[h.hablante];
-      // Si coincide con la propuesta original del modelo y no estamos en modo manual -> 'modelo', de lo contrario 'persona'
-      const coincidenciaModelo = !modoManual && h.propuesta && h.propuesta.etiqueta === elegida;
+      // Si coincide con la propuesta del modelo -> 'modelo'; en modo manual no hay propuesta -> 'persona'
+      const coincidenciaModelo = h.propuesta && h.propuesta.etiqueta === elegida;
       const origen: OrigenEtiqueta = coincidenciaModelo ? "modelo" : "persona";
 
       return {
@@ -150,40 +141,13 @@ export const ConfirmarVocesView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Cabecera con selector de modo manual (RF-08) */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1.75rem",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
-        <div>
-          <h2 style={{ fontSize: "1.35rem" }}>Confirmación de voces presentes</h2>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-            Solo pasan a confirmación las voces con ≥10 s de habla y ≥3 fragmentos (D-18). Hasta que
-            no confirmes todas, no se generarán los resultados (RN-01).
-          </p>
-        </div>
-
-        <button
-          onClick={() => {
-            const nuevoModo = !modoManual;
-            setModoManual(nuevoModo);
-            if (nuevoModo) {
-              setElecciones({}); // En modo manual se evalúa a ciegas
-            }
-          }}
-          className={`btn ${modoManual ? "btn-primary" : "btn-secondary"}`}
-          style={{ fontSize: "0.85rem" }}
-          aria-label="Alternar modo manual"
-        >
-          {modoManual ? <EyeOff size={16} /> : <Eye size={16} />}
-          {modoManual ? "Modo manual activo (a ciegas)" : "Activar modo manual (RF-08)"}
-        </button>
+      {/* Cabecera (el modo manual se elige antes de subir, RF-08) */}
+      <div style={{ marginBottom: "1.75rem" }}>
+        <h2 style={{ fontSize: "1.35rem" }}>Confirmación de voces presentes</h2>
+        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+          Solo pasan a confirmación las voces con ≥10 s de habla y ≥3 fragmentos (D-18). Hasta que
+          no confirmes todas, no se generarán los resultados (RN-01).
+        </p>
       </div>
 
       {/* Tarjetas de hablantes */}
@@ -197,7 +161,7 @@ export const ConfirmarVocesView: React.FC<Props> = ({
       >
         {hablantes.map((h) => {
           const eleccionActual = elecciones[h.hablante];
-          const esDudosa = !modoManual && esPropuestaDudosa(h.propuesta);
+          const esDudosa = esPropuestaDudosa(h.propuesta);
 
           return (
             <div
@@ -255,8 +219,8 @@ export const ConfirmarVocesView: React.FC<Props> = ({
                 )}
               </div>
 
-              {/* Propuesta del modelo (si no está en modo manual) */}
-              {!modoManual && h.propuesta ? (
+              {/* Propuesta del modelo (en modo manual llega sin ella) */}
+              {h.propuesta ? (
                 <div
                   style={{
                     background: esDudosa ? "rgba(245, 158, 11, 0.1)" : "var(--bg-surface-elevated)",
