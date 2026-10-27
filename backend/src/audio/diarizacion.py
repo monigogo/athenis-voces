@@ -19,6 +19,7 @@ Restricciones:
 from __future__ import annotations
 
 import os
+import threading
 import wave
 from pathlib import Path
 from typing import Any
@@ -90,6 +91,27 @@ def _cargar_pipeline() -> Any:
     return pipeline
 
 
+# El modelo cargado se guarda y se reutiliza: cargarlo en cada análisis tarda (spec 003, T052).
+_cargado: Any = None
+_cerrojo = threading.Lock()
+
+
+def modelo() -> Any:
+    """El pipeline de pyannote, cargado en la primera llamada. Si la carga falla, no se guarda."""
+    global _cargado
+    with _cerrojo:
+        if _cargado is None:
+            _cargado = _cargar_pipeline()
+        return _cargado
+
+
+def olvidar_modelo() -> None:
+    """Descarta el modelo guardado (para las pruebas)."""
+    global _cargado
+    with _cerrojo:
+        _cargado = None
+
+
 # ---------------------------------------------------------------------------
 # Lectura del audio
 # ---------------------------------------------------------------------------
@@ -133,8 +155,7 @@ def diarizar(wav: Path) -> tuple[list[Turno], list[Solapamiento]]:
     No lanza excepción por número de hablantes; esa validación corresponde al
     pipeline (D-17, voces_presentes_minimas).
     """
-    pipeline = _cargar_pipeline()
-    salida = pipeline(_cargar_audio(wav))
+    salida = modelo()(_cargar_audio(wav))
     # community-1 devuelve un DiarizeOutput con la anotación dentro; otros pipelines, la anotación
     anotacion = getattr(salida, "speaker_diarization", salida)
 

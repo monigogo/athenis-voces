@@ -1,0 +1,221 @@
+{
+  "version_contrato": "0.2",
+  "id_analisis": "ejemplo-con-voces-femeninas",
+  "duracion": 180.0,
+  "voz_femenina_presente": true,
+  "primera_intervencion_femenina": 0.0,
+  "segundos_voces_cortas": 0.0,
+  "grupos": [
+    {
+      "etiqueta": "femenino",
+      "numero_voces": 2,
+      "segundos_habla": 132.0,
+      "cuota_tiempo": 67.18,
+      "turnos": 4,
+      "cuota_turnos": 57.14,
+      "interrupciones_recibidas": 3,
+      "tasa_interrupcion_recibida": 13.636
+    },
+    {
+      "etiqueta": "masculino",
+      "numero_voces": 1,
+      "segundos_habla": 64.5,
+      "cuota_tiempo": 32.82,
+      "turnos": 3,
+      "cuota_turnos": 42.86,
+      "interrupciones_recibidas": 1,
+      "tasa_interrupcion_recibida": 9.302
+    }
+  ],
+  "hablantes": [
+    {
+      "hablante": 1,
+      "etiqueta": "femenino",
+      "origen": "modelo",
+      "segundos_habla": 75.8,
+      "turnos": 2,
+      "turnos_largos": 2,
+      "abre": true,
+      "cierra": false,
+      "interrupciones_recibidas": 2,
+      "interrupciones_hechas": 0,
+      "tasa_interrupcion_recibida": 15.831,
+      "recupera_palabra": 0.0,
+      "apoyos_recibidos": 0.0,
+      "indice_protagonismo": 87.5
+    },
+    {
+      "hablante": 2,
+      "etiqueta": "masculino",
+      "origen": "modelo",
+      "segundos_habla": 64.5,
+      "turnos": 3,
+      "turnos_largos": 1,
+      "abre": false,
+      "cierra": false,
+      "interrupciones_recibidas": 1,
+      "interrupciones_hechas": 3,
+      "tasa_interrupcion_recibida": 9.302,
+      "recupera_palabra": 100.0,
+      "apoyos_recibidos": 0.0,
+      "indice_protagonismo": 55.05
+    },
+    {
+      "hablante": 3,
+      "etiqueta": "femenino",
+      "origen": "persona",
+      "segundos_habla": 56.2,
+      "turnos": 2,
+      "turnos_largos": 0,
+      "abre": false,
+      "cierra": true,
+      "interrupciones_recibidas": 1,
+      "interrupciones_hechas": 1,
+      "tasa_interrupcion_recibida": 10.676,
+      "recupera_palabra": null,
+      "apoyos_recibidos": 10.676,
+      "indice_protagonismo": 49.57
+    }
+  ],
+  "turnos": [
+    {
+      "inicio": 0.0,
+      "fin": 42.0,
+      "hablante": 1
+    },
+    {
+      "inicio": 41.0,
+      "fin": 70.0,
+      "hablante": 2
+    },
+    {
+      "inicio": 69.0,
+      "fin": 96.2,
+      "hablante": 3
+    },
+    {
+      "inicio": 75.0,
+      "fin": 80.0,
+      "hablante": 2
+    },
+    {
+      "inicio": 85.0,
+      "fin": 85.8,
+      "hablante": 1
+    },
+    {
+      "inicio": 96.0,
+      "fin": 129.0,
+      "hablante": 1
+    },
+    {
+      "inicio": 120.0,
+      "fin": 150.5,
+      "hablante": 2
+    },
+    {
+      "inicio": 151.0,
+      "fin": 180.0,
+      "hablante": 3
+    }
+  ],
+  "solapamientos": [
+    {
+      "inicio": 41.0,
+      "fin": 42.0,
+      "hablantes": [
+        1,
+        2
+      ]
+    },
+    {
+      "inicio": 69.0,
+      "fin": 70.0,
+      "hablantes": [
+        2,
+        3
+      ]
+    },
+    {
+      "inicio": 75.0,
+      "fin": 80.0,
+      "hablantes": [
+        2,
+        3
+      ]
+    },
+    {
+      "inicio": 85.0,
+      "fin": 85.8,
+      "hablantes": [
+        1,
+        3
+      ]
+    },
+    {
+      "inicio": 96.0,
+      "fin": 96.2,
+      "hablantes": [
+        1,
+        3
+      ]
+    },
+    {
+      "inicio": 120.0,
+      "fin": 129.0,
+      "hablantes": [
+        1,
+        2
+      ]
+    }
+  ],
+  "interrupciones": [
+    {
+      "inicio": 41.0,
+      "fin": 42.0,
+      "interrumpe": 2,
+      "interrumpido": 1,
+      "tipo": "con_exito"
+    },
+    {
+      "inicio": 69.0,
+      "fin": 70.0,
+      "interrumpe": 3,
+      "interrumpido": 2,
+      "tipo": "con_exito"
+    },
+    {
+      "inicio": 75.0,
+      "fin": 80.0,
+      "interrumpe": 2,
+      "interrumpido": 3,
+      "tipo": "intento"
+    },
+    {
+      "inicio": 85.0,
+      "fin": 85.8,
+      "interrumpe": 1,
+      "interrumpido": 3,
+      "tipo": "senal_de_escucha"
+    },
+    {
+      "inicio": 120.0,
+      "fin": 129.0,
+      "interrumpe": 2,
+      "interrumpido": 1,
+      "tipo": "intento"
+    }
+  ],
+  "indices": [
+    {
+      "nombre": "ratio_representacion",
+      "valor": 1.008,
+      "formula": "RR = (T_F / T_E) / (N_F / N_E)"
+    },
+    {
+      "nombre": "brecha_interrupcion",
+      "valor": 1.466,
+      "formula": "BI = (I_F / (T_F / 600)) / (I_M / (T_M / 600))"
+    }
+  ]
+}
