@@ -1,4 +1,11 @@
-import { BookOpen, CheckCircle2, FileAudio, FlaskConical, Radio, SlidersHorizontal } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle2,
+  FileAudio,
+  FlaskConical,
+  Radio,
+  SlidersHorizontal,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { AudioPlayerBar } from "./components/AudioPlayerBar";
