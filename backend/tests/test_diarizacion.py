@@ -595,3 +595,19 @@ def test_un_wav_sin_muestras_se_rechaza(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="no tiene muestras"):
         _cargar_audio(wav)
+
+
+def test_mismo_hablante_con_dos_tramos_que_se_pisan(tmp_path: Path) -> None:
+    """A habla de 0 a 10 s y pyannote le da otro tramo de 4 a 6 s; B habla de 5 a 8 s.
+
+    El solapamiento con B dura de 5 a 8 s: que acabe el tramo corto de A no quiere decir que A calle.
+    """
+    from audio.diarizacion import diarizar
+
+    wav = tmp_path / "audio.wav"
+    _crear_wav(wav, duracion_s=10.0)
+    segmentos = [(0.0, 10.0, "SPEAKER_00"), (4.0, 6.0, "SPEAKER_00"), (5.0, 8.0, "SPEAKER_01")]
+    with patch(_PATCH_PIPELINE, return_value=_pipeline_ok(segmentos)):
+        _, solapamientos = diarizar(wav)
+
+    assert [(s.inicio, s.fin, s.hablantes) for s in solapamientos] == [(5.0, 8.0, [1, 2])]
