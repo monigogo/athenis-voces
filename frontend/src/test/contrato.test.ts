@@ -1,11 +1,26 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   EJEMPLO_CON_VOCES_FEMENINAS,
   EJEMPLO_MUCHAS_INTERRUPCIONES,
   EJEMPLO_SIN_VOCES_FEMENINAS,
   LISTA_EJEMPLOS,
 } from "../data/ejemplos";
-import { VERSION_CONTRATO, esPropuestaDudosa, formatearSegundos } from "../types/contrato";
+import type { components } from "../types/api";
+import {
+  type Completo,
+  type Confirmacion,
+  type EstadoAnalisis,
+  type Hablante,
+  type HablantesParaConfirmar,
+  type MetricasHablante,
+  type PropuestaVoz,
+  type Resultado,
+  VERSION_CONTRATO,
+  esPropuestaDudosa,
+  formatearSegundos,
+} from "../types/contrato";
+
+type Esquemas = components["schemas"];
 
 describe("Contrato de datos de Athenis Voces (v0.2)", () => {
   it("todos los ejemplos tienen versión de contrato '0.2'", () => {
@@ -64,5 +79,33 @@ describe("Contrato de datos de Athenis Voces (v0.2)", () => {
 
   it("hay exactamente 3 ejemplos precalculados en la lista (RF-02)", () => {
     expect(LISTA_EJEMPLOS.length).toBe(3);
+  });
+});
+
+// T044 (FR-015, RD-02): los tipos del contrato salen del OpenAPI del servidor, no se escriben a mano.
+// Las comprobaciones de tipos las verifica tsc (pnpm build); vitest no las ejecuta.
+describe("Tipos generados desde el OpenAPI del servidor", () => {
+  it("existe el módulo generado types/api", async () => {
+    await expect(import("../types/api")).resolves.toBeDefined();
+  });
+
+  it("los tipos del contrato son los del esquema, con todos los campos obligatorios", () => {
+    expectTypeOf<Resultado>().toEqualTypeOf<Completo<Esquemas["Resultado"]>>();
+    expectTypeOf<EstadoAnalisis>().toEqualTypeOf<Completo<Esquemas["EstadoAnalisis"]>>();
+    expectTypeOf<HablantesParaConfirmar>().toEqualTypeOf<
+      Completo<Esquemas["HablantesParaConfirmar"]>
+    >();
+    expectTypeOf<Confirmacion>().toEqualTypeOf<Completo<Esquemas["Confirmacion"]>>();
+    expectTypeOf<MetricasHablante>().toEqualTypeOf<Completo<Esquemas["MetricasHablante"]>>();
+  });
+
+  it("Completo también vale para los objetos anidados de Resultado", () => {
+    expectTypeOf<Resultado["hablantes"][number]["indice_protagonismo"]>().toEqualTypeOf<
+      number | null
+    >();
+    expectTypeOf<Resultado["grupos"][number]["cuota_tiempo"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<Resultado["primera_intervencion_femenina"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<EstadoAnalisis["progreso"]>().toEqualTypeOf<number | null>();
+    expectTypeOf<Hablante["propuesta"]>().toEqualTypeOf<PropuestaVoz | null>();
   });
 });

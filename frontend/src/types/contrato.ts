@@ -1,129 +1,50 @@
 /**
  * Contrato de datos de Athenis Voces - Versión 0.2
  *
- * Mapeo exacto de docs/contrato_de_datos.md y backend/src/contrato.py.
- * Ningún nombre difiere del backend. Tiempos en segundos con decimales.
+ * Los tipos salen del OpenAPI que publica el servidor (FR-015, RD-02): se generan en api.ts con
+ * `pnpm tipos` y aquí solo se les da nombre. No se escriben a mano. Tiempos en segundos con
+ * decimales.
  */
+
+import type { components } from "./api";
 
 export const VERSION_CONTRATO = "0.2";
 
-export type EtiquetaVoz = "femenino" | "masculino" | "indeterminado";
+/**
+ * El OpenAPI marca como opcionales los campos que tienen valor por defecto (por ejemplo, los que
+ * valen null si no aplican), pero el servidor siempre los envía. Completo los marca como
+ * obligatorios, también en los objetos anidados.
+ */
+export type Completo<T> = T extends readonly (infer U)[]
+  ? Completo<U>[]
+  : T extends object
+    ? { [K in keyof T]-?: Completo<T[K]> }
+    : T;
 
-export type OrigenEtiqueta = "modelo" | "persona";
+type Esquema<N extends keyof components["schemas"]> = Completo<components["schemas"][N]>;
 
-export type Estado = "en_cola" | "procesando" | "esperando_confirmacion" | "terminado" | "error";
+export type EtiquetaVoz = Esquema<"EtiquetaVoz">;
+export type OrigenEtiqueta = Esquema<"OrigenEtiqueta">;
+export type Estado = Esquema<"Estado">;
+export type TipoSolapamiento = Esquema<"TipoSolapamiento">;
+export type NombreIndice = Esquema<"NombreIndice">;
 
-export type TipoSolapamiento = "con_exito" | "intento" | "senal_de_escucha";
+export type Turno = Esquema<"Turno">;
+export type Solapamiento = Esquema<"Solapamiento">;
+export type Fragmento = Esquema<"Fragmento">;
+export type PropuestaVoz = Esquema<"PropuestaVoz">;
+export type Hablante = Esquema<"Hablante">;
+export type HablantesParaConfirmar = Esquema<"HablantesParaConfirmar">;
+export type EtiquetaConfirmada = Esquema<"EtiquetaConfirmada">;
+export type Confirmacion = Esquema<"Confirmacion">;
+export type EstadoAnalisis = Esquema<"EstadoAnalisis">;
+export type Interrupcion = Esquema<"Interrupcion">;
+export type MetricasHablante = Esquema<"MetricasHablante">;
+export type MetricasGrupo = Esquema<"MetricasGrupo">;
+export type Indice = Esquema<"Indice">;
+export type Resultado = Esquema<"Resultado">;
 
-export type NombreIndice = "ratio_representacion" | "brecha_interrupcion";
-
-export interface Tramo {
-  inicio: number;
-  fin: number;
-}
-
-export interface Turno extends Tramo {
-  hablante: number;
-}
-
-export interface Solapamiento extends Tramo {
-  hablantes: number[];
-}
-
-export interface Fragmento extends Tramo {}
-
-export interface PropuestaVoz {
-  etiqueta: EtiquetaVoz;
-  confianza: number; // entre 0 y 1; entre 0.35 y 0.65 es propuesta dudosa
-}
-
-export interface Hablante {
-  hablante: number;
-  segundos_habla: number;
-  propuesta: PropuestaVoz | null; // null en modo manual
-  fragmentos: Fragmento[];
-}
-
-export interface HablantesParaConfirmar {
-  version_contrato: string;
-  id_analisis: string;
-  hablantes: Hablante[];
-}
-
-export interface EtiquetaConfirmada {
-  hablante: number;
-  etiqueta: EtiquetaVoz;
-  origen: OrigenEtiqueta;
-}
-
-export interface Confirmacion {
-  version_contrato: string;
-  etiquetas: EtiquetaConfirmada[];
-}
-
-export interface EstadoAnalisis {
-  version_contrato: string;
-  id_analisis: string;
-  estado: Estado;
-  progreso: number | null; // solo en 'procesando'
-  motivo_error: string | null; // solo en 'error'
-}
-
-export interface Interrupcion extends Tramo {
-  interrumpe: number;
-  interrumpido: number;
-  tipo: TipoSolapamiento;
-}
-
-export interface MetricasHablante {
-  hablante: number;
-  etiqueta: EtiquetaVoz;
-  origen: OrigenEtiqueta;
-  segundos_habla: number;
-  turnos: number;
-  turnos_largos: number; // MD-06 (> 30s)
-  abre: boolean; // MD-07 (primer turno > 5s)
-  cierra: boolean; // MD-08 (último turno > 5s)
-  interrupciones_recibidas: number;
-  interrupciones_hechas: number;
-  tasa_interrupcion_recibida: number | null; // cada 10 min de habla
-  recupera_palabra: number | null; // % de interrupciones con éxito tras las que retoma en <= 10s
-  apoyos_recibidos: number | null; // señales de escucha recibidas cada 10 min
-  indice_protagonismo: number | null; // 0 a 100
-}
-
-export interface MetricasGrupo {
-  etiqueta: EtiquetaVoz;
-  numero_voces: number;
-  segundos_habla: number;
-  cuota_tiempo: number | null; // % del tiempo total de voces etiquetadas
-  turnos: number;
-  cuota_turnos: number | null;
-  interrupciones_recibidas: number;
-  tasa_interrupcion_recibida: number | null;
-}
-
-export interface Indice {
-  nombre: NombreIndice;
-  valor: number | null; // null = no aplicable
-  formula: string;
-}
-
-export interface Resultado {
-  version_contrato: string;
-  id_analisis: string;
-  duracion: number;
-  voz_femenina_presente: boolean;
-  primera_intervencion_femenina: number | null;
-  segundos_voces_cortas: number; // voces < 10s o < 3 fragmentos (D-15, D-18)
-  grupos: MetricasGrupo[];
-  hablantes: MetricasHablante[];
-  turnos: Turno[];
-  solapamientos: Solapamiento[];
-  interrupciones: Interrupcion[];
-  indices: Indice[];
-}
-
+/** Datos de un ejemplo que solo usa la web (nombre y descripción): no están en el contrato. */
 export interface EjemploPrecalculado {
   id: string;
   nombre: string;
