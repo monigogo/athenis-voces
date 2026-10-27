@@ -270,3 +270,9 @@ def test_si_no_termina_no_guarda_el_tiempo(tmp_path, mod):
     ):
         mod.analizar(audio, salida)
     assert not (salida / "corto.tiempo.json").exists()
+
+
+def test_encuentra_el_repositorio_aunque_se_ejecute_desde_fuera(mod, tmp_path, monkeypatch):
+    """La protección RD-04 no puede depender de la carpeta desde la que se lanza el script."""
+    monkeypatch.chdir(tmp_path)  # una carpeta que no es un repositorio
+    assert mod._raiz_repositorio() == BACKEND_DIR.parent

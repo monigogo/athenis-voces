@@ -32,13 +32,18 @@ if str(_SRC) not in sys.path:
 
 
 def _raiz_repositorio() -> Path | None:
-    """Raíz del repositorio git activo, o None si no hay repo."""
+    """Raíz del repositorio en el que está este script, o None si no hay repo.
+
+    Se mira desde la carpeta del script y no desde la actual: lanzado desde fuera, la protección de
+    RD-04 dejaría escribir dentro del repositorio.
+    """
     try:
         resultado = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
             capture_output=True,
             text=True,
             check=True,
+            cwd=Path(__file__).resolve().parent,
         )
         return Path(resultado.stdout.strip()).resolve()
     except (subprocess.CalledProcessError, FileNotFoundError):

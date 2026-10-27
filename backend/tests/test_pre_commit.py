@@ -34,7 +34,7 @@ def test_ruff_solo_mira_el_backend(hooks, id_):  # constitución 5
 
 def test_biome_solo_mira_el_frontend_y_sin_modificar_nada(hooks):  # constitución 5
     _, _, hook = hooks["biome-ci"]
-    assert hook["files"] == r"^frontend/"
+    assert hook["files"] == r"^frontend/src/"  # lo mismo que revisa la web: biome check src
     assert "--write" not in hook.get("entry", "")
 
 
@@ -48,3 +48,11 @@ def test_ruff_es_el_mismo_que_el_del_backend(hooks):  # un solo ruff: el del uv.
     version = next(p["version"] for p in bloqueados["package"] if p["name"] == "ruff")
     assert hooks["ruff-check"][1] == f"v{version}"
     assert hooks["ruff-format"][1] == f"v{version}"
+
+
+def test_biome_es_el_mismo_que_el_de_la_web(hooks):  # con otra versión, el hook falla siempre
+    import json
+
+    paquete = json.loads((RAIZ / "frontend" / "package.json").read_text(encoding="utf-8"))
+    version = paquete["devDependencies"]["@biomejs/biome"].lstrip("^~")
+    assert hooks["biome-ci"][1] == f"v{version}"
