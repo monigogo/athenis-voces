@@ -112,6 +112,18 @@ describe("con el backend conectado", () => {
     expect(cuerpo.get("modo_manual")).toBe("false");
   });
 
+  it("subir un audio en modo manual lo pide al backend (RF-08)", async () => {
+    const { api, fetch } = await conectada({
+      "POST /api/analisis": () => json(estado("a1", "en_cola"), 201),
+      "GET /api/analisis/a1": () => json(estado("a1", "esperando_confirmacion")),
+    });
+
+    await api.subirAudio(audio(), () => {}, true);
+
+    const cuerpo = llamada(fetch, "POST", "/api/analisis").body as FormData;
+    expect(cuerpo.get("modo_manual")).toBe("true");
+  });
+
   it("si el análisis acaba en error, se muestra su motivo", async () => {
     const motivo = "Solo se ha detectado una voz que se pueda confirmar; hacen falta al menos 2.";
     const { api } = await conectada({
@@ -189,5 +201,29 @@ describe("sin backend", () => {
 
     expect(resultado.id_analisis).toBe("ejemplo-con-voces-femeninas");
     expect(fetch).toHaveBeenCalledTimes(1); // solo /salud
+  });
+
+  it("en modo manual las voces llegan sin propuesta", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("sin conexión");
+      }),
+    );
+    const api = new ApiClient({ intervaloMs: 0 });
+    await api.checkSalud();
+
+    try {
+      const subida = api.subirAudio(audio(), () => {}, true);
+      await vi.runAllTimersAsync();
+      const { id_analisis } = await subida;
+
+      const { hablantes } = await api.getHablantes(id_analisis);
+      expect(hablantes.length).toBeGreaterThan(0);
+      expect(hablantes.every((h) => h.propuesta === null)).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -150,6 +150,7 @@ export class ApiClient {
   async subirAudio(
     archivo: File,
     onProgreso: (estado: EstadoAnalisis) => void,
+    modoManual = false,
   ): Promise<{ id_analisis: string }> {
     // Validar tipo de audio por extensión y mime
     const extensionesPermitidas = [".mp3", ".wav", ".m4a", ".ogg", ".flac"];
@@ -168,7 +169,7 @@ export class ApiClient {
     if (this.backendAvailable) {
       const formulario = new FormData();
       formulario.append("audio", archivo);
-      formulario.append("modo_manual", "false");
+      formulario.append("modo_manual", String(modoManual));
       const creado = await this.pedir<EstadoAnalisis>("/analisis", {
         method: "POST",
         body: formulario,
@@ -267,6 +268,11 @@ export class ApiClient {
         },
       ],
     };
+
+    // En modo manual no hay propuesta: la persona decide a ciegas (RF-08)
+    if (modoManual) {
+      for (const h of hablantesParaConfirmar.hablantes) h.propuesta = null;
+    }
 
     this.localState.hablantes = hablantesParaConfirmar;
     this.localState.estado = {
