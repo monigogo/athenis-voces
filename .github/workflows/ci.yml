@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
+# El token del CI solo puede leer el código: ningún paso necesita escribir
+permissions:
+  contents: read
+
 jobs:
   frontend-build:
     name: Frontend Build & Type Check
@@ -78,6 +82,9 @@ jobs:
 
       - name: Lint (ruff)
         run: uv run ruff check src/ tests/ scripts/
+
+      - name: Format (ruff)
+        run: uv run ruff format --check src/ tests/ scripts/
 
       - name: Run Pytest
         run: uv run pytest tests/ -m "not slow"
