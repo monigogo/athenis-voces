@@ -167,6 +167,10 @@ concreto. Es idempotente: lo que ya está bien no se vuelve a bajar.
 Los audios nunca entran en el repositorio. Las etiquetas de interrupción anotadas por el
 equipo sí están, en `evaluacion/etiquetas/`, sin audio, texto ni nombres.
 
+Los ejemplos de la demo (`backend/ejemplos/`) son resultados del sistema sobre las reuniones IB4002
+e IB4010 del [corpus AMI](https://groups.inf.ed.ac.uk/ami/corpus/) (CC BY 4.0): resultados derivados,
+sin audio.
+
 ---
 
 ## Dependencias principales y sus licencias

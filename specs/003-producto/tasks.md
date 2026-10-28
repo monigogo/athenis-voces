@@ -24,7 +24,7 @@
 - [X] T001 Añadir `fastapi`, `uvicorn` y `python-multipart` a `dependencies`, y `httpx` al grupo `dev`, en `backend/pyproject.toml`; ejecutar `uv lock`
 - [X] T002 [P] Test en `backend/tests/test_config.py`: `subida_max_bytes` (200 MB), `subida_max_segundos` (3600) y `retencion_segundos` (86 400) con sus valores iniciales y rechazados si no son positivos
 - [X] T003 Añadir esos tres umbrales a `backend/src/config.py`, marcados [VALIDAR] (aclaraciones 1 y 2)
-- [X] T004 [P] Crear `backend/src/api/__init__.py` y `backend/ejemplos/` con los tres `Resultado` sintéticos copiados de `backend/tests/ejemplos/`
+- [X] T004 [P] Crear `backend/src/api/__init__.py` y `backend/ejemplos/` (al principio, con los tres `Resultado` sintéticos de `backend/tests/ejemplos/`; ahora, con IB4002 e IB4010)
 
 ---
 
@@ -108,7 +108,7 @@
 ### Implementación
 
 - [X] T034 [US4] `GET /ejemplos` y `POST /analisis` con `ejemplo` en `backend/src/api/app.py`
-- [ ] T035 [US4] `frontend/src/services/api.ts` y `frontend/src/views/AnalizarView.tsx`: ejemplos desde el servidor; el texto de cada ejemplo dice que es sintético
+- [ ] T035 [US4] `frontend/src/services/api.ts` y `frontend/src/views/AnalizarView.tsx`: ejemplos desde el servidor; el texto de cada ejemplo dice que es un resultado del sistema sobre una reunión AMI, con etiquetas del modelo sin confirmación humana y sin audio
 
 ---
 

@@ -175,10 +175,11 @@ funcionando.
 análisis ya «terminado» con ese resultado (8.1: los ejemplos se saltan la confirmación). No se lee
 nada de `tests/` en producción.
 
-**Punto abierto para el equipo**: hoy los únicos ejemplos son los tres sintéticos de
-`backend/tests/ejemplos`. Los reales se generan con `scripts/analizar_audio.py` sobre audios con
-licencia (no sobre la partición de prueba, regla 9). Hasta tenerlos, se copian los sintéticos y la web
-los presenta como sintéticos.
+**Ejemplos en uso**: `backend/ejemplos/` contiene los resultados del sistema sobre las reuniones
+IB4002 e IB4010 del corpus AMI (CC BY 4.0), de la partición de desarrollo, no de la de prueba
+(regla 9). Las etiquetas de voz las propone el modelo y ninguna persona las ha confirmado: solo sirven
+para evaluación, y la web lo dice. No llevan audio. La web importa esos mismos JSON, sin copia. Los
+tres sintéticos siguen solo en `backend/tests/ejemplos`.
 
 ---
 
