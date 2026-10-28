@@ -45,7 +45,7 @@ describe("barra del reproductor", () => {
 
     expect(reproducir).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: /reanudar reproducción/i })).toBeDisabled();
-    expect(screen.getByText("Ejemplo sintético, sin audio")).toBeInTheDocument();
+    expect(screen.getByText("Ejemplo precalculado, sin audio")).toBeInTheDocument();
   });
 });
 

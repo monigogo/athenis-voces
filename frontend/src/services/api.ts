@@ -15,11 +15,8 @@
  * contracts/api-http.md. Sin backend, sigue el modo demo integrado (plan, Parte 8).
  */
 
-import {
-  EJEMPLO_CON_VOCES_FEMENINAS,
-  EJEMPLO_SIN_VOCES_FEMENINAS,
-  LISTA_EJEMPLOS,
-} from "../data/ejemplos";
+import { LISTA_EJEMPLOS } from "../data/ejemplos";
+import { EJEMPLO_CON_VOCES_FEMENINAS, EJEMPLO_SIN_VOCES_FEMENINAS } from "../data/simulacion";
 import type {
   Confirmacion,
   EjemploPrecalculado,

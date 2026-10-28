@@ -6,7 +6,7 @@
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { EJEMPLO_CON_VOCES_FEMENINAS } from "../data/ejemplos";
+import { EJEMPLO_CON_VOCES_FEMENINAS } from "../data/simulacion";
 import { ApiClient, tramoDeEvento, tramoDeVoz, urlFragmento } from "../services/api";
 import { audioService } from "../services/audioPlayer";
 import type { Confirmacion, Estado, HablantesParaConfirmar } from "../types/contrato";
@@ -84,11 +84,11 @@ describe("con el backend conectado", () => {
         json({ ...EJEMPLO_CON_VOCES_FEMENINAS, id_analisis: "e1" }),
     });
 
-    const resultado = await api.iniciarEjemplo("ejemplo-con-voces-femeninas");
+    const resultado = await api.iniciarEjemplo("IB4002");
 
     expect(resultado.id_analisis).toBe("e1");
     const cuerpo = llamada(fetch, "POST", "/api/analisis").body as FormData;
-    expect(cuerpo.get("ejemplo")).toBe("ejemplo-con-voces-femeninas");
+    expect(cuerpo.get("ejemplo")).toBe("IB4002");
   });
 
   it("subir un audio lo envía y pregunta el estado hasta que espera confirmación", async () => {
@@ -198,9 +198,9 @@ describe("sin backend", () => {
     const api = new ApiClient({ intervaloMs: 0 });
     expect(await api.checkSalud()).toBe(false);
 
-    const resultado = await api.iniciarEjemplo("ejemplo-con-voces-femeninas");
+    const resultado = await api.iniciarEjemplo("IB4002");
 
-    expect(resultado.id_analisis).toBe("ejemplo-con-voces-femeninas");
+    expect(resultado.id_analisis).toBe("IB4002");
     expect(fetch).toHaveBeenCalledTimes(1); // solo /salud
   });
 
@@ -285,7 +285,7 @@ describe("fragmentos de audio (RF-18)", () => {
         json({ ...EJEMPLO_CON_VOCES_FEMENINAS, id_analisis: "e1" }),
     });
 
-    await api.iniciarEjemplo("ejemplo-con-voces-femeninas");
+    await api.iniciarEjemplo("IB4002");
 
     expect(api.hayAudio()).toBe(false);
     expect(api.urlFragmentoActual({ inicio: 29, fin: 32.5 })).toBeNull();

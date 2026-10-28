@@ -176,7 +176,7 @@ export const AudioPlayerBar: React.FC<Props> = ({ currentTrack }) => {
       >
         <Volume2 size={16} color="var(--accent-primary)" />
         <span className="badge-tag">
-          {conAudio ? "Fragmento auditivo acústico" : "Ejemplo sintético, sin audio"}
+          {conAudio ? "Fragmento auditivo acústico" : "Ejemplo precalculado, sin audio"}
         </span>
       </div>
     </section>

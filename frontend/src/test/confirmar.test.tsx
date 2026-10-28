@@ -7,7 +7,7 @@
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { EJEMPLO_CON_VOCES_FEMENINAS } from "../data/ejemplos";
+import { EJEMPLO_CON_VOCES_FEMENINAS } from "../data/simulacion";
 import { api } from "../services/api";
 import type { HablantesParaConfirmar } from "../types/contrato";
 import { AnalizarView } from "../views/AnalizarView";

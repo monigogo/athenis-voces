@@ -17,6 +17,14 @@ describe("Aplicación Athenis Voces Frontend", () => {
     ).toBeInTheDocument();
   });
 
+  it("los ejemplos dicen que nadie confirmó sus voces y muestran la duración en minutos", () => {
+    render(<App />);
+    expect(screen.queryByText(/confirmación validada/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/resultados del sistema sobre reuniones reales/i)).toBeInTheDocument();
+    expect(screen.getByText("31m 22s · 4 voces")).toBeInTheDocument();
+    expect(screen.getByText("49m 20s · 4 voces")).toBeInTheDocument();
+  });
+
   it("permite seleccionar un ejemplo precalculado y ver resultados directamente", async () => {
     render(<App />);
     const botonVerResultados = screen.getAllByText("Ver resultados")[0];
