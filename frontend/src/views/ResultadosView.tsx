@@ -293,6 +293,7 @@ export const ResultadosView: React.FC<Props> = ({ resultado, onNuevoAnalisis, on
       {/* Tabla de interrupciones con "escuchar" (RF-18, Must) */}
       <InterrupcionesTable
         interrupciones={resultado.interrupciones}
+        duracion={resultado.duracion}
         onPlay={(inicio, fin, hablante, titulo) => onPlayAudio(inicio, fin, hablante, titulo)}
       />
 

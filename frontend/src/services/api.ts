@@ -32,6 +32,44 @@ import { audioService } from "./audioPlayer";
 
 const API_BASE = "/api";
 
+/** Lo más largo que puede durar un fragmento (9.3, RF-18): el backend rechaza tramos mayores. */
+const MAX_FRAGMENTO_S = 15;
+/** Lo que se oye antes de una interrupción: «empieza como mucho 1 s antes del evento» (RF-18). */
+const ANTES_DEL_EVENTO_S = 1;
+/**
+ * Lo que se oye después de una interrupción: RF-18 pide que el fragmento «acaba después».
+ * El valor no está fijado en ningún documento.
+ */
+const DESPUES_DEL_EVENTO_S = 0.5;
+
+export interface Tramo {
+  inicio: number;
+  fin: number;
+}
+
+/** Tramo de una interrupción (RF-18): 1 s antes, un poco después y 15 s como máximo. */
+export function tramoDeEvento(inicio: number, fin: number, duracion: number): Tramo {
+  const desde = Math.max(0, inicio - ANTES_DEL_EVENTO_S);
+  const hasta = Math.min(fin + DESPUES_DEL_EVENTO_S, duracion, desde + MAX_FRAGMENTO_S);
+  return { inicio: desde, fin: hasta };
+}
+
+/** Tramo de una muestra de voz o de un turno: tal cual, con el tope de 15 s y la duración si se conoce. */
+export function tramoDeVoz(
+  inicio: number,
+  fin: number,
+  duracion = Number.POSITIVE_INFINITY,
+): Tramo {
+  const desde = Math.max(0, inicio);
+  return { inicio: desde, fin: Math.min(fin, duracion, desde + MAX_FRAGMENTO_S) };
+}
+
+/** Ruta del WAV de un tramo (GET /analisis/{id}/fragmento). */
+export function urlFragmento(idAnalisis: string, { inicio, fin }: Tramo): string {
+  const consulta = new URLSearchParams({ inicio: String(inicio), fin: String(fin) });
+  return `${API_BASE}/analisis/${encodeURIComponent(idAnalisis)}/fragmento?${consulta}`;
+}
+
 interface Opciones {
   /** Cada cuánto se pregunta el estado de un análisis en marcha. */
   intervaloMs?: number;
@@ -66,6 +104,17 @@ export class ApiClient {
 
   isBackendConnected(): boolean {
     return !!this.backendAvailable;
+  }
+
+  /** Si el análisis actual tiene audio: los ejemplos precalculados no lo tienen. */
+  hayAudio(): boolean {
+    return !!this.localState?.archivoAudio;
+  }
+
+  /** URL del fragmento en el backend; null si no hay backend o el análisis no tiene audio. */
+  urlFragmentoActual(tramo: Tramo): string | null {
+    if (!this.backendAvailable || !this.localState?.archivoAudio) return null;
+    return urlFragmento(this.localState.id_analisis, tramo);
   }
 
   /** Pide una ruta y devuelve su JSON; si falla, el motivo que da el backend (`detail`). */
@@ -163,8 +212,9 @@ export class ApiClient {
       );
     }
 
-    // Cargar en el reproductor de audio para reproducción local
-    await audioService.loadUserAudio(archivo);
+    // Sin backend, el reproductor usa el audio local. Con backend, los fragmentos los da el
+    // servidor: decodificar aquí una reunión larga bloquearía la subida
+    if (!this.backendAvailable) await audioService.loadUserAudio(archivo);
 
     if (this.backendAvailable) {
       const formulario = new FormData();

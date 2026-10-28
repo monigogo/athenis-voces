@@ -7,7 +7,8 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EJEMPLO_CON_VOCES_FEMENINAS } from "../data/ejemplos";
-import { ApiClient } from "../services/api";
+import { ApiClient, tramoDeEvento, tramoDeVoz, urlFragmento } from "../services/api";
+import { audioService } from "../services/audioPlayer";
 import type { Confirmacion, Estado, HablantesParaConfirmar } from "../types/contrato";
 
 // El reproductor no es lo que se prueba aquí (y el File de jsdom no tiene arrayBuffer)
@@ -222,6 +223,106 @@ describe("sin backend", () => {
       const { hablantes } = await api.getHablantes(id_analisis);
       expect(hablantes.length).toBeGreaterThan(0);
       expect(hablantes.every((h) => h.propuesta === null)).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("fragmentos de audio (RF-18)", () => {
+  it("una interrupción empieza 1 s antes y acaba después", () => {
+    expect(tramoDeEvento(30, 32, 120)).toEqual({ inicio: 29, fin: 32.5 });
+  });
+
+  it("una interrupción larga se corta a 15 s", () => {
+    expect(tramoDeEvento(30, 60, 120)).toEqual({ inicio: 29, fin: 44 });
+  });
+
+  it("una interrupción al principio del audio no empieza antes de 0", () => {
+    expect(tramoDeEvento(0.4, 2, 120)).toEqual({ inicio: 0, fin: 2.5 });
+  });
+
+  it("una interrupción al final del audio no pasa de su duración", () => {
+    expect(tramoDeEvento(118, 119.8, 120)).toEqual({ inicio: 117, fin: 120 });
+  });
+
+  it("una muestra de voz suena tal cual", () => {
+    expect(tramoDeVoz(1, 4)).toEqual({ inicio: 1, fin: 4 });
+  });
+
+  it("una muestra de voz larga se corta a 15 s", () => {
+    expect(tramoDeVoz(10, 40)).toEqual({ inicio: 10, fin: 25 });
+  });
+
+  it("un turno no pasa de la duración del audio", () => {
+    expect(tramoDeVoz(110, 124, 120)).toEqual({ inicio: 110, fin: 120 });
+  });
+
+  it("la URL pide el tramo a la ruta del fragmento", () => {
+    expect(urlFragmento("a1", { inicio: 29, fin: 32.5 })).toBe(
+      "/api/analisis/a1/fragmento?inicio=29&fin=32.5",
+    );
+  });
+
+  it("con backend y un audio subido, el fragmento se pide al backend", async () => {
+    const { api } = await conectada({
+      "POST /api/analisis": () => json(estado("a1", "en_cola"), 201),
+      "GET /api/analisis/a1": () => json(estado("a1", "esperando_confirmacion")),
+    });
+
+    await api.subirAudio(audio(), () => {});
+
+    expect(api.hayAudio()).toBe(true);
+    expect(api.urlFragmentoActual({ inicio: 29, fin: 32.5 })).toBe(
+      "/api/analisis/a1/fragmento?inicio=29&fin=32.5",
+    );
+  });
+
+  it("un ejemplo precalculado no tiene audio", async () => {
+    const { api } = await conectada({
+      "POST /api/analisis": () => json(estado("e1", "terminado"), 201),
+      "GET /api/analisis/e1/resultado": () =>
+        json({ ...EJEMPLO_CON_VOCES_FEMENINAS, id_analisis: "e1" }),
+    });
+
+    await api.iniciarEjemplo("ejemplo-con-voces-femeninas");
+
+    expect(api.hayAudio()).toBe(false);
+    expect(api.urlFragmentoActual({ inicio: 29, fin: 32.5 })).toBeNull();
+  });
+});
+
+describe("audio subido en el navegador", () => {
+  it("con backend no se decodifica en el navegador: lo procesa el servidor", async () => {
+    const { api } = await conectada({
+      "POST /api/analisis": () => json(estado("a1", "en_cola"), 201),
+      "GET /api/analisis/a1": () => json(estado("a1", "esperando_confirmacion")),
+    });
+    vi.mocked(audioService.loadUserAudio).mockClear();
+
+    await api.subirAudio(audio(), () => {});
+
+    expect(audioService.loadUserAudio).not.toHaveBeenCalled();
+  });
+
+  it("sin backend se decodifica en el navegador para el modo demo", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("sin conexión");
+      }),
+    );
+    const api = new ApiClient({ intervaloMs: 0 });
+    await api.checkSalud();
+    vi.mocked(audioService.loadUserAudio).mockClear();
+
+    try {
+      const subida = api.subirAudio(audio(), () => {});
+      await vi.runAllTimersAsync();
+      await subida;
+
+      expect(audioService.loadUserAudio).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
     }
