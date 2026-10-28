@@ -80,3 +80,19 @@ def test_audio_y_ejemplo_a_la_vez_da_400(api):
     )
     assert respuesta.status_code == 400
     assert list(api.ajustes.carpeta_trabajo.iterdir()) == []
+
+
+def test_los_ejemplos_de_la_demo_son_ib4002_e_ib4010(api, tmp_path):
+    """La carpeta por defecto (backend/ejemplos) tiene los resultados reales que muestra la web."""
+    from fastapi.testclient import TestClient
+
+    from api.ajustes import EJEMPLOS_POR_DEFECTO, Ajustes
+    from api.app import crear_app
+
+    ajustes = Ajustes(carpeta_trabajo=tmp_path / "t", ejemplos=EJEMPLOS_POR_DEFECTO)
+    cliente = TestClient(crear_app(pasos=api.falsos.pasos(), ajustes=ajustes))
+    ejemplos = [c.Resultado.model_validate(r) for r in cliente.get("/ejemplos").json()]
+    assert [e.id_analisis for e in ejemplos] == ["IB4002", "IB4010"]
+    for nombre in ("IB4002", "IB4010"):
+        respuesta = cliente.post("/analisis", files={"ejemplo": (None, nombre)})
+        assert respuesta.status_code == 201

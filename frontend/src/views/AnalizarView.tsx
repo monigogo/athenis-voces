@@ -11,7 +11,12 @@ import {
 import type React from "react";
 import { useRef, useState } from "react";
 import { api } from "../services/api";
-import type { EjemploPrecalculado, EstadoAnalisis, Resultado } from "../types/contrato";
+import {
+  type EjemploPrecalculado,
+  type EstadoAnalisis,
+  type Resultado,
+  formatearSegundos,
+} from "../types/contrato";
 
 interface Props {
   onAnalisisIniciado: (id: string) => void;
@@ -387,9 +392,9 @@ export const AnalizarView: React.FC<Props> = ({ onAnalisisIniciado, onEjemploSel
           <p
             style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "1.25rem" }}
           >
-            Selecciona un episodio ya anotado del Corpus AMI con confirmación validada para explorar
-            los resultados y métricas de inmediato sin esperar el procesamiento acústico (RF-02,
-            RNF-02).
+            Resultados del sistema sobre reuniones reales del corpus AMI, para explorar las métricas
+            de inmediato sin esperar el procesamiento acústico. Las voces no las ha confirmado
+            ninguna persona (RF-02, RNF-02).
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -426,7 +431,7 @@ export const AnalizarView: React.FC<Props> = ({ onAnalisisIniciado, onEjemploSel
                         color: "var(--text-secondary)",
                       }}
                     >
-                      {ej.duracion}s · {ej.total_hablantes} voces
+                      {formatearSegundos(ej.duracion)} · {ej.total_hablantes} voces
                     </span>
                   </div>
 

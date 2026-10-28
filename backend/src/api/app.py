@@ -161,7 +161,7 @@ def crear_app(
         return estado
 
     def _desde_ejemplo(id_analisis: str, nombre: str) -> EstadoAnalisis:
-        """Los ejemplos ya se confirmaron al prepararlos: se saltan la confirmación (8.1)."""
+        """Los ejemplos son resultados ya calculados: se saltan la confirmación (8.1)."""
         ejemplo = next((r for r in _ejemplos() if r.id_analisis == nombre), None)
         if ejemplo is None:
             raise SubidaRechazada(status.HTTP_404_NOT_FOUND, "No existe ese ejemplo")

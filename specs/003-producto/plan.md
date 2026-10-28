@@ -137,7 +137,8 @@ frontend/src/
 - Confirmar los [VALIDAR]: 200 MB, 60 min, retención de 24 h y demo pública sin subidas (D-08).
 - Metadatos de los ejemplos (nombre, origen, licencia): fuera del contrato hasta que lo acuerden las
   tres (constitución 3).
-- Ejemplos reales: hoy solo existen los tres sintéticos.
+- Ejemplos reales: IB4002 e IB4010 del corpus AMI (partición de desarrollo), con etiquetas de voz del
+  modelo, sin confirmación humana; sin audio.
 
 ---
 

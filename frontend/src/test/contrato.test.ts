@@ -1,10 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import {
-  EJEMPLO_CON_VOCES_FEMENINAS,
-  EJEMPLO_MUCHAS_INTERRUPCIONES,
-  EJEMPLO_SIN_VOCES_FEMENINAS,
-  LISTA_EJEMPLOS,
-} from "../data/ejemplos";
+import { LISTA_EJEMPLOS } from "../data/ejemplos";
+import { EJEMPLO_CON_VOCES_FEMENINAS, EJEMPLO_SIN_VOCES_FEMENINAS } from "../data/simulacion";
 import type { components } from "../types/api";
 import {
   type Completo,
@@ -22,19 +18,21 @@ import {
 
 type Esquemas = components["schemas"];
 
+const RESULTADOS: Resultado[] = [
+  EJEMPLO_CON_VOCES_FEMENINAS,
+  EJEMPLO_SIN_VOCES_FEMENINAS,
+  ...LISTA_EJEMPLOS.map((e) => e.resultado),
+];
+
 describe("Contrato de datos de Athenis Voces (v0.2)", () => {
   it("todos los ejemplos tienen versión de contrato '0.2'", () => {
-    expect(EJEMPLO_CON_VOCES_FEMENINAS.version_contrato).toBe(VERSION_CONTRATO);
-    expect(EJEMPLO_SIN_VOCES_FEMENINAS.version_contrato).toBe(VERSION_CONTRATO);
-    expect(EJEMPLO_MUCHAS_INTERRUPCIONES.version_contrato).toBe(VERSION_CONTRATO);
+    for (const r of RESULTADOS) {
+      expect(r.version_contrato).toBe(VERSION_CONTRATO);
+    }
   });
 
   it("los hablantes están numerados desde 1 (RN-10)", () => {
-    for (const ej of [
-      EJEMPLO_CON_VOCES_FEMENINAS,
-      EJEMPLO_SIN_VOCES_FEMENINAS,
-      EJEMPLO_MUCHAS_INTERRUPCIONES,
-    ]) {
+    for (const ej of RESULTADOS) {
       for (const h of ej.hablantes) {
         expect(h.hablante).toBeGreaterThanOrEqual(1);
       }
@@ -77,8 +75,8 @@ describe("Contrato de datos de Athenis Voces (v0.2)", () => {
     expect(formatearSegundos(42.5)).toBe("42.5s");
   });
 
-  it("hay exactamente 3 ejemplos precalculados en la lista (RF-02)", () => {
-    expect(LISTA_EJEMPLOS.length).toBe(3);
+  it("hay exactamente 2 ejemplos precalculados en la lista (RF-02)", () => {
+    expect(LISTA_EJEMPLOS.length).toBe(2);
   });
 });
 
