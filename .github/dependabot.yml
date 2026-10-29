@@ -11,6 +11,13 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # Las versiones mayores rompen la configuración (p. ej. Biome 2): se suben a mano
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # torch y torchaudio están fijados en 2.11.0: la GPU V100S no admite versiones posteriores
+      - dependency-name: "torch"
+      - dependency-name: "torchaudio"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -22,6 +29,10 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "chore(ci)"
+    ignore:
+      # Las versiones mayores rompen la configuración (p. ej. Biome 2): se suben a mano
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -33,3 +44,7 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # Las versiones mayores rompen la configuración (p. ej. Biome 2): se suben a mano
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
