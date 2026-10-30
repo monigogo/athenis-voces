@@ -2,9 +2,9 @@ name: Athenis CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
 
 # El token del CI solo puede leer el código: ningún paso necesita escribir
 permissions:
