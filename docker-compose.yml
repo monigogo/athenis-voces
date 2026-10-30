@@ -1,0 +1,28 @@
+# athenis-voces: la web en http://localhost:8080 y la API detrás, solo visible para la web.
+#
+#   cp .env.example .env        # y pon tu HF_TOKEN
+#   docker compose up -d --build
+#
+# Con GPU NVIDIA: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    volumes:
+      # El audio subido se borra solo a las 24 h; los modelos se descargan una vez
+      - trabajo:/trabajo
+      - modelos:/modelos
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  trabajo:
+  modelos:

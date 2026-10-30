@@ -1,0 +1,14 @@
+# Para servidores con GPU NVIDIA (p. ej. la V100S de OVHcloud). Necesita NVIDIA Container Toolkit.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+services:
+  backend:
+    environment:
+      DISPOSITIVO: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

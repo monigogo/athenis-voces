@@ -39,6 +39,26 @@ el modelo solo propone.
 
 ## Instalación y uso
 
+### Desplegar con Docker
+
+Levanta la web y la API con un solo comando. Necesita Docker con Compose y el token de
+Hugging Face descrito en los requisitos previos:
+
+```bash
+cp .env.example .env              # y rellena HF_TOKEN
+docker compose up -d --build
+```
+
+La web queda en `http://localhost:8080`. La API no se publica fuera: la web la alcanza en
+`/api` a través de nginx. El audio subido y los modelos descargados se guardan en volúmenes de
+Docker, nunca dentro de las imágenes.
+
+En un servidor con GPU NVIDIA (con NVIDIA Container Toolkit instalado):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+```
+
 ### Requisitos previos
 
 - **Python 3.11** o superior

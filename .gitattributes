@@ -1,3 +1,7 @@
 *.sh text eol=lf
 # Biome exige finales de línea LF: así salen igual en Windows, aunque git tenga core.autocrlf
 frontend/** text eol=lf
+# Docker lee estos ficheros dentro de Linux: con CRLF, las líneas que siguen con \ se rompen
+**/Dockerfile text eol=lf
+**/.dockerignore text eol=lf
+docker-compose*.yml text eol=lf

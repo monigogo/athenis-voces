@@ -1,0 +1,9 @@
+# Nada de claves en la imagen (RD-04, constitución 7)
+.env
+.env.*
+
+# Se instalan y se compilan dentro de la imagen
+node_modules
+dist
+coverage
+.design-sync

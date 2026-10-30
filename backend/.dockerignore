@@ -1,0 +1,16 @@
+# Nada de claves, datos ni audios en la imagen (RD-04, constitución 7)
+.env
+.env.*
+**/*.mp3
+**/*.wav
+**/*.m4a
+**/*.ogg
+**/*.flac
+
+# Ni entornos, ni cachés, ni lo que no hace falta para servir la API
+.venv
+**/__pycache__
+.pytest_cache
+.ruff_cache
+tests
+scripts
