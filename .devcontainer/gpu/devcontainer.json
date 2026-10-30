@@ -1,0 +1,63 @@
+{
+  "name": "athenis-voces · GPU NVIDIA",
+  "build": {
+    "dockerfile": "../Dockerfile"
+  },
+  "features": {
+    "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "postCreateCommand": "sudo chown vscode:vscode /home/vscode/.cache; sudo chown -R vscode:vscode /home/vscode/.cache/uv; sudo apt-get update; sudo apt-get install -y --no-install-recommends ffmpeg; corepack enable pnpm",
+  "mounts": [
+    "source=athenis-voces-uv-cache,target=/home/vscode/.cache/uv,type=volume"
+  ],
+  "forwardPorts": [
+    8000,
+    5173,
+    8080
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "API (uvicorn)",
+      "onAutoForward": "silent"
+    },
+    "5173": {
+      "label": "Web (Vite)",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Web desplegada (docker compose)",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "biomejs.biome"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": false
+      }
+    }
+  },
+  "containerEnv": {
+    "UV_SYSTEM_PYTHON": "1",
+    "UV_PYTHON_PREFERENCE": "only-system",
+    "UV_LINK_MODE": "copy",
+    "DISPOSITIVO": "cuda"
+  },
+  "runArgs": [
+    "--gpus=all",
+    "--shm-size=8g"
+  ],
+  "hostRequirements": {
+    "gpu": true
+  }
+}
